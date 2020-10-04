@@ -1,8 +1,0 @@
-Tareas del proyecto (alto nivel)
-
-1. Diseñar el modelo (logica)
-2. Desarrollar la arquitectura SaaS
-3. Elegir un framework/ejemplo
-4. Integrar el modelo en la arquitectura
-5. Integrar el protocolo
-

@@ -10,13 +10,13 @@ function Juego(){
 		}while(!this.partidas[codigo]);
 		this.partidas[codigo] = new Partida(number, owner);
 	}
-	this.unirAPartida = function(codigo,nick){
-		this.partidas[codigo].agregarUsuario(nick);
-	}
+
 	this.obtenerCodigo= function(){
 		let cadena = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 		let letras = cadena.split('');
 		let codigo = [];
+		
+
 		for(i=0;i<6;i++){
 			codigo.push(letras[randomInt(1,25)-1]);
 		}
@@ -26,7 +26,7 @@ function Juego(){
 }
 
 function Partida (number, owner){
-	this.maxUsers = number;
+	this.numberUsuario = number;
 	this.owner = owner;
 	//Patron state
 	
@@ -35,8 +35,6 @@ function Partida (number, owner){
 	this.agregarUsuario=function(nick){
 		//TODO
 		//Comprobar si el usuario maximo number
-		if (this.usuairo.length < maxUsers)
-			this.usuario.push(nick);
 	}
 	this.agregarUsuario(owner);
 }
