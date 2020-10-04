@@ -10,7 +10,9 @@ function Juego(){
 		}while(!this.partidas[codigo]);
 		this.partidas[codigo] = new Partida(number, owner);
 	}
-
+	this.unirApartida=function(nick){
+		//TODO
+	}
 	this.obtenerCodigo= function(){
 		let cadena = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 		let letras = cadena.split('');
