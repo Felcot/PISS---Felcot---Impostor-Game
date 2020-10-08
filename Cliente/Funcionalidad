@@ -1,0 +1,11 @@
+Funcionalidad:
+	- Crear partida(num), el sistema devuelve un código
+	- Unir a partida, el sistema controla el máximo
+	- Abandonar partida
+	- Modificar partida (cambiar mapa, ampliar el maximo )
+	- Iniciar partida
+	- Asignar tareas
+	- Asignar el impostor
+	- Atacar(tiempo entre ataques)
+	- Votacion al sospechoso o soltar la votacion
+	

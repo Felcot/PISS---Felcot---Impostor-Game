@@ -1,15 +1,19 @@
 function Juego(){
 						 // Que collection elegir? -- Array asociativo.
 	this.partidas =  {}; // Utilizamos un diccionario para obtener una mayor velocidad de búsqueda.
-	this.crearPartida = function(number,owner){
+	this.propietarios = {};
+	this.crearPartida = function(number,ownerNick){
 		//do{
+		owner = new Usuario(ownerNick);
 		let codigo = this.obtenerCodigo();
 		//alert(codigo);
 		if(!this.partidas[codigo]){
-			this.partidas[codigo] = new Partida(number, owner);
+			this.partidas[codigo] = new Partida(number, onwer);
+			this.propietarios[onwer] = new Propietario(this.partidas[codigo]);
 		}
 		//}while(this.partidas[codigo]);
 		//this.partidas[codigo] = new Partida(number, owner);
+
 	}
 	this.unirApartida=function(nick,codigo){
 		//TODO
@@ -26,16 +30,22 @@ function Juego(){
 		}
 		return codigo.join('');
 	}
+	this.abandonarPartida = funciton(){
+		this.fase.abandonarPartida(this);
+	}
+	this.iniciarPartida = function(){
+		this.fase.iniciarPartida(this);
+	}
 		
 }
 
 function Partida (number, owner){
 	this.numberUsuario = number;
-	this.nickOwner = owner;
+	this.nickOwner = new Propietario(owner);
 	//Patron state
 	
-	this.usuarios = [];//index 0 sera owner
-	//this.usuarios = {};
+	//this.usuarios = [];//index 0 sera owner
+	this.usuarios = {};
 	this.fase = new Inicial();
 	this.agregarUsuario=function(nick){
 		this.fase.agregarUsuario(nick,this);
@@ -44,19 +54,48 @@ function Partida (number, owner){
 		//TODO
 		//Comprobar si el usuario maximo number
 		//(object.keys.(juego.partida["code"].usuarios).length)
-		if(this.numberUsuario > this.usuarios.length){
-			let cont=1;
-			mayNick = nick;
-			while(this.usuarios.includes(mayNick)){
-				mayNick= nick + cont;
-				cont= cont+1;
-			}else
-				this.fase = new Jugando();
-			
-		}
-		this.usuarios.push(mayNick);
+			let cont = 1;
+			let mayNick = nick;
+			while(this.usuarios[mayNick]){
+				mayNick = nick + cont;
+				cont = cont + 1;
+			}
+		this.usuarios[mayNick] =  new Usuario(mayNick);
 	}
 	this.agregarUsuario(owner);
+}
+
+function Inicial(){
+	this.agregarUsuario=function(nick,partida){
+		if(partida.numberUsuario > Object.keys(partida.usuarios).length){
+			partida.puedeAgregarUsuario(nick);
+		}else{
+			partida.fase = new Completado();
+		}
+	}
+
+	this.iniciarPartida = function(partida){
+		if (Object.keys(partida.usuarios).length >= 4){//hacer refactor
+			partida.fasde = new Jugando();
+		} else{
+			console.log("Todavía no tenemos el minimo de usuarios");
+		}
+	}
+}
+function Completado(){
+	this.iniciarPartida = function(partida){
+		partida.fase = new Jugando();
+	}
+}
+function Jugando(){
+	this.agregarUsuario=function(nick,partida){
+		console.log("La partida ya ha comenzado");
+	}
+}
+function Final(){
+	this.agregarUsuario=function(nick,partida){
+		console.log("La partida ya ha terminado");
+	}
 }
 
 function randomInt(low, high) {
@@ -66,15 +105,9 @@ function randomInt(low, high) {
 function Usuario(nick){
 	this.nick = nick;
 }
-
-function Inicial(){
-	this.agregarUsuario=function(nick,partida){
-		partida.puedeAgregarUsuario(nick);
-	}
-}
-function Jugando(){}
-function Final(){
-	this.agregarUsuario=function(nick,partida){
-		partida.puedeAgregarUsuario(nick);
+function Propietario (partida){
+	this.partida =  partida;
+		this.iniciarPartida(){
+			this.partida.fase =  new Jugando();
 	}
 }
