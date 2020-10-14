@@ -3,20 +3,16 @@ function Juego(){
 	this.partidas =  {}; // Utilizamos un diccionario para obtener una mayor velocidad de búsqueda.
 	this.propietarios = {};
 	this.crearPartida = function(number,ownerNick){
-		//do{
+
 		owner = new Usuario(ownerNick);
 		let codigo = this.obtenerCodigo();
-		//alert(codigo);
 		if(!this.partidas[codigo]){
 			this.partidas[codigo] = new Partida(number, onwer);
 			this.propietarios[onwer] = new Propietario(this.partidas[codigo]);
 		}
-		//}while(this.partidas[codigo]);
-		//this.partidas[codigo] = new Partida(number, owner);
 
 	}
 	this.unirApartida=function(nick,codigo){
-		//TODO
 		if(this.partidas[codigo])
 			this.partidas[codigo].agregarUsuario(nick);
 	}
@@ -29,19 +25,12 @@ function Juego(){
 			codigo.push(letras[randomInt(1,maxCadena)-1]);
 		}
 		return codigo.join('');
-	}
-	this.abandonarPartida = funciton(){
-		this.fase.abandonarPartida(this);
-	}
-	this.iniciarPartida = function(){
-		this.fase.iniciarPartida(this);
-	}
-		
+	}		
 }
 
 function Partida (number, owner){
 	this.numberUsuario = number;
-	this.nickOwner = new Propietario(owner);
+	this.nickOwner = owner;
 	//Patron state
 	
 	//this.usuarios = [];//index 0 sera owner
@@ -60,18 +49,17 @@ function Partida (number, owner){
 				mayNick = nick + cont;
 				cont = cont + 1;
 			}
+
 		this.usuarios[mayNick] =  new Usuario(mayNick);
+		if(partida.numberUsuario > Object.keys(partida.usuarios).length)
+			this.fase = new Completado();
 	}
 	this.agregarUsuario(owner);
 }
 
 function Inicial(){
 	this.agregarUsuario=function(nick,partida){
-		if(partida.numberUsuario > Object.keys(partida.usuarios).length){
-			partida.puedeAgregarUsuario(nick);
-		}else{
-			partida.fase = new Completado();
-		}
+		partida.puedeAgregarUsuario(nick);
 	}
 
 	this.iniciarPartida = function(partida){
@@ -91,10 +79,16 @@ function Jugando(){
 	this.agregarUsuario=function(nick,partida){
 		console.log("La partida ya ha comenzado");
 	}
+	this.iniciarPartida()=function(partida){
+		console.log("Error: La partida ya esta iniciada");
+	}
 }
 function Final(){
 	this.agregarUsuario=function(nick,partida){
 		console.log("La partida ya ha terminado");
+	}
+	this.iniciarPartida=function(partida){
+		console.log("No se puede iniciar una partida terminada");
 	}
 }
 
@@ -104,10 +98,12 @@ function randomInt(low, high) {
 
 function Usuario(nick){
 	this.nick = nick;
-}
-function Propietario (partida){
-	this.partida =  partida;
-		this.iniciarPartida(){
-			this.partida.fase =  new Jugando();
+	this.juego = juego;
+	this.partida;
+	this.crearPartida=function(num){
+		this.partida = this.juego.crearPartida(num,this);
+	}
+	this.iniciarPartida=function(){
+		this.partida.iniciarPartida();
 	}
 }
