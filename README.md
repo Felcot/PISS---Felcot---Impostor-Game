@@ -1,2 +1,2 @@
-# PSSS---Felcot---Impostor-Game
+# PISS---Felcot---Impostor-Game
 
