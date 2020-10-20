@@ -35,7 +35,7 @@ function Partida(num,owner){
 	this.nickOwner=owner;
 	this.fase=new Inicial();
 	this.usuarios={};
-	this.observer = new observer();
+	this.contenedor = new contenedor();
 	this.agregarUsuario=function(nick){
 		this.fase.agregarUsuario(nick,this)
 	}
@@ -67,27 +67,41 @@ function Partida(num,owner){
 		this.fase.expulsarJugador(nick,this);
 	}
 	this.eliminarUsuario=function(nick){
+		this.contenedor.eliminar(nick,this.usuarios[nick].impostor);
 		delete this.usuarios[nick];
 	}
 	this.AsignarTarea = function(){
-		for(var usr in this.usuarios)
-			this.usuarios[usr].encargo = encargo();
+		for(var usr in this.usuarios){
+			if(!this.usuarios[usr].impostor){
+				this.usuarios[usr].encargo = encargo();
+				this.contenedor.declarar(this.usuarios[usr]);
+			}
+		}
 
 	}
 	this.AsignarImpostor = function(){
 		let keys = Object.keys(this.usuarios);
-		this.usuarios[keys[randomInt(0,keys.length)]].impostor = true;
+		let usr = this.usuarios[keys[randomInt(0,keys.length)]];
+		usr.impostor = true;
+		this.contenedor.declarar(usr);
 	}
 	this.puedeIniciarPartida = function(){
-		this.AsignarTarea();
 		this.AsignarImpostor();
+		this.AsignarTarea();
 		this.fase = new Jugando();
 	}
 	this.evaluarPartida = function(){
-		if(this.observer.devolverNumImpostores == 0)
-			this.fase = new Final('Crewmate');
-		if(this.observer.crewmate == 0)
-			this.fase = new Final('Impostor');
+		F =(impostores,crewmates) => {return impostores>crewmates || (impostores == 1 && crewmates == impostores);};
+		let cond = this.contenedor.evaluarIC(F);
+		if(cond)
+			this.fase = new Final('Impostores');
+		
+		F = (impostores) => {return impostores == 0;};
+		cond = this.contenedor.evaluarI(F)
+		console.log(cond);
+		if(cond)
+			this.fase = new Final('Tripulantes')
+		
 	}
 	this.agregarUsuario(owner);
 }
@@ -144,8 +158,9 @@ function Jugando(){
 	this.iniciarPartida=function(partida){
 	}
 	this.abandonarPartida=function(nick,partida){
+		console.log(partida);
 		partida.eliminarUsuario(nick);
-		partida.puedeTerminar();
+		partida.evaluarPartida();
 	}
 	this.expulsarJugador=function(nick,partida){
 		//TODO
@@ -154,9 +169,10 @@ function Jugando(){
 }
 
 function Final(ganadores){
-	this.final="final";
+	this.nombre="final";
+	this.ganan=ganadores;
 	this.anunciarGanador=function(ganadores){
-		console.log("Los ganadores son "+ganadores+"!!");
+		console.log("Los ganadores son los "+ganadores+"!!");
 	}
 	this.agregarUsuario=function(nick,partida){
 		throw new Exception("AUPT1");
@@ -199,33 +215,50 @@ function encargo(){
 function randomInt(low, high) {
 	return Math.floor(Math.random() * (high - low) + low);
 }
-function observer(){
-	this.impostor= {}
-	this.eliminarImpostor=function(){
-		delete this.impostor[nick];
+function contenedor(){
+	this.impostor = {}
+	this.crewmate = {}
+
+	this.eliminar=function(nick,cond){
+		if(cond)
+			delete this.impostor[nick];
+		else
+			delete this.crewmate[nick];
 	}
-	this.declararImpostor=function(usr){
-		this.impostor["usr.nick"] = usr;
+	this.declarar=function(usr){
+		if(usr.impostor)
+			this.impostor[usr.nick] = usr;
+		else
+			this.crewmate[usr.nick] = usr;
 	}
-	this.devolverNumImpostores=function(){
-		return sizeDictionary(impostor);
+	this.sizeTam= function(impostor){
+		if(impostor)
+			return sizeDictionary(this.impostor);
+		else
+			return sizeDictionary(this.crewmate);
+	}
+	this.evaluarIC=function(F){
+		return F(this.sizeTam(true),this.sizeTam(false));
+	}
+	this.evaluarI=function(F){
+		return F(this.sizeTam(true));
 	}
 }
 function inicio(){
 	try{
 		juego = new Juego();
 		var usr =new Usuario("pepe",juego);
-		var codigo = usr.crearPartida(10);
+		var codigo = usr.crearPartida(4);
 		juego.unirAPartida(codigo,"luis");
 		juego.unirAPartida(codigo,"luias");
-		juego.unirAPartida(codigo,"luisito");
 		juego.unirAPartida(codigo,"pepe");
+		juego.unirAPartida(codigo,"luisito");
 
 		usr.iniciarPartida();
 	}catch(Exception){}
 }
 function sizeDictionary(dic){
-	return Object.keys(this.usuarios).length;
+	return Object.keys(dic).length;
 }
 function Exception(code){
 	this.diccionario= function(code){
@@ -235,7 +268,7 @@ function Exception(code){
 			dic["EJ01"] = "Error: EJ01 Se ha intentado expusltar a un jugador en la fase final.";
 			dic["N410"] = "Error: N410 Se ha intentado crear una partida ilegal, debe tener min 4 o máx 10 Jugadores.";
 			dic["N410C"] = "Error: N410C Se ha intentado iniciar una partida a al que le faltan jugadoress";
-			dic["S10J"] = "Error: S10J "
+			dic["S10J"] = "Error: S10J Ya esta alcanzado el numero maximo de jugadores ";
 			dic["UAP01"] = "Error: UAP01 Se ha intentado abandonar partida en la fase final.";
  		return dic[code];
 	}	

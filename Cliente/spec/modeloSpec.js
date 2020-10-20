@@ -60,7 +60,7 @@ describe("El juego del impostor", function() {
     expect(juego.partidas[codigo].fase.nombre).toEqual("jugando");
   })
    });
-  describe("Abandonar partida",function(){
+  describe("Abandonar partida no es impostor",function(){
     var codigo;
     beforeEach(function() {
       codigo=usr.crearPartida(4);
@@ -75,7 +75,7 @@ describe("El juego del impostor", function() {
       expect(num).toEqual(1);
       expect(juego.partidas[codigo].usuarios["ana"]).toBe(undefined);
     });
-    it("Ana abandona partida en la fase juegando, sin ser impostor",function(){
+    it("Ana abandona partida en la fase jugando, sin ser impostor",function(){
 
       juego.unirAPartida(codigo,"ana");
       var num=Object.keys(juego.partidas[codigo].usuarios).length;
@@ -88,15 +88,17 @@ describe("El juego del impostor", function() {
       juego.unirAPartida(codigo,"tomas");
       var num=Object.keys(juego.partidas[codigo].usuarios).length;
       expect(num).toEqual(4);
-      expect(juego.partidas[codigo].fase.nombre).toEqual("completado");   
-      usr.iniciarPartida();
-      expect(juego.partidas[codigo].fase.nombre).toEqual("jugando");
+      expect(juego.partidas[codigo].fase.nombre).toEqual("completado");
+      usr.iniciarPartida();   
       do{
         for(var user in juego.partidas[codigo].usuarios){
+          juego.partidas[codigo].contenedor.eliminar(user,juego.partidas[codigo].usuarios[user].impostor);
           juego.partidas[codigo].usuarios[user].impostor=false;
         }
         juego.partidas[codigo].AsignarImpostor();
+        juego.partidas[codigo].AsignarTarea();
       }while(juego.partidas[codigo].usuarios["ana"].impostor);
+      expect(juego.partidas[codigo].fase.nombre).toEqual("jugando");
       expect(juego.partidas[codigo].usuarios["ana"].impostor).toEqual(false);
       juego.partidas[codigo].usuarios["ana"].abandonarPartida();
       var num=Object.keys(juego.partidas[codigo].usuarios).length;
@@ -104,8 +106,7 @@ describe("El juego del impostor", function() {
       expect(juego.partidas[codigo].usuarios["ana"]).toBe(undefined);
     });
 
-    it("Ana abandona partida en la fase juegando, es impostor",function(){
-
+   it("Ana abandona partida en la fase jugando, es impostor",function(){
       juego.unirAPartida(codigo,"ana");
       var num=Object.keys(juego.partidas[codigo].usuarios).length;
       expect(num).toEqual(2);
@@ -117,24 +118,101 @@ describe("El juego del impostor", function() {
       juego.unirAPartida(codigo,"tomas");
       var num=Object.keys(juego.partidas[codigo].usuarios).length;
       expect(num).toEqual(4);
-      expect(juego.partidas[codigo].fase.nombre).toEqual("completado");   
-      usr.iniciarPartida();
-      expect(juego.partidas[codigo].fase.nombre).toEqual("jugando");
+      expect(juego.partidas[codigo].fase.nombre).toEqual("completado");
+      usr.iniciarPartida();   
       do{
-        for(var user in juego.partidas[codigo].usuarios){
-          juego.partidas[codigo].usuarios[user].impostor=false;
-        }
-        juego.partidas[codigo].AsignarImpostor();
-      }while(!juego.partidas[codigo].usuarios["ana"].impostor);
+          for(var user in juego.partidas[codigo].usuarios){
+            juego.partidas[codigo].contenedor.eliminar(user,juego.partidas[codigo].usuarios[user].impostor);
+            juego.partidas[codigo].usuarios[user].impostor=false;
+          }
+          juego.partidas[codigo].AsignarImpostor();
+          juego.partidas[codigo].AsignarTarea();
+      }while(!juego.partidas[codigo].usuarios.ana.impostor);
+      expect(juego.partidas[codigo].fase.nombre).toEqual("jugando");
       expect(juego.partidas[codigo].usuarios["ana"].impostor).toEqual(true);
       juego.partidas[codigo].usuarios["ana"].abandonarPartida();
       var num=Object.keys(juego.partidas[codigo].usuarios).length;
       expect(num).toEqual(3);
       expect(juego.partidas[codigo].usuarios["ana"]).toBe(undefined);
-      expect(juego.partidas[codigo].fase.nombre).toEqual("terminado");   
     });
 
     
   });
+  describe("Evaluar Victoria",function(){
+    var codigo;
+    beforeEach(function() {
+      codigo=usr.crearPartida(4);
+    });
+      it("Ganan tripulantes",function(){
+        juego.unirAPartida(codigo,"ana");
+        var num=Object.keys(juego.partidas[codigo].usuarios).length;
+        expect(num).toEqual(2);
+        expect(juego.partidas[codigo].fase.nombre).toEqual("inicial");
+        juego.unirAPartida(codigo,"isa");
+        var num=Object.keys(juego.partidas[codigo].usuarios).length;
+        expect(num).toEqual(3);
+        expect(juego.partidas[codigo].fase.nombre).toEqual("inicial");      
+        juego.unirAPartida(codigo,"tomas");
+        var num=Object.keys(juego.partidas[codigo].usuarios).length;
+        expect(num).toEqual(4);
+        expect(juego.partidas[codigo].fase.nombre).toEqual("completado");
+        usr.iniciarPartida();   
+        do{
+          for(var user in juego.partidas[codigo].usuarios){
+            juego.partidas[codigo].contenedor.eliminar(user,juego.partidas[codigo].usuarios[user].impostor);
+            juego.partidas[codigo].usuarios[user].impostor=false;
+                }
+          juego.partidas[codigo].AsignarImpostor();
+          juego.partidas[codigo].AsignarTarea();
+        }while(!juego.partidas[codigo].usuarios.ana.impostor);
+        expect(juego.partidas[codigo].fase.nombre).toEqual("jugando");
+        expect(juego.partidas[codigo].usuarios["ana"].impostor).toEqual(true);
+        juego.partidas[codigo].usuarios["ana"].abandonarPartida();
+        var num=Object.keys(juego.partidas[codigo].usuarios).length;
+        expect(num).toEqual(3);
+        expect(juego.partidas[codigo].usuarios["ana"]).toBe(undefined);
+        expect(juego.partidas[codigo].fase.nombre).toEqual("final");
+        expect(juego.partidas[codigo].fase.ganan).toEqual("Tripulantes");   
+      });
+        
+  it("Ganan Impostores",function(){
 
-})
+            juego.unirAPartida(codigo,"ana");
+        var num=Object.keys(juego.partidas[codigo].usuarios).length;
+        expect(num).toEqual(2);
+        expect(juego.partidas[codigo].fase.nombre).toEqual("inicial");
+        juego.unirAPartida(codigo,"isa");
+        var num=Object.keys(juego.partidas[codigo].usuarios).length;
+        expect(num).toEqual(3);
+        expect(juego.partidas[codigo].fase.nombre).toEqual("inicial");      
+        juego.unirAPartida(codigo,"tomas");
+        var num=Object.keys(juego.partidas[codigo].usuarios).length;
+        expect(num).toEqual(4);
+        expect(juego.partidas[codigo].fase.nombre).toEqual("completado");
+        usr.iniciarPartida();   
+        do{
+          for(var user in juego.partidas[codigo].usuarios){
+            juego.partidas[codigo].contenedor.eliminar(user,juego.partidas[codigo].usuarios[user].impostor);
+            juego.partidas[codigo].usuarios[user].impostor=false;
+                }
+          juego.partidas[codigo].AsignarImpostor();
+          juego.partidas[codigo].AsignarTarea();
+        }while(!juego.partidas[codigo].usuarios.ana.impostor);
+        expect(juego.partidas[codigo].fase.nombre).toEqual("jugando");
+        expect(juego.partidas[codigo].usuarios["isa"].impostor).toEqual(false);
+        juego.partidas[codigo].usuarios["isa"].abandonarPartida();
+        var num=Object.keys(juego.partidas[codigo].usuarios).length;
+        expect(num).toEqual(3);
+        expect(juego.partidas[codigo].usuarios["isa"]).toBe(undefined);
+
+        expect(juego.partidas[codigo].usuarios["tomas"].impostor).toEqual(false);
+        juego.partidas[codigo].usuarios["tomas"].abandonarPartida();
+        var num=Object.keys(juego.partidas[codigo].usuarios).length;
+        expect(num).toEqual(2);
+        expect(juego.partidas[codigo].usuarios["tomas"]).toBe(undefined);
+
+        expect(juego.partidas[codigo].fase.nombre).toEqual("final");
+        expect(juego.partidas[codigo].fase.ganan).toEqual("Impostores");   
+          });
+        });
+});
