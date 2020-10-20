@@ -9,3 +9,10 @@ Funcionalidad:
 	- Atacar(tiempo entre ataques)
 	- Votacion al sospechoso o soltar la votacion
 	
+Tareas del proyecto (alto nivel)
+	- Diseñar modelo de Lógica
+	- Desarrollar arquitectura saas
+	- Elegir un framework/example : phaser
+	- Integrar el modelo en la arquitectura
+	- Integrar el ejemplo
+	-
