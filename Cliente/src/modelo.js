@@ -213,8 +213,13 @@ function Final(ganadores){
 		throw new Exception("UAP01");
 	}
 	this.expulsarJugador=function(nick,partida){
-		throw new Exception("EJ01");
+		throw new Exception("FeJ01");
 	}
+	this.recuento = function(nick){
+		throw new Exception("FR02")
+	}
+
+
 	this.anunciarGanador(ganadores);
 }
 
@@ -240,8 +245,6 @@ function Votacion(){
 				check = (this.votacion[masVotado] == this.votacion[votado]);
 				masVotado=votado;
 			}
-
-		
 		if(masVotado != "skipe" && !check){
 			partida.eyectar(masVotado);
 		}else{
@@ -251,6 +254,24 @@ function Votacion(){
 		if(partida.fase.nombre != "final")
 			partida.fase = new Jugando();
 	}
+	this.anunciarGanador=function(ganadores){
+		throw new Exception("VaG01");
+		}
+	
+	this.agregarUsuario=function(nick,partida){
+		throw new Exception("VaU01");
+	}
+	this.iniciarPartida=function(partida){
+		throw new Exception("ViP01");	
+	} 
+	this.abandonarPartida=function(nick,partida){
+		throw new Exception("VaP01"); // Esto realmente es así comrpobar
+	}
+	this.expulsarJugador=function(nick,partida){
+		//TODO
+		throw new Exception("VeJ01"); // Esto no es cierto, debe ser implementado 
+	}
+	
 
 }
 
@@ -301,8 +322,16 @@ function Vivo(){
 function Fantasma(){
 	this.nombre =  "fantasma";
 	this.matar = function(nick,partida){
-		throw new Exception("MF01");
+		throw new Exception("FM01");
 	}
+	this.votar=function(nick,partida){
+		throw new Exception("FV01");
+	}
+	this.report = function(partida){
+		throw new Exception("FR01")
+	}
+	
+	
 }
 
 function encargo(){
@@ -369,14 +398,23 @@ function sizeDictionary(dic){
 function Exception(code){
 	this.diccionario= function(code){
 		var dic={};
-			dic["AUPC1"] = "Error: AUPC1 Se ha intentado unir a una partida que ya a comenzado.";
-			dic["AUPT2"] = "Error: AUPT2 Se ha intentado unir a una partida que ya a terminado.";
-			dic["EJ01"] = "Error: EJ01 Se ha intentado expusltar a un jugador en la fase final.";
-			dic["MF01"] =  "Error: MF01  Un fantasma no puede matar";
-			dic["N410"] = "Error: N410 Se ha intentado crear una partida ilegal, debe tener min 4 o máx 10 Jugadores.";
-			dic["N410C"] = "Error: N410C Se ha intentado iniciar una partida a al que le faltan jugadoress";
-			dic["S10J"] = "Error: S10J Ya esta alcanzado el numero maximo de jugadores ";
-			dic["UAP01"] = "Error: UAP01 Se ha intentado abandonar partida en la fase final.";
+			dic["AUPC1"] = "Error AUPC1: Se ha intentado unir a una partida que ya a comenzado.";
+			dic["AUPT2"] = "Error AUPT2: Se ha intentado unir a una partida que ya a terminado.";
+			dic["EJ01"] = "Error EJ01: Se ha intentado expusltar a un jugador en la fase final.";
+			dic["N410"] = "Error N410: Se ha intentado crear una partida ilegal, debe tener min 4 o máx 10 Jugadores.";
+			dic["N410C"] = "Error N410C: Se ha intentado iniciar una partida a al que le faltan jugadoress";
+			dic["S10J"] = "Error S10J: Ya esta alcanzado el numero maximo de jugadores ";
+			dic["UAP01"] = "Error UAP01: Se ha intentado abandonar partida en la fase final.";
+			dic["FM01"] =  "Error MF01:  Un fantasma no puede matar";
+ 			dic["FR01"] = "Error FR01: No se puede votar cuando se es fantasma";
+			dic["FR02"] = "Error FR02: No se puede realizar el recuento de votos en la fase final";
+			dic["FV01"] = "Error FV01: No se puede votar cuando se es fantasma";
+			dic["VaG01"] = "Error VaG01: En la fase de votacion no se puede anunciar Ganadores.";
+			dic["VaU01"] = "Error VaU01: En la fase de votacion no se puede agregar nuevos usuarios";
+			dic["ViP01"] = "Error ViP01: En la fase de votacion no se puede iniciar Partida";
+			dic["VaP01"] = "Error VaP01: En la fase de votacion no se puede abandonarPartida";
+			dic["VeJ01"] = "Error VeJ01: Trabajando en ello, sera implementado en los proximos días, perdonen las molestias";
+			dic["FeJ01"] = "Error FeJ01: No se puede expulsar a un jugador en la fase final";
  		return dic[code];
 	}	
 	this.toConsLog= function(code){
