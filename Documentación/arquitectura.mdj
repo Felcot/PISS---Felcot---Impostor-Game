@@ -6162,9 +6162,9 @@
 											"font": "Arial;13;1",
 											"left": 133,
 											"top": 423,
-											"width": 43.3291015625,
+											"width": 60.68994140625,
 											"height": 13,
-											"text": "Muerto"
+											"text": "Fantasma"
 										},
 										{
 											"_type": "LabelView",
@@ -6195,7 +6195,7 @@
 									"font": "Arial;13;0",
 									"left": 128,
 									"top": 416,
-									"width": 53.3291015625,
+									"width": 70.68994140625,
 									"height": 25,
 									"stereotypeLabel": {
 										"$ref": "AAAAAAF1KDjXN/vWA2A="
@@ -6222,7 +6222,7 @@
 									"font": "Arial;13;0",
 									"left": 128,
 									"top": 441,
-									"width": 53.3291015625,
+									"width": 70.68994140625,
 									"height": 10
 								},
 								{
@@ -6237,7 +6237,7 @@
 									"font": "Arial;13;0",
 									"left": 128,
 									"top": 451,
-									"width": 53.3291015625,
+									"width": 70.68994140625,
 									"height": 10
 								},
 								{
@@ -6275,7 +6275,7 @@
 							"containerChangeable": true,
 							"left": 128,
 							"top": 416,
-							"width": 53.3291015625,
+							"width": 70.68994140625,
 							"height": 45,
 							"nameCompartment": {
 								"$ref": "AAAAAAF1KDjXN/vVChU="
@@ -6408,7 +6408,7 @@
 									},
 									"visible": false,
 									"font": "Arial;13;0",
-									"left": 120,
+									"left": 124,
 									"top": 394,
 									"height": 13,
 									"alpha": 1.5707963267948966,
@@ -6429,8 +6429,8 @@
 									},
 									"visible": null,
 									"font": "Arial;13;0",
-									"left": 106,
-									"top": 400,
+									"left": 111,
+									"top": 401,
 									"height": 13,
 									"alpha": 1.5707963267948966,
 									"distance": 30,
@@ -6450,7 +6450,7 @@
 									},
 									"visible": false,
 									"font": "Arial;13;0",
-									"left": 147,
+									"left": 151,
 									"top": 381,
 									"height": 13,
 									"alpha": -1.5707963267948966,
@@ -6469,7 +6469,7 @@
 								"$ref": "AAAAAAF1KDjXN/vU8Qo="
 							},
 							"lineStyle": 1,
-							"points": "144:415;124:373",
+							"points": "149:415;127:373",
 							"showVisibility": true,
 							"nameLabel": {
 								"$ref": "AAAAAAF1KDkVNf9yVqg="
@@ -7568,7 +7568,7 @@
 					"_parent": {
 						"$ref": "AAAAAAFF+qBWK6M3Z8Y="
 					},
-					"name": "Muerto",
+					"name": "Fantasma",
 					"ownedElements": [
 						{
 							"_type": "UMLGeneralization",
