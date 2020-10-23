@@ -115,7 +115,7 @@ function Partida(num,owner){
 		this.matar(nick);
 	}
 	this.matar=function(nick){
-		this.usuarios[nick].estado = new Fantasma();
+		this.usuarios[nick].asesinado()
 		this.contenedor.eliminar(nick,this.usuarios[nick].impostor,this);
 	}
 
@@ -304,6 +304,10 @@ function Usuario(nick,juego){
 		if(this.impostor)
 			this.estado.matar(nick,this.partida);
 	}
+
+	this.asesinado = function(){
+		this.estado.asesinado(this);
+	}
 }
 
 
@@ -311,6 +315,9 @@ function Vivo(){
 	this.nombre = "vivo";
 	this.matar = function(nick,partida){
 		partida.fase.matar(nick,partida);
+	}
+	this.asesinado = function(usr){
+		usr.estado = new Fantasma();
 	}
 	this.votar = function(nick,partida){
 		partida.votar(nick);
