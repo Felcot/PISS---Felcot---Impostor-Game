@@ -22,6 +22,7 @@ app.use(bodyParser.json());
 //Se desea utilizar, nos encargaremos de realizar la transmisión de las peticiones de tal maneras
 //Que permitira realizar la respuesta especializada por ejemplo del impostor devuelviendole la interfaz
 //correspondiente por ejemplo.
+
 app.get('/', function (request, response) {
     var contenido = fs.readFileSync(__dirname + "/cliente/index.html");
     	// readFileSync Transmite una respuesta asincrona
@@ -30,6 +31,26 @@ app.get('/', function (request, response) {
     response.send(contenido);
     
 });
+//Esto es la ruta dentro del API rest
+/*Example: app.get('/nuevoUsuario/:param1/:param2/:param3',function(request,response){});*/
+app.get('/nuevoUsuario/:nick',function(request,response){ //funcion de callback -- 
+	var nick =  request.params.nick;					//peticion que le hace el servidor al cliente
+	var usr = new modelo.Usuario(nick);
+	response.send({"usr":usr});
+});
+
+app.get('/crearPartida/:num', function(request,response){
+	var num = parseInt(request.params.num); // recogemos los parametros
+	/*Errores posibles: Nick null, o por ejemplo numero null/notNumberType*/
+	//var num = 4;
+	var usr = new modelo.Usuario(nick); // creamos un usuario
+	var codigo = usr.crearPartida(num); //El usuario crea la partida
+	console.log(codigo);
+	response.send({"codigo":codigo}); // la función emite como respuesta el objeto json {"codigo":codigo}
+});
+
+app.get('/unirAPartida/:numero', function(request,response){});
+app.get('/iniciarPartida/:numero', function(request,response){});
 
 //Le dice al servidor que se ponga a escuchar en el puerto, además permite enviar un mensaje
 //por ejemplo Node app is running on port N ->  El nodo esta escuchando en el puerto N

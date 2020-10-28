@@ -283,6 +283,7 @@ function Usuario(nick,juego){
 	this.encargo ="ninguno";
 	this.impostor = false;
 	this.crearPartida=function(num){
+		console.log("Hola");
 		return this.juego.crearPartida(num,this);
 	}
 	this.iniciarPartida=function(){
@@ -386,19 +387,19 @@ function contenedor(){
 		return F(this.sizeTam(true));
 	}
 }
-function inicio(){
-	try{
-		juego = new Juego();
-		var usr =new Usuario("pepe",juego);
-		var codigo = usr.crearPartida(4);
-		juego.unirAPartida(codigo,"luis");
-		juego.unirAPartida(codigo,"luias");
-		juego.unirAPartida(codigo,"pepe");
-		juego.unirAPartida(codigo,"luisito");
+// function inicio(){
+// 	try{
+// 		juego = new Juego();
+// 		var usr =new Usuario("pepe",juego);
+// 		var codigo = usr.crearPartida(4);
+// 		juego.unirAPartida(codigo,"luis");
+// 		juego.unirAPartida(codigo,"luias");
+// 		juego.unirAPartida(codigo,"pepe");
+// 		juego.unirAPartida(codigo,"luisito");
 
-		usr.iniciarPartida();
-	}catch(Exception){}
-}
+// 		usr.iniciarPartida();
+// 	}catch(Exception){}
+// }
 function sizeDictionary(dic){
 	return Object.keys(dic).length;
 }
