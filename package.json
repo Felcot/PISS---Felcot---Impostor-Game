@@ -1,0 +1,24 @@
+{
+  "name": "psss---felcot---impostor-game",
+  "version": "1.0.0",
+  "description": "Este proyecto será realizado durante el curso 20/21 de la asignatura de \r Procesos de sistemas software.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "./node_modules/.bin/jasmine-node servidor"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Felcot/PISS---Felcot---Impostor-Game.git"
+  },
+  "author": "Felipe Costa Tébar",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Felcot/PISS---Felcot---Impostor-Game/issues"
+  },
+  "homepage": "https://github.com/Felcot/PISS---Felcot---Impostor-Game#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "jasmine-node": "^3.0.0"
+  }
+}
