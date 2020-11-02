@@ -6,7 +6,7 @@ var bodyParser = require("body-parser"); // es necesario para parsear los formul
 //QueryString -> Esta limitada por lo que no se puede pasar mucha información en la URI
 //Por tanto, tenemos el bodyParse que permite realizar transferencia de volumenes de información superior
 // a través del cuerpo del index.
-var modelo = require("./Servidor/modelo.js");
+var modelo = require("./servidor/modelo.js");
 
 app.set('port', process.env.PORT || 5000); // Nuestro servidor va a escuchar en caso de no estar definido
 //El puerto en la variable de entorno $PORT, escuchara por el puerto 5000
@@ -33,20 +33,27 @@ app.get('/', function (request, response) {
 });
 //Esto es la ruta dentro del API rest
 /*Example: app.get('/nuevoUsuario/:param1/:param2/:param3',function(request,response){});*/
-app.get('/nuevoUsuario/:nick',function(request,response){ //funcion de callback -- 
-	var nick =  request.params.nick;					//peticion que le hace el servidor al cliente
-	var usr = new modelo.Usuario(nick);
+/*app.get('/nuevoUsuario/:nick',function(request,response){ //funcion de callback -- 
+	var nick =  request.params.nick;
+	console.log(nick);					//peticion que le hace el servidor al cliente
+	usr = juego.nuevoUsuario(nick);
 	response.send({"usr":usr});
-});
+});*/
 
-app.get('/crearPartida/:num', function(request,response){
+app.get('/crearPartida/:nick/:num', function(request,response){
 	var num = parseInt(request.params.num); // recogemos los parametros
 	/*Errores posibles: Nick null, o por ejemplo numero null/notNumberType*/
 	//var num = 4;
-	var usr = new modelo.Usuario(nick); // creamos un usuario
-	var codigo = usr.crearPartida(num); //El usuario crea la partida
-	console.log(codigo);
-	response.send({"codigo":codigo}); // la función emite como respuesta el objeto json {"codigo":codigo}
+	var nick =  request.params.nick;
+	var usr = juego.nuevoUsuario(nick); // creamos un usuario
+	//var codigo = usr.crearPartida(num); //El usuario crea la partida
+
+	response.send({"nick":nick}); // la función emite como respuesta el objeto json {"codigo":codigo}
+});
+
+app.get('/listarPartida/',function(request,response){
+	var lista = juego.listarPartida();
+	response.send({"Partidas":lista});
 });
 
 app.get('/unirAPartida/:numero', function(request,response){});

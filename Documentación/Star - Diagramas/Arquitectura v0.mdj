@@ -2547,9 +2547,9 @@
 										"$ref": "AAAAAAF1CZ6HTBe5JL8="
 									},
 									"font": "Arial;13;0",
-									"left": 600,
+									"left": 599,
 									"top": 456,
-									"width": 5.05908203125,
+									"width": 6.5,
 									"height": 13,
 									"alpha": -0.5235987755982988,
 									"distance": 25,
@@ -2730,6 +2730,7 @@
 								"reference": {
 									"$ref": "AAAAAAF05WdYJvHGbCQ="
 								},
+								"navigable": false,
 								"multiplicity": "*"
 							}
 						}
