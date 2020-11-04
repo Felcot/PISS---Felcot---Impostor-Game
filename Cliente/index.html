@@ -3,7 +3,9 @@
 	<header>
 		<title> Impostor Game</title>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
 		<script src="Cliente/src/clienteRest.js"></script>
+		<script src="Cliente/src/clienteWS.js"></script>
 	</header>
 	<body>
 		<p>
@@ -11,6 +13,8 @@
 		</p>
 		<script type="text/javascript">
 			var rest = new ClienteRest();
+			var ws =  new ClienteWS();
+				ws.ini();
 		</script>
 	</body>
 </html>
