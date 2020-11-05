@@ -1,28 +1,32 @@
 var modelo=require("./modelo.js");
 describe("El juego del impostor", function() {
   var juego;
-  var usr;
-
+  //var usr;
+  var nick;
   beforeEach(function() {
     juego=new modelo.Juego();
-    usr=new modelo.Usuario("Pepe",juego);
+    //usr=new modelo.Usuario("Pepe",juego);
+    nick = "Pepe";
   });
 
   it("comprobar valores iniciales del juego", function() {
     expect(Object.keys(juego.partidas).length).toEqual(0);
-    expect(usr.nick).toEqual("Pepe");
-    expect(usr.juego).not.toBe(undefined);
+    //expect(usr.nick).toEqual("Pepe");
+    expect(nick).toEqual("Pepe");
+    //expect(usr.juego).not.toBe(undefined);
   });
 
   describe("el usr Pepe crea una partida de 4 jugadores",function(){
   var codigo;
   beforeEach(function() {
-      codigo=usr.crearPartida(4);
+      //codigo=usr.crearPartida(4);
+      codigo = juego.crearPartida(4,nick);
     });
 
   it("se comprueba la partida",function(){  
       expect(codigo).not.toBe(undefined);
-      expect(juego.partidas[codigo].nickOwner).toEqual(usr.nick);
+      //expect(juego.partidas[codigo].nickOwner).toEqual(usr.nick);
+      expect(juego.partidas[codigo].nickOwner).toEqual(nick);
       expect(juego.partidas[codigo].maximo).toEqual(4);
       expect(juego.partidas[codigo].fase.nombre).toEqual("inicial");
     var num=Object.keys(juego.partidas[codigo].usuarios).length;
@@ -57,14 +61,14 @@ describe("El juego del impostor", function() {
       var num=Object.keys(juego.partidas[codigo].usuarios).length;
       expect(num).toEqual(4);
     expect(juego.partidas[codigo].fase.nombre).toEqual("completado");   
-    usr.iniciarPartida();
+    juego.usuario[nick].iniciarPartida();
     expect(juego.partidas[codigo].fase.nombre).toEqual("jugando");
   })
    });
   describe("Abandonar partida no es impostor",function(){
     var codigo;
     beforeEach(function() {
-      codigo=usr.crearPartida(4);
+      codigo=juego.crearPartida(4,nick);
     });
     it("Ana abandona partida en la fase inicial",function(){
       expect(juego.partidas[codigo].fase.nombre).toEqual("inicial");
@@ -113,7 +117,7 @@ describe("El juego del impostor", function() {
       var num=Object.keys(juego.partidas[codigo].usuarios).length;
       expect(num).toEqual(4);
       expect(juego.partidas[codigo].fase.nombre).toEqual("completado");
-      usr.iniciarPartida();   
+      juego.usuario[nick].iniciarPartida();   
       do{
         for(var user in juego.partidas[codigo].usuarios){
             // Reiniciamos el contenedor, hasta tener el escenario deseado
@@ -145,7 +149,7 @@ describe("El juego del impostor", function() {
       var num=Object.keys(juego.partidas[codigo].usuarios).length;
       expect(num).toEqual(4);
       expect(juego.partidas[codigo].fase.nombre).toEqual("completado");
-      usr.iniciarPartida();   
+      juego.usuario[nick].iniciarPartida();   
       do{
           for(var user in juego.partidas[codigo].usuarios){
             // Reiniciamos el contenedor, hasta tener el escenario deseado
@@ -169,7 +173,7 @@ describe("El juego del impostor", function() {
  describe("Asignar y Matar",function(){
     var codigo;
     beforeEach(function() {
-      codigo=usr.crearPartida(4);
+      codigo=juego.crearPartida(4,nick);
     });
     it("Tareas asignadas",function(){
         juego.unirAPartida(codigo,"ana");
@@ -184,7 +188,7 @@ describe("El juego del impostor", function() {
         var num=Object.keys(juego.partidas[codigo].usuarios).length;
         expect(num).toEqual(4);
         expect(juego.partidas[codigo].fase.nombre).toEqual("completado");
-        usr.iniciarPartida();
+        juego.usuario[nick].iniciarPartida();
         expect(juego.partidas[codigo].fase.nombre).toEqual("jugando");
 
         for(var usrExpected in juego.partidas[codigo].usuarios){
@@ -207,7 +211,7 @@ describe("El juego del impostor", function() {
         var num=Object.keys(juego.partidas[codigo].usuarios).length;
         expect(num).toEqual(4);
         expect(juego.partidas[codigo].fase.nombre).toEqual("completado");
-        usr.iniciarPartida();
+        juego.usuario[nick].iniciarPartida();
         expect(juego.partidas[codigo].fase.nombre).toEqual("jugando");
         var expectImpostor = false;
         for(var usrExpected in juego.partidas[codigo].usuarios){
@@ -229,7 +233,7 @@ describe("El juego del impostor", function() {
         var num=Object.keys(juego.partidas[codigo].usuarios).length;
         expect(num).toEqual(4);
         expect(juego.partidas[codigo].fase.nombre).toEqual("completado");
-        usr.iniciarPartida();
+        juego.usuario[nick].iniciarPartida();
         expect(juego.partidas[codigo].fase.nombre).toEqual("jugando");
         var checked = false;
         var expectImpostorName="";
@@ -263,7 +267,7 @@ describe("El juego del impostor", function() {
         var num=Object.keys(juego.partidas[codigo].usuarios).length;
         expect(num).toEqual(4);
         expect(juego.partidas[codigo].fase.nombre).toEqual("completado");
-        usr.iniciarPartida();
+        juego.usuario[nick].iniciarPartida();
         expect(juego.partidas[codigo].fase.nombre).toEqual("jugando");
         var checked = false;
         var expectImpostorName="";
@@ -302,7 +306,7 @@ describe("El juego del impostor", function() {
         var num=Object.keys(juego.partidas[codigo].usuarios).length;
         expect(num).toEqual(4);
         expect(juego.partidas[codigo].fase.nombre).toEqual("completado");
-        usr.iniciarPartida();
+        juego.usuario[nick].iniciarPartida();
         expect(juego.partidas[codigo].fase.nombre).toEqual("jugando");
         var checked = false;
         var expectImpostorName="";
@@ -342,7 +346,7 @@ describe("El juego del impostor", function() {
         var num=Object.keys(juego.partidas[codigo].usuarios).length;
         expect(num).toEqual(4);
         expect(juego.partidas[codigo].fase.nombre).toEqual("completado");
-        usr.iniciarPartida();
+        juego.usuario[nick].iniciarPartida();
         expect(juego.partidas[codigo].fase.nombre).toEqual("jugando");
         var checked = false;
         var expectImpostorName="";
@@ -374,7 +378,7 @@ describe("El juego del impostor", function() {
   describe("Evaluar Victoria",function(){
     var codigo;
     beforeEach(function() {
-      codigo=usr.crearPartida(4);
+      codigo=juego.crearPartida(4,nick);
     });
       it("Ganan tripulantes",function(){
         juego.unirAPartida(codigo,"ana");
@@ -389,7 +393,7 @@ describe("El juego del impostor", function() {
         var num=Object.keys(juego.partidas[codigo].usuarios).length;
         expect(num).toEqual(4);
         expect(juego.partidas[codigo].fase.nombre).toEqual("completado");
-        usr.iniciarPartida();   
+        juego.usuario[nick].iniciarPartida();   
         do{
           for(var user in juego.partidas[codigo].usuarios){
             // Reiniciamos el contenedor, hasta tener el escenario deseado
@@ -424,7 +428,7 @@ describe("El juego del impostor", function() {
         var num=Object.keys(juego.partidas[codigo].usuarios).length;
         expect(num).toEqual(4);
         expect(juego.partidas[codigo].fase.nombre).toEqual("completado");
-        usr.iniciarPartida();   
+        juego.usuario[nick].iniciarPartida();   
         do{
           for(var user in juego.partidas[codigo].usuarios){
             // Reiniciamos el contenedor, hasta tener el escenario deseado

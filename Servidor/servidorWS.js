@@ -31,11 +31,23 @@ function ServidorWS(){
 		    	cli.enviarATodosMenosRemitente(socket,codigo,"nuevoJugador",nick);
 		    });
 
-		    socket.on('iniciarPartida',function(nick){
-		    	var usr = juego.usuario(nick);
-		    	var fase = usr.iniciarPartida();
-		    	var codigo = usr.getPartidaCode();
+		    socket.on('iniciarPartida',function(nick,codigo){
+		    	// var usr = juego.usuario(nick);
+		    	// var fase = usr.iniciarPartida();
+		    	// var codigo = usr.getPartidaCode();
+		    	// cli.enviarATodos(socket,"partidaIniciada",{"codigo":codigo,"fase":fase});
+
+		    	juego.iniciarPartida(nick,codigo);
+		    	var fase = juego.partias[codigo].fase.nombre;
 		    	cli.enviarATodos(socket,"partidaIniciada",{"codigo":codigo,"fase":fase});
+		    });
+		    socket.on('listarPartidas',function(nick,codigo){
+		    	var data = juego.listarPartidas();
+		    	cli.enviarRemitente(socket,"recibirListarPartidas",data);
+		    });
+		    socket.on('listarPartidasDisponibles',function(nick,codigo){
+		    	var data = juego.listarPartidasDisponibles();
+		    	cli.enviarRemitente(socket,"recibirListarPartidasDisponibles",data);
 		    });
 		});
 	}

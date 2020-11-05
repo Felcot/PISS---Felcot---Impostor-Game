@@ -1,15 +1,16 @@
 function Juego(){
 	this.partidas={};
 	this.usuario={};
-	this.crearPartida=function(num,owner){
+	this.crearPartida=function(num,nick){
 		if((num < 4) || (num > 10)){
 		 	throw new Exception("N410");
 		}
 
 		let codigo=this.obtenerCodigo();
 		if (!this.partidas[codigo]){
-			this.partidas[codigo]=new Partida(num,owner.nick);
-			owner.partida=this.partidas[codigo];
+			this.partidas[codigo]=new Partida(num,nick,this);
+			var usr =  this.partidas[codigo].usuarios;
+			this.usuario[nick] = usr[nick];
 		}
 		return codigo;
 	}
@@ -34,16 +35,25 @@ function Juego(){
 	this.eliminarPartida= function(codigo){
 		delete this.partida[codigo];
 	}
-	this.listarPartida=function(){
+	this.listarPartidasDisponibles=function(){
 		this.result = {};
 		var huecos = 0;
 		for (var key in this.partidas){
 			var partida = this.partidas[key];
 			if(partida.sePuedeEntrar() && partida.comprobarMaximo()){
 				huecos = partida.emptyFree();
-				result[partida] = (partida,huecos);
+				result[partida] = {"codidgo":key,"owner":partida.nickOwner,"huecos":huecos};
 			}
 		}
+		return result;
+	}
+	this.listarPartidas=function(){
+		this.result = {};
+		var huecos = 0;
+		for (var key in this.partidas){
+			var partida = this.partidas[key];
+			result[partida] = {"codidgo":key,"owner":partida.nickOwner};
+			}
 		return result;
 	}
 	this.usuario=function(nick){
@@ -57,11 +67,12 @@ function Juego(){
 	
 }
 
-function Partida(num,owner){
+function Partida(num,owner,juego){
 	this.maximo=num;
 	this.nickOwner=owner;
 	this.fase=new Inicial();
 	this.usuarios={};
+	this.juego = juego;
 	this.contenedor = new contenedor();
 	this.agregarUsuario=function(nick){
 		this.fase.agregarUsuario(nick,this)
@@ -75,8 +86,6 @@ function Partida(num,owner){
 		}
 		this.usuarios[nuevo]=new Usuario(nuevo);
 		this.usuarios[nuevo].partida = this;
-
-		//this.comprobarMinimo();
 	}
 	this.comprobarMinimo=function(){
 		return sizeDictionary(this.usuarios)>=4
@@ -96,6 +105,8 @@ function Partida(num,owner){
 	this.eliminarUsuario=function(nick){
 		this.contenedor.eliminar(nick,this.usuarios[nick].impostor,this);
 		delete this.usuarios[nick];
+		if(this.comprobarUsuarios()<0)
+			this.juego.eliminarPartida(this.codigo);
 	}
 	this.comprobarUsuarios=function(){
 		return sizeDictionary(this.usuarios);
