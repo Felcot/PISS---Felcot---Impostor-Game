@@ -56,10 +56,10 @@ app.get('/crearPartida/:nick/:num', function(request,response){
 	response.send({"codigo":codigo}); // la función emite como respuesta el objeto json {"codigo":codigo}
 });
 
-app.get('/listarPartida/',function(request,response){
+/*app.get('/listarPartida/',function(request,response){
 	var lista = juego.listarPartida();
 	response.send({"Partidas":lista});
-});
+});*/
 
 app.get('/unirAPartida/:numero', function(request,response){});
 app.get('/iniciarPartida/:numero', function(request,response){});

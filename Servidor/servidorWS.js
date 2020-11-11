@@ -15,8 +15,7 @@ function ServidorWS(){
 		var cli=this;
 		io.on('connection',function(socket){	// bloques io.on primer mensaje "connection" socket referencia al cliente que lo ha pedido	    
 		    socket.on('crearPartida', function(nick,num) {
-		        var usr=new modelo.Usuario(nick);
-				var codigo=juego.crearPartida(num,usr);	
+		        var codigo=juego.crearPartida(num,nick);	
 				socket.join(codigo);	      
 				console.log('Usuario: '+nick+" crea partida codigo: "+codigo);  				
 		       	cli.enviarRemitente(socket,"partidaCreada",{"codigo":codigo,"owner":nick});		        		        
@@ -24,30 +23,33 @@ function ServidorWS(){
 
 		    socket.on('unirAPartida',function(nick,codigo){
 		    	console.log('El usuario: '+ nick + ' quiere unirse a la partida '+codigo);
-		    	var result = juego.unirAPartida(nick,codigo);
+		    	var result = juego.unirAPartida(codigo,nick);
 		    	socket.join(codigo);
 		    	var owner = juego.partidas[codigo].nickOwner;
 		    	cli.enviarRemitente(socket,"unidoAPartida",{"codigo" : codigo,"owner":owner});
 		    	cli.enviarATodosMenosRemitente(socket,codigo,"nuevoJugador",nick);
 		    });
+		    socket.on('abandonarPartida',function(nick,codigo){
+		    	console.log("El usuario: "+ nick+ " quiere abandonar la partida" + codigo);
+		    	var result = juego.abandonarPartida(nick);
+		    	cli.enviarATodosMenosRemitente(socket,codigo,"haAbandonadoPartida",{"nick":nick,"check":result});
+		    });
 
 		    socket.on('iniciarPartida',function(nick,codigo){
-		    	// var usr = juego.usuario(nick);
-		    	// var fase = usr.iniciarPartida();
-		    	// var codigo = usr.getPartidaCode();
-		    	// cli.enviarATodos(socket,"partidaIniciada",{"codigo":codigo,"fase":fase});
-
-		    	juego.iniciarPartida(nick,codigo);
-		    	var fase = juego.partias[codigo].fase.nombre;
-		    	cli.enviarATodos(socket,"partidaIniciada",{"codigo":codigo,"fase":fase});
+		    	var fase = juego.iniciarPartida(nick,codigo);
+		    	cli.enviarATodos(io,codigo,"partidaIniciada",{"codigo":codigo,"fase":fase.nombre});
 		    });
-		    socket.on('listarPartidas',function(nick,codigo){
+		    socket.on('listaPartidas',function(nick,codigo){
 		    	var data = juego.listarPartidas();
 		    	cli.enviarRemitente(socket,"recibirListarPartidas",data);
 		    });
-		    socket.on('listarPartidasDisponibles',function(nick,codigo){
+		    socket.on('listaPartidasDisponibles',function(nick,codigo){
 		    	var data = juego.listarPartidasDisponibles();
 		    	cli.enviarRemitente(socket,"recibirListarPartidasDisponibles",data);
+		    });
+		    socket.on('votar',function(nick,votado){
+		    	juego.usuario[nick].votar(votado);
+		    	cli.enviarATodos(socket,"recibirVotacion",data);
 		    });
 		});
 	}
