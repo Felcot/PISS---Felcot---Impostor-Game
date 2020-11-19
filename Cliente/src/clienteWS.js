@@ -1,7 +1,8 @@
-function ClienteWS (name){
+function ClienteWS (name,controlWeb){
 	this.socket = undefined;
 	this.nick = name;
 	this.codigo;
+	this.cw = controlWeb;
 	this.ini=function(){
 		this.socket=io.connect();
 		this.lanzarSocketSrv();
@@ -38,6 +39,9 @@ function ClienteWS (name){
 	this.listaPartidasDisponibles = function(){
 		this.socket.emit('listaPartidasDisponibles');
 	}
+	this.report = function(){
+		this.socket.emit('report',this.getNick(),this.getCodigo());
+	}
 	this.votar = function(votado){
 		this.socket.emit('votar',this.getNick(),votado);
 	}	
@@ -51,6 +55,7 @@ function ClienteWS (name){
 		this.socket.on('partidaCreada',function(data){
 			cli.setCodigo(data.codigo);
 			console.log(data);
+			data.codigo != "fallo"? cw.mostrarEsperandoRivales(): cw.mostrarCrearPartida();
 		});
 		this.socket.on('unidoAPartida',function(data){
 			console.log(data)
@@ -70,6 +75,13 @@ function ClienteWS (name){
 		});
 		this.socket.on('recibirListarPartidasDisponibles',function(data){
 			console.log(data);
+			cw.mostrarUnirAPartida(data);
+		});
+		this.socket.on('recibirVotacion',function(data){
+			console.log(data);
+		});
+		this.socket.on('activarReport',function(data){
+			console.log(data);
 		});
 
 	}
@@ -78,15 +90,16 @@ function ClienteWS (name){
 }
 //En el lado del cliente, no tenemos que exportar, ya que en este lado es la anarquia.
 
-
+var ws,ws2,ws3,ws4,ws5;
 function pruebasWS(){
-	var ws2 = new ClienteWS("Juani");
-	var ws3 = new ClienteWS("Juana");
-	var ws4 = new ClienteWS("Juanan");
-	var codigo = ws.getCodigo();
+	ws2 = new ClienteWS("Juani");
+	ws3 = new ClienteWS("Juana");
+	ws4 = new ClienteWS("Juanan");
+	ws5 = new ClienteWS("YoAbandono");
+	codigo = ws.getCodigo();
+	ws5.unirAPartida(codigo);
 	ws2.unirAPartida(codigo);
+	ws5.abandonarPartida();
 	ws3.unirAPartida(codigo);
 	ws4.unirAPartida(codigo);
-	console.log("AHORA abandonarPartida");
-	ws4.abandonarPartida();
 }

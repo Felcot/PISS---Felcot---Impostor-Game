@@ -1,6 +1,5 @@
 var modelo = require("./modelo.js");
 function ServidorWS(){
-
 	this.enviarRemitente=function(socket,mens,datos){
         socket.emit(mens,datos);
     }
@@ -17,8 +16,9 @@ function ServidorWS(){
 		    socket.on('crearPartida', function(nick,num) {
 		        var codigo=juego.crearPartida(num,nick);	
 				socket.join(codigo);	      
-				console.log('Usuario: '+nick+" crea partida codigo: "+codigo);  				
-		       	cli.enviarRemitente(socket,"partidaCreada",{"codigo":codigo,"owner":nick});		        		        
+				console.log('Usuario: '+nick+" crea partida codigo: "+codigo);
+				var data = codigo != "fallo"?{"codigo":codigo,"owner":nick}: {"Error":codigo}; 				
+		       	cli.enviarRemitente(socket,"partidaCreada",data);		        		        
 		    });
 
 		    socket.on('unirAPartida',function(nick,codigo){
@@ -45,10 +45,16 @@ function ServidorWS(){
 		    });
 		    socket.on('listaPartidasDisponibles',function(nick,codigo){
 		    	var data = juego.listarPartidasDisponibles();
+
+		    	console.log(data);
 		    	cli.enviarRemitente(socket,"recibirListarPartidasDisponibles",data);
 		    });
+		    socket.on('report',function(nick,codigo){
+		    	var data = juego.report(nick,codigo);
+		    	cli.enviarATodos(io,codigo,"activarReport",data);
+		    });
 		    socket.on('votar',function(nick,votado){
-		    	juego.usuario[nick].votar(votado);
+		    	data = juego.usuario[nick].votar(votado);
 		    	cli.enviarATodos(socket,"recibirVotacion",data);
 		    });
 		});

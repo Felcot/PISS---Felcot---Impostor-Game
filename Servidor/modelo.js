@@ -2,17 +2,21 @@ function Juego(){
 	this.partidas={};
 	this.usuario={};
 	this.crearPartida=function(num,nick){
-		if((num < 4) || (num > 10)){
-		 	throw new Exception("N410");
-		}
+			try{
+			if((num < 4) || (num > 10)){
+			 	throw new Exception("N410");
+			}
 
-		let codigo=this.obtenerCodigo();
-		if (!this.partidas[codigo]){
-			this.partidas[codigo]= new Partida(num,nick,this);
-			var usr =  this.partidas[codigo].usuarios;
-			this.usuario[nick] = usr[nick];
+			let codigo=this.obtenerCodigo();
+			if (!this.partidas[codigo]){
+				this.partidas[codigo]= new Partida(num,nick,this);
+				var usr =  this.partidas[codigo].usuarios;
+				this.usuario[nick] = usr[nick];
+			}
+			return codigo;
+		}catch(Exception){
+			return "fallo";
 		}
-		return codigo;
 	}
 	
 	this.unirAPartida=function(codigo,nick){
@@ -36,23 +40,23 @@ function Juego(){
 		delete this.partida[codigo];
 	}
 	this.listarPartidasDisponibles=function(){
-		var result = {};
+		var result = [];
 		var huecos = 0;
 		for (var key in this.partidas){
 			var partida = this.partidas[key];
 			if(partida.sePuedeEntrar() && partida.comprobarMaximo()){
 				huecos = partida.emptyFree();
-				result[partida] = {"codigo":key,"owner":partida.nickOwner,"huecos":huecos};
+				result.push({"codigo":key,"owner":partida.nickOwner,"ocupado":(partida.maximo-huecos),"maximo":partida.maximo});
 			}
 		}
 		return result;
 	}
 	this.listarPartidas=function(){
-		var result = {};
+		var result = [];
 		var huecos = 0;
 		for (var key in this.partidas){
 			var partida = this.partidas[key];
-			result[key] = {"codigo": key, "owner": partida.nickOwner, "fase":partida.getFase()};
+			result.push({"codigo": key, "owner": partida.nickOwner, "fase":partida.getFase()});
 			}
 		return result;
 	}
@@ -66,20 +70,18 @@ function Juego(){
 
 	this.iniciarPartida = function(nick){
 		var usuario = this.usuario(nick);
-		if(usuario)
-			return usuario.iniciarPartida();
+		return usuario ? usuario.iniciarPartida():false;
 	}	
 	this.getPartida = function(codigo){
-		var result = this.partidas[codigo] ? this.partidas[codigo] : undefined;
-		return result;
+		return this.partidas[codigo] ? this.partidas[codigo] : undefined;
 	}
 	this.abandonarPartida = function(nick){
 		var usuario = this.usuario(nick);
-		console.log("No se ha encontrado "+usuario);
-		if(usuario)
-			return usuario.abandonarPartida();
-		else
-			console.log("No he abandonado nick:"+nick);
+		return usuario? usuario.abandonarPartida(): console.log("No he abandonado nick:"+nick);	
+	}
+	this.report=function(nick,codigo){
+		var usuario = this.usuario(nick);
+		return (usuario && usuario.Partida == this.getPartida(codigo))? usuario.report(): {"Error": "No reportado"};
 	}
 }
 
@@ -179,11 +181,11 @@ function Partida(num,owner,juego){
 	}
 
 	this.report = function(){
-		this.fase.report(this);
+		return {"Fase":this.fase.report(this)};
 	}
 
-	this.votar = function(nick){
-		return this.fase.votar(nick);
+	this.votar = function(usr,nick){
+		return this.fase.votar(usr,nick);
 	}
 	this.recuento = function(){
 		this.fase.recuento(this);
@@ -289,7 +291,7 @@ function Jugando(){
 		partida.matar(nick);
 	}
 	this.report = function(partida){
-		partida.fase = new Votacion();
+		return partida.fase = new Votacion();
 	}
 	this.recuento = function(partida){
 		throw new Exception("JR01")
@@ -334,14 +336,19 @@ function Final(ganadores){
 function Votacion(){
 	this.nombre = "votacion";
 	this.votacion = {}
-	this.votar = function(nick){
-		if(!this.votacion[nick])
-			this.votacion[nick] = 1;
-		else
-			this.votacion[nick]++;
+	this.votantes = {}
+	this.votar = function(votante,nick){
+		return !this.votantes[votante.nick]?this.addVotante(votante,nick):{"check":true,"Error": votante.nick+"Ya habias votado"};
+	}
+	this.addVotante =  function(votante,nick){
+		this.votantes[votante.nick] = votante;
+		return this.puedeVotar(nick);
+	}
+	this.puedeVotar = function(nick){
+		this.votacion[nick] = !this.votacion[nick]? 1: this.votacion[nick]+1;
+
 		return {"check":true,"Votado":nick};
 	}
-
 	this.recuento=function(partida){
 		let masVotado = "skipe";
 		this.votacion["skipe"] = 0;
@@ -383,8 +390,7 @@ function Votacion(){
 	this.report = function(partida){
 		throw new Exception("VR01");
 	}
-	
-
+	return this.nombre;
 }
 
 function Usuario(nick,juego){
@@ -414,7 +420,7 @@ function Usuario(nick,juego){
 		this.partida.expulsarJugador(nick);
 	}
 	this.votar = function(nick){
-		return this.estado.votar(nick,this.partida);
+		return this.estado.votar(this,nick,this.partida);
 	}
 	this.report = function(){
 		this.estado.report(this.partida);
@@ -438,8 +444,8 @@ function Vivo(){
 	this.asesinado = function(usr){
 		usr.estado = new Fantasma();
 	}
-	this.votar = function(nick,partida){
-		partida.votar(nick);
+	this.votar = function(usr,nick,partida){
+		partida.votar(usr,nick);
 	}
 	this.report = function(partida){
 		partida.report();
@@ -496,10 +502,7 @@ function contenedor(){
 			this.crewmate[usr.nick] = usr;
 	}
 	this.sizeTam= function(impostor){
-		if(impostor)
-			return sizeDictionary(this.impostor);
-		else
-			return sizeDictionary(this.crewmate);
+		return impostor? sizeDictionary(this.impostor):sizeDictionary(this.crewmate);
 	}
 	this.evaluarIC=function(F){
 		return F(this.sizeTam(true),this.sizeTam(false));
