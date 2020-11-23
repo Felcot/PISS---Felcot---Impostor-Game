@@ -53,8 +53,10 @@ function ControlWeb(){
 			ws.crearPartida(num);
 		});
 			}
+
+
 	this.mostrarEsperandoRivales= function(){
-		var cadena = '<div id="mER" style="background-imagen:url("Cliente/img/waitingClock.gif")">';
+		var cadena = '<div id="mER" style ="background-image:url('+"'Cliente/img/waitingClock.gif'"+')"'+">";
 				//cadena += '<img src="Cliente/img/waitingClock.gif">';
 			cadena+= '</div;';
 		$('#esperandoRival').append(cadena);
