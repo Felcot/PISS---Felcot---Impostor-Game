@@ -37,7 +37,9 @@ function preload() {
   //  https://labs.phaser.io/view.html?src=src/animation/texture%20atlas%20animation.js
   // If you don't use an atlas, you can do the same thing with a spritesheet, see:
   //  https://labs.phaser.io/view.html?src=src/animation/single%20sprite%20sheet.js
-  this.load.atlas("atlas", "Cliente/assets/atlas/atlas.png", "Cliente/assets/atlas/atlas.json");
+  //this.load.atlas("atlas", "Cliente/assets/atlas/atlas.png", "Cliente/assets/atlas/atlas.json");
+  this.load.spritesheet("gabe","Cliente/assets/images/players.png",{frameWidth:32,frameHeight:48});
+  //repetir por cada personaje
 }
 
 function create() {
@@ -53,7 +55,7 @@ function create() {
   const aboveLayer = map.createStaticLayer("Above Player", tileset, 0, 0);
 
   worldLayer.setCollisionByProperty({ collides: true });
-
+  // Lo de arriba hace que se colisione
   // By default, everything gets depth sorted on the screen in the order we created things. Here, we
   // want the "Above Player" layer to sit on top of the player, so we explicitly give it a depth.
   // Higher depths will sit on top of lower depth objects.
@@ -62,20 +64,23 @@ function create() {
   // Object layers in Tiled let you embed extra info into a map - like a spawn point or custom
   // collision shapes. In the tmx file, there's an object layer with a point named "Spawn Point"
   const spawnPoint = map.findObject("Objects", obj => obj.name === "Spawn Point");
-
+  // Punto en el que aparece
   // Create a sprite with physics enabled via the physics system. The image used for the sprite has
   // a bit of whitespace, so I'm using setSize & setOffset to control the size of the player's body.
-  player = this.physics.add
-    .sprite(spawnPoint.x, spawnPoint.y, "atlas", "misa-front")
-    .setSize(30, 40)
-    .setOffset(0, 24);
+   // player = this.physics.add
+   //  .sprite(spawnPoint.x, spawnPoint.y, "gabe", "misa-front")
+   //  .setSize(30, 40)
+   //  .setOffset(0, 24); 
 
+     player = this.physics.add.sprite(spawnPoint.x, spawnPoint.y,"gabe");
+    //Aqui se agrega el personaje
+  
   // Watch the player and worldLayer for collisions, for the duration of the scene:
   this.physics.add.collider(player, worldLayer);
 
   // Create the player's walking animations from the texture atlas. These are stored in the global
   // animation manager so any sprite can access them.
-  const anims = this.anims;
+  /*const anims = this.anims;
   anims.create({
     key: "misa-left-walk",
     frames: anims.generateFrameNames("atlas", {
@@ -120,6 +125,52 @@ function create() {
     frameRate: 10,
     repeat: -1
   });
+*/
+const anims = this.anims;
+      anims.create({
+        key: "gabe-left-walk",
+        frames: anims.generateFrameNames("gabe", {
+          //prefix: "gabe-left-walk.",
+          start: 12,
+          end: 14,
+          //zeroPad: 3
+        }),
+        //frameRate: 10,
+        repeat: -1
+      });
+      anims.create({
+        key: "gabe-right-walk",
+        frames: anims.generateFrameNames("gabe", {
+          //prefix: "gabe-right-walk.",
+          start: 24,
+          end: 26,
+          //zeroPad: 3
+        }),
+        //frameRate: 10,
+        repeat: -1
+      });
+      anims.create({
+        key: "gabe-front-walk",
+        frames: anims.generateFrameNames("gabe", {
+          //prefix: "gabe-front-walk.",
+          start: 0,
+          end: 2,
+          //zeroPad: 3
+        }),
+        //frameRate: 10,
+        repeat: -1
+      });
+      anims.create({
+        key: "gabe-back-walk",
+        frames: anims.generateFrameNames("gabe", {
+          //prefix: "gabe-back-walk.",
+          start: 36,
+          end: 38,
+          //zeroPad: 3
+        }),
+        //frameRate: 10,
+        repeat: -1
+      });
 
   const camera = this.cameras.main;
   camera.startFollow(player);
@@ -182,20 +233,20 @@ function update(time, delta) {
 
   // Update the animation last and give left/right animations precedence over up/down animations
   if (cursors.left.isDown) {
-    player.anims.play("misa-left-walk", true);
+    player.anims.play("gabe-left-walk", true);
   } else if (cursors.right.isDown) {
-    player.anims.play("misa-right-walk", true);
+    player.anims.play("gabe-right-walk", true);
   } else if (cursors.up.isDown) {
-    player.anims.play("misa-back-walk", true);
+    player.anims.play("gabe-back-walk", true);
   } else if (cursors.down.isDown) {
-    player.anims.play("misa-front-walk", true);
+    player.anims.play("gabe-front-walk", true);
   } else {
     player.anims.stop();
 
     // If we were moving, pick and idle frame to use
-    if (prevVelocity.x < 0) player.setTexture("atlas", "misa-left");
-    else if (prevVelocity.x > 0) player.setTexture("atlas", "misa-right");
-    else if (prevVelocity.y < 0) player.setTexture("atlas", "misa-back");
-    else if (prevVelocity.y > 0) player.setTexture("atlas", "misa-front");
+    if (prevVelocity.x < 0) player.setTexture("gabe", "gabe-left-walk");
+    else if (prevVelocity.x > 0) player.setTexture("gabe", "gabe-right-walk");
+    else if (prevVelocity.y < 0) player.setTexture("gabe", "gabe-back-walk");
+    else if (prevVelocity.y > 0) player.setTexture("gabe", "gabe-front-walk");
   }
 }
