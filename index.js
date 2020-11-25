@@ -28,7 +28,15 @@ app.use(bodyParser.json());
 //correspondiente por ejemplo.
 
 app.get('/', function (request, response) {
-    var contenido = fs.readFileSync(__dirname + "/cliente/index.html");
+    var contenido = fs.readFileSync(__dirname + "/Cliente/index.html");
+    	// readFileSync Transmite una respuesta asincrona
+    
+    response.setHeader("Content-type", "text/html");
+    response.send(contenido);
+    
+});
+app.get('/game', function (request, response) {
+    var contenido = fs.readFileSync(__dirname + "/Cliente/index-game.html");
     	// readFileSync Transmite una respuesta asincrona
     
     response.setHeader("Content-type", "text/html");

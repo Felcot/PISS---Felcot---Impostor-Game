@@ -1,0 +1,3 @@
+world --> Colisiona
+below player --> suelo
+above player -- Esta por encima del jugador

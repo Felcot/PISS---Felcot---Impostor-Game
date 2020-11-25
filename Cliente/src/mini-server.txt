@@ -1,0 +1,4 @@
+mini server
+
+Mac
+python -m SimpleHTTPServer 8000

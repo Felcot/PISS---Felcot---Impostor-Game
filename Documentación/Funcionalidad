@@ -15,4 +15,12 @@ Tareas del proyecto (alto nivel)
 	- Elegir un framework/example : phaser
 	- Integrar el modelo en la arquitectura
 	- Integrar el ejemplo
-	-
+
+Trabajo cerrar sprint 3:
+	- Nuevas tareas:
+		-controlar max y min en numero de partida
+		- ajustar los formularios: columnas o todo en una
+		- controlar nick undefined y codigo undefined
+		- poner los huecos y el maximo 3/4 o 5/10
+		- poner el boton de iniciar partida
+		- avisar a los usuarios que se han unido a la partida.

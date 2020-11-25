@@ -12,7 +12,6 @@ function ControlWeb(){
 		$('#mainMenu').append(html);
 		$('#btnRegister').on('click',function(){
 
-			var nick = $('#nick').val();
 			console.log("soy :"+nick);
 			ws =  new ClienteWS(nick);
 			$('#register').remove();
