@@ -5,6 +5,7 @@
  */
 
 const config = {
+  //comentario inutil
   type: Phaser.AUTO,
   width: 800,
   height: 600,
