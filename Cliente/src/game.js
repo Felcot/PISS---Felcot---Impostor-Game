@@ -133,9 +133,9 @@ const anims = this.anims;
           //prefix: "gabe-left-walk.",
           start: 12,
           end: 14,
-          //zeroPad: 3
+          //zeroPad: 13
         }),
-        //frameRate: 10,
+        frameRate: 10,
         repeat: -1
       });
       anims.create({
@@ -144,9 +144,9 @@ const anims = this.anims;
           //prefix: "gabe-right-walk.",
           start: 24,
           end: 26,
-          //zeroPad: 3
+          //zeroPad: 25
         }),
-        //frameRate: 10,
+        frameRate: 10,
         repeat: -1
       });
       anims.create({
@@ -155,9 +155,9 @@ const anims = this.anims;
           //prefix: "gabe-front-walk.",
           start: 0,
           end: 2,
-          //zeroPad: 3
+          //zeroPad: 1
         }),
-        //frameRate: 10,
+        frameRate: 10,
         repeat: -1
       });
       anims.create({
@@ -166,9 +166,9 @@ const anims = this.anims;
           //prefix: "gabe-back-walk.",
           start: 36,
           end: 38,
-          //zeroPad: 3
+          //zeroPad: 37
         }),
-        //frameRate: 10,
+        frameRate: 10,
         repeat: -1
       });
 
