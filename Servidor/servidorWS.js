@@ -19,10 +19,10 @@ function ServidorWS(){
 		        var codigo=juego.crearPartida(num,nick);	
 				socket.join(codigo);	      
 				console.log('Usuario: '+nick+" crea partida codigo: "+codigo);
-				var partida = codigo != "fallo"?{"codigo":codigo,"owner":nick}: {"Error":codigo};
-				var lista = juego.getPartida(codigo).ListaJugadores(); 				
+				var data = codigo != "fallo"?{"codigo":codigo,"owner":nick}: {"Error":codigo};
+				var lista = juego.partida[codigo].ListaJugadores(); 				
 		       	cli.enviarRemitente(socket,"partidaCreada",data);
-		       	cli.enviarGlobal(socket,"recibirListarPartidasDisponibles",partida);		        		        
+		       	cli.enviarGlobal(socket,"recibirListarPartidasDisponibles",data);		        		        
 		    });
 
 		    socket.on('unirAPartida',function(nick,codigo){

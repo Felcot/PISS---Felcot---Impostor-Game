@@ -1,9 +1,10 @@
+var min = 2;
 function Juego(){
 	this.partidas={};
 	this.usuario={};
 	this.crearPartida=function(num,nick){
 			try{
-			if((num < 4) || (num > 10)){
+			if((num < min) || (num > 10)){
 			 	throw new Exception("N410");
 			}
 
@@ -144,7 +145,7 @@ function Partida(num,owner,juego){
 		this.usuarios[nuevo].partida = this;
 	}
 	this.comprobarMinimo=function(){
-		return sizeDictionary(this.usuarios)>=4
+		return sizeDictionary(this.usuarios)>=min
 	}
 	this.comprobarMaximo=function(){
 		return sizeDictionary(this.usuarios)<this.maximo

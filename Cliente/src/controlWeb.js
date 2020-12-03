@@ -55,7 +55,6 @@ function ControlWeb(){
 
 
 	this.mostrarEsperandoRivales= function(lista){
-		$('#esperandoRival').remove();
 		var cadena = '<div id="mER"><div class = "list-group">';
 				for(var usr in lista)
 					cadena+='<a href="#" class="list-group-item" value="'+usr+'">'+usr+'</div>';
@@ -75,7 +74,7 @@ function ControlWeb(){
 	} 
 	this.mostrarUnirAPartida = function(lista){
 		var cadena= '<div id="mUAP" class ="list-group">';
-		
+
 				cadena+=this.mostrarPartidasDisponibles(lista);
 			cadena+='<button id = "btnmUAP" type="button" class="btn btn-primary">Unirse</button>'
 			cadena+= '</div>';
