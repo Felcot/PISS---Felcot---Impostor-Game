@@ -2,6 +2,7 @@ function ClienteWS (name,controlWeb){
 	this.socket = undefined;
 	this.nick = name;
 	this.codigo;
+	this.personaje;
 	this.cw = controlWeb;
 	this.ini=function(){
 		this.socket=io.connect();
@@ -18,6 +19,13 @@ function ClienteWS (name,controlWeb){
 	this.getNick = function(){
 		return this.nick;
 	}
+	this.getPersonaje=function(){
+		return this.personaje;
+	}
+	this.setPersonaje = function(personaje){
+		this.personaje=personaje;
+	}
+
 	this.crearPartida = function(number){
 		// emit genera una peticion al servidor, se puede paquetizar todo mas con objetos json
 		this.socket.emit('crearPartida',this.getNick(), number);
@@ -45,6 +53,12 @@ function ClienteWS (name,controlWeb){
 	this.votar = function(votado){
 		this.socket.emit('votar',this.getNick(),votado);
 	}	
+	this.obtenerListaJugadores = function(){
+		this.socket.emit('EstoyDentro',this.getNick(),this.getCodigo());
+	}
+	this.movimiento=function(direccion){
+		this.socket.emit('meHeMovido',this.getPersonaje(),direccion)
+	}
 	this.lanzarSocketSrv = function(){
 		var cli =  this; // capturar el objeto, porque se hace pisto manchego con las funciones de callback.
 						 // y se puede llegar a perder. Se lanza una porcion de codigo que se encargad de escuchar
@@ -55,27 +69,34 @@ function ClienteWS (name,controlWeb){
 		this.socket.on('partidaCreada',function(data){
 			cli.setCodigo(data.codigo);
 			console.log(data);
-			data.codigo != "fallo"? cw.mostrarEsperandoRivales(): cw.mostrarCrearPartida();
+			data.codigo != "fallo"? cw.mostrarEsperandoRivales(data.lista): cw.mostrarCrearPartida();
 		});
 		this.socket.on('unidoAPartida',function(data){
 			console.log(data)
+			cw.mostrarEsperandoRivales(data.lista);
 		});
-		this.socket.on('nuevoJugador',function(nick){
-			console.log("Se une a la partida "+nick);
+		this.socket.on('nuevoJugador',function(data){
+			console.log("Se une a la partida "+data.nick);
+			cw.mostrarEsperandoRivales(data.lista);
 			});
 		this.socket.on('haAbandonadoPartida',function(data){
 			if(data.check)
 				console.log("Ha abandondo Partida "+data.nick)
 		});
+		this.socket.on('esperando',function(data){
+			console.log("esperando");
+		});
 		this.socket.on('partidaIniciada',function(data){
 			console.log("Partida "+data.codigo+" esta en fase "+ data.fase);
+			//Aquí va el inicio al juego
 		});
 		this.socket.on('recibirListarPartidas',function(data){
 			console.log(data);
 		});
 		this.socket.on('recibirListarPartidasDisponibles',function(data){
 			console.log(data);
-			cw.mostrarUnirAPartida(data);
+			if(!cli.codigo)
+				cw.mostrarUnirAPartida(data);
 		});
 		this.socket.on('recibirVotacion',function(data){
 			console.log(data);
@@ -83,7 +104,12 @@ function ClienteWS (name,controlWeb){
 		this.socket.on('activarReport',function(data){
 			console.log(data);
 		});
-
+		this.socket.on('dibujarRemoto',function(data){
+			lanzarJugadorRemoto(data);
+		});
+		this.socket.on('seHaMovido',function(data){
+			moverRemoto(data);
+		});
 	}
 
 	this.ini();

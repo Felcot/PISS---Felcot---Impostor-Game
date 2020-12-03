@@ -54,26 +54,32 @@ function ControlWeb(){
 			}
 
 
-	this.mostrarEsperandoRivales= function(){
-		var cadena = '<div id="mER" style ="background-image:url('+"'Cliente/img/waitingClock.gif'"+')"'+">";
-				//cadena += '<img src="Cliente/img/waitingClock.gif">';
-			cadena+= '</div;';
+	this.mostrarEsperandoRivales= function(lista){
+		$('#esperandoRival').remove();
+		var cadena = '<div id="mER"><div class = "list-group">';
+				for(var usr in lista)
+					cadena+='<a href="#" class="list-group-item" value="'+usr+'">'+usr+'</div>';
+					cadena += '&nbsp;';
+			cadena+= '</div></div>';
 		$('#esperandoRival').append(cadena);
 	}
 	this.mostrarPartidasDisponibles = function(lista){
-		var cadena= '<div class = "list-group">';
-				for(var partida in lista)
-					cadena+='<a href="#" class="list-group-item" value="'+lista[partida].codigo+'">'+lista[partida].codigo+'<span class="badge">'+lista[partida].ocupado+'/'+lista[partida].maximo+'</span></div>';
-			cadena+= '</div>'
+		var cadena= '<div id = "listaPartidas"><div class = "list-group">';
+		console.log(lista);
+				for(var partida in lista){
+					console.log("Soy partida:"+lista[partida].codigo);
+					cadena+='<a href="#" class="list-group-item" value="'+lista[partida].codigo+'">'+lista[partida].codigo+'<span class="badge">'+lista[partida].ocupado+'/'+lista[partida].maximo+'</span></a>';
+				}
+			cadena+= '</div></div>';
 		return cadena;
 	} 
 	this.mostrarUnirAPartida = function(lista){
-		$('#mUAP').remove();
 		var cadena= '<div id="mUAP" class ="list-group">';
+		
 				cadena+=this.mostrarPartidasDisponibles(lista);
 			cadena+='<button id = "btnmUAP" type="button" class="btn btn-primary">Unirse</button>'
 			cadena+= '</div>';
-			
+		this.limpiarTerminal("unirAPartida");
 		$('#unirAPartida').append(cadena);
 
 		 StoreValue = [];
@@ -89,5 +95,12 @@ function ControlWeb(){
 			ws.unirAPartida(codigo);
 			me.mostrarEsperandoRivales();
 		});
+	}
+	this.limpiarTerminal=function(cadena){
+		if(cadena != "mainMenu")$('#mainMenu').remove();
+		if(cadena != "crearPartida")$('#crearPartida').remove();
+		if(cadena != "unirAPartida")$('#unirAPartida').remove();
+		if(cadena != "esperandoRival")$('#esperandoRival').remove();
+		if(cadena != "initialGame") $('#initialGame').remove();
 	}
 }

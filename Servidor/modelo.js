@@ -46,7 +46,7 @@ function Juego(){
 			var partida = this.partidas[key];
 			if(partida.sePuedeEntrar() && partida.comprobarMaximo()){
 				huecos = partida.emptyFree();
-				result.push({"codigo":key,"owner":partida.nickOwner,"ocupado":(partida.maximo-huecos),"maximo":partida.maximo});
+				result.push({"codigo":key,"ocupado":(partida.maximo-huecos),"maximo":partida.maximo});
 			}
 		}
 		return result;
@@ -56,9 +56,13 @@ function Juego(){
 		var huecos = 0;
 		for (var key in this.partidas){
 			var partida = this.partidas[key];
-			result.push({"codigo": key, "owner": partida.nickOwner, "fase":partida.getFase()});
+			result.push({"codigo": key, "fase":partida.getFase()});
 			}
 		return result;
+	}
+	this.listarJugadores=function(codigo){
+		var partida = this.getPartida(codigo);
+		return partida.listarJugadores();
 	}
 	this.usuario=function(nick){
 		return this.usuario[nick];
@@ -92,6 +96,36 @@ function Partida(num,owner,juego){
 	this.usuarios={};
 	this.juego = juego;
 	this.contenedor = new contenedor();
+	this.personajes={};
+	this.iniciarPersonajes = function(){
+		var spritesNumber = 8;
+		for (var i = 0; i <= spritesNumber; i++) {
+			personajes[i] = {"id":i,"elegido":false};
+		}
+	}
+	this.elegirPersonaje=function(usr,id){
+		if(id == "default"){
+			var lista = this.listarPartidasDisponibles();
+			this.elegirPersonaje(usr,lista[0]);
+		}
+		usr.setPersonaje(id);
+		personajes[id].elegido = true;
+	}
+	this.listarPersonajesLibres=function(){
+		var result = [];
+		for (var id in this.personajes){
+			if(!this.personajes[id].elegido)
+				result.push(id);
+		}
+		return result;
+	}
+	this.listarJugadores=function(){
+		var result = [];
+		for (var nick in this.usuarios){
+			result.push({"nick":this.usuarios[nick].getNick(),"personaje":this.usuairos[nick].getPersonaje()});
+		}
+		return result;
+	}
 	this.getUsuarios = function(nick){
 		return this.usuarios[nick];
 	}
@@ -128,8 +162,9 @@ function Partida(num,owner,juego){
 	this.eliminarUsuario=function(nick){
 		this.contenedor.eliminar(nick,this.usuarios[nick].impostor,this);
 		delete this.usuarios[nick];
-		if(this.comprobarUsuarios()<0)
-			this.juego.eliminarPartida(this.codigo);
+		// if(this.comprobarUsuarios()<0)
+		// 	this.juego.eliminarPartida(this.codigo);
+		return this.comprobarUsuarios()<0 ? this.eliminarPartida(this.codigo) : false;
 	}
 	this.comprobarUsuarios=function(){
 		return sizeDictionary(this.usuarios);
@@ -141,7 +176,6 @@ function Partida(num,owner,juego){
 				this.contenedor.declarar(this.usuarios[usr]);
 			}
 		}
-
 	}
 	this.AsignarImpostor = function(){
 		let keys = Object.keys(this.usuarios);
@@ -165,7 +199,7 @@ function Partida(num,owner,juego){
 		F = (impostores) => {return impostores == 0;};
 		cond = this.contenedor.evaluarI(F)
 		if(cond)
-			this.fase = new Final('Tripulantes')
+			this.fase = new Final('Tripulantes');
 	}
 
 	this.eyectar=function(nick){
@@ -265,7 +299,7 @@ function Completado(){
 		throw new Exception("CR01");
 	}
 	this.recuento = function(partida){
-		throw new Exception("CR02")
+		throw new Exception("CR02");
 	}
 	this.anunciarGanador= function(ganadores){
 		throw new Exception("CaG01");
@@ -294,7 +328,7 @@ function Jugando(){
 		return partida.fase = new Votacion();
 	}
 	this.recuento = function(partida){
-		throw new Exception("JR01")
+		throw new Exception("JR01");
 	}
 	this.anunciarGanador= function(ganadores){
 		throw new Exception("JaG01");
@@ -318,7 +352,7 @@ function Final(ganadores){
 		throw new Exception("FeJ01");
 	}
 	this.recuento = function(partida){
-		throw new Exception("FR02")
+		throw new Exception("FR02");
 	}
 	this.matar = function(nick,partida){
 		throw new Exception("CM01");
@@ -400,6 +434,16 @@ function Usuario(nick,juego){
 	this.estado= new Vivo();
 	this.encargo ="ninguno";
 	this.impostor = false;
+	this.personaje = undefined;
+	//Permite establecer un personaje.
+	this.getPersonaje=function(){
+		if(!personaje)
+			this.setPersonaje(this.partida.elegirPersonaje(this,"default"));
+		return this.personaje;
+	}
+	this.setPersonaje=function(personaje){
+		this.personaje = personaje;
+	} 
 	this.getNick = function(){return this.nick;}
 	this.crearPartida=function(num){
 		return this.juego.crearPartida(num,this);
@@ -408,7 +452,6 @@ function Usuario(nick,juego){
 	this.iniciarPartida=function(){
 		if(this.partida.nickOwner == nick)
 			return this.partida.iniciarPartida().getFase();
-		 
 	}
 	this.getPartidaCode = function(){
 		return this.partida.getCodigo();

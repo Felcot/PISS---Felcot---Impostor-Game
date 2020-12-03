@@ -1,0 +1,11 @@
+#mER{
+	height: 1000px;
+	opacity:0.45;
+	-moz-opacity:0.45;
+	filter:alpha(opacity=45);
+	width: 950px;
+	background-attachment: fixed;
+	background-image: url(../img/waitingClock.gif);
+	background-repeat: no-repeat;
+	background-position: center center;
+}

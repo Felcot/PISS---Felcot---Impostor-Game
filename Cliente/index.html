@@ -6,12 +6,15 @@
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 		<script src="Cliente/lib/bootstrap.min.js"></script>
 		<link rel="stylesheet" href="Cliente/lib/bootstrap.min.css">
+		<link rel="stylesheet" type="text/css" href="Cliente/css/index.css">
 
 		
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
 		<script src="Cliente/src/clienteRest.js"></script>
 		<script src="Cliente/src/clienteWS.js"></script>
 		<script src="Cliente/src/controlWeb.js"></script>
+		<script src="//cdn.jsdelivr.net/npm/phaser@3.16.2/dist/phaser.js"></script>
+    	<script src="../Cliente/src/game.js"></script>
 	</header>
 	<body>
 		<div class="container">
@@ -21,11 +24,12 @@
 				<div id="crearPartida"></div>
 				<div id="unirAPartida"></div>
 				<div id="esperandoRival"></div>
+				<div id="initialGame"></div>
 			</div>
 		</div>
 		<script type="text/javascript">
-			var rest = new ClienteRest();
-			//var ws =  new ClienteWS("Pepe");
+			//var rest = new ClienteRest();
+			var ws =  new ClienteWS("Pepe");
 			var cw =  new ControlWeb();
 			cw.mainMenu();
 				//ws.ini();
