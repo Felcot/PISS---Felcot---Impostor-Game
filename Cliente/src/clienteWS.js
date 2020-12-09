@@ -3,6 +3,7 @@ function ClienteWS (name,controlWeb){
 	this.nick = name;
 	this.codigo;
 	this.personaje;
+	this.owner = false;
 	this.cw = controlWeb;
 	this.ini=function(){
 		this.socket=io.connect();
@@ -21,6 +22,9 @@ function ClienteWS (name,controlWeb){
 	}
 	this.getPersonaje=function(){
 		return this.personaje;
+	}
+	this.isOwner=function(){
+		return this.owner;
 	}
 	this.setPersonaje = function(personaje){
 		this.personaje=personaje;
@@ -68,7 +72,10 @@ function ClienteWS (name,controlWeb){
 		});
 		this.socket.on('partidaCreada',function(data){
 			cli.setCodigo(data.codigo);
+			cli.owner = data.codigo != "fallo"; //Si no ha fallado se establece como owner
+console.log("----");
 			console.log(data);
+console.log("----");
 			data.codigo != "fallo"? cw.mostrarEsperandoRivales(data.lista): cw.mostrarCrearPartida();
 		});
 		this.socket.on('unidoAPartida',function(data){
@@ -77,7 +84,7 @@ function ClienteWS (name,controlWeb){
 		});
 		this.socket.on('nuevoJugador',function(data){
 			console.log("Se une a la partida "+data.nick);
-			cw.mostrarEsperandoRivales(data.lista);
+			cw.mostrarEsperandoRivales(data);
 			});
 		this.socket.on('haAbandonadoPartida',function(data){
 			if(data.check)

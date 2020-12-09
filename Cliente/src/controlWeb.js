@@ -1,18 +1,20 @@
 function ControlWeb(){
 	var ws;
 	var me = this;
+	var ownerGame = false;
 	this.mainMenu= function(){
-		var html = '';
+		$('#mainRemove').remove();
+		var html = '<div id="mainRemove">';
 		if(ws == undefined){
 			html += this.mostrarRegistrarse();
 		}else{
 			html+='<button id = "btnmmCP" type="button" class="btn btn-primary">Crear partida</button>';
 			html+='<button id = "btnuAP" type="button" class="btn btn-primary">Unir a Partida</button>';
 		}
+		html += '</div>'; 
 		$('#mainMenu').append(html);
 		$('#btnRegister').on('click',function(){
-
-			console.log("soy :"+nick);
+			var nick = $('#nick').val();
 			ws =  new ClienteWS(nick);
 			$('#register').remove();
 			me.mainMenu();
@@ -55,19 +57,20 @@ function ControlWeb(){
 
 
 	this.mostrarEsperandoRivales= function(lista){
-		$('#esperandoRival').remove();
-		var cadena = '<div id="mER"><div class = "list-group">';
+		$('#esperandoRemove').remove();
+		var esperandoRival = '<div id="esperandoRemove"><div id="jugadores" class = "list-group">';
 				for(var usr in lista)
-					cadena+='<a href="#" class="list-group-item" value="'+usr+'">'+usr+'</div>';
-					cadena += '&nbsp;';
-			cadena+= '</div></div>';
-		$('#esperandoRival').append(cadena);
+					esperandoRival+='<a href="#" class="list-group-item" value="'+lista[usr].nick+'">'+lista[usr].nick+'</a>';
+				
+			esperandoRival += ws.isOwner()? '</div><div id="ownerGame"></div></div>':'</div></div>';
+
+		$('#esperandoRival').append(esperandoRival);
+		this.mostrarInicarPartida();
+		
 	}
 	this.mostrarPartidasDisponibles = function(lista){
 		var cadena= '<div id = "listaPartidas"><div class = "list-group">';
-		console.log(lista);
-				for(var partida in lista){
-					console.log("Soy partida:"+lista[partida].codigo);
+			for(var partida in lista){
 					cadena+='<a href="#" class="list-group-item" value="'+lista[partida].codigo+'">'+lista[partida].codigo+'<span class="badge">'+lista[partida].ocupado+'/'+lista[partida].maximo+'</span></a>';
 				}
 			cadena+= '</div></div>';
@@ -75,11 +78,10 @@ function ControlWeb(){
 	} 
 	this.mostrarUnirAPartida = function(lista){
 		var cadena= '<div id="mUAP" class ="list-group">';
-		
 				cadena+=this.mostrarPartidasDisponibles(lista);
 			cadena+='<button id = "btnmUAP" type="button" class="btn btn-primary">Unirse</button>'
 			cadena+= '</div>';
-		this.limpiarTerminal("unirAPartida");
+		//this.limpiarHTML("unirAPartida");
 		$('#unirAPartida').append(cadena);
 
 		 StoreValue = [];
@@ -96,11 +98,27 @@ function ControlWeb(){
 			me.mostrarEsperandoRivales();
 		});
 	}
-	this.limpiarTerminal=function(cadena){
-		if(cadena != "mainMenu")$('#mainMenu').remove();
+	this.mostrarInicarPartida=function(){
+		var ownerGame = '<div id="initialGameButton">';
+			ownerGame +='<button id = "btnInitGame" type="button" class="btn btn-primary">Iniciar Partida</button>'
+			ownerGame += '</div>'
+		$('#ownerGame').append(ownerGame);
+		$('#btnInitGame').on('click',function(){
+			ws.iniciarPartida();
+		});
+	}
+	this.limpiarHTML=function(cadena){
+		if(cadena != "mainRemove")$('#mainRemove').remove();
 		if(cadena != "crearPartida")$('#crearPartida').remove();
 		if(cadena != "unirAPartida")$('#unirAPartida').remove();
 		if(cadena != "esperandoRival")$('#esperandoRival').remove();
 		if(cadena != "initialGame") $('#initialGame').remove();
 	}
 }
+
+
+/*
+ * Una vez pasados los test y demás
+ * hacer commit y añadir a la rama
+ * 
+ */

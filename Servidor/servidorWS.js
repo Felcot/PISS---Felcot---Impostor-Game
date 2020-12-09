@@ -19,10 +19,11 @@ function ServidorWS(){
 		        var codigo=juego.crearPartida(num,nick);	
 				socket.join(codigo);	      
 				console.log('Usuario: '+nick+" crea partida codigo: "+codigo);
-				var partida = codigo != "fallo"?{"codigo":codigo,"owner":nick}: {"Error":codigo};
-				var lista = juego.getPartida(codigo).ListaJugadores(); 				
-		       	cli.enviarRemitente(socket,"partidaCreada",data);
-		       	cli.enviarGlobal(socket,"recibirListarPartidasDisponibles",partida);		        		        
+				var lista = juego.listarJugadores(codigo);
+				var result = codigo != "fallo"?{"codigo":codigo,"owner":nick,"lista":lista}: {"Error":codigo};
+				 		
+		       	cli.enviarRemitente(socket,"partidaCreada",result);
+		       	//cli.enviarGlobal(socket,"recibirListarPartidasDisponibles",lista);		        		        
 		    });
 
 		    socket.on('unirAPartida',function(nick,codigo){
@@ -32,7 +33,7 @@ function ServidorWS(){
 		    	var lista =  juego.listarJugadores(codigo);
 
 		    	cli.enviarRemitente(socket,"unidoAPartida",{"codigo" : codigo,"lista":lista});
-		    	cli.enviarATodosMenosRemitente(socket,codigo,"nuevoJugador",nick);
+		    	cli.enviarATodosMenosRemitente(socket,codigo,"nuevoJugador",lista);
 		    });
 		    socket.on('abandonarPartida',function(nick,codigo){
 		    	console.log("El usuario: "+ nick+ " quiere abandonar la partida" + codigo);
@@ -44,6 +45,7 @@ function ServidorWS(){
 		    	var fase = juego.iniciarPartida(nick,codigo);
 		    	var data = {"codigo":codigo,"fase":fase.nombre};
 		    	fase.nombre == "Jugando" ? cli.enviarATodos(io,codigo,"partidaIniciada",data): cli.enviarRemitente(socket,"esperando",data);
+		    	fase.nombre == "Jugando" ? lanzarJuego():console.log("No se ha lanzado el juego");
 		    });
 		    socket.on('listaPartidas',function(nick,codigo){
 		    	var data = juego.listarPartidas();
@@ -52,7 +54,7 @@ function ServidorWS(){
 		    socket.on('listaPartidasDisponibles',function(nick,codigo){
 		    	var data = juego.listarPartidasDisponibles();
 
-		    	console.log(data);
+		    	console.log("ListaPartidasDisponibles:-->"+data);
 		    	cli.enviarRemitente(socket,"recibirListarPartidasDisponibles",data);
 		    });
 		    socket.on('meHeMovido',function(codigo,personaje,direccion){

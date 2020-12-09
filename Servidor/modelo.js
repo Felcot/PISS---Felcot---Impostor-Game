@@ -3,9 +3,9 @@ function Juego(){
 	this.usuario={};
 	this.crearPartida=function(num,nick){
 			try{
-			if((num < 4) || (num > 10)){
-			 	throw new Exception("N410");
-			}
+				if((num < 4) || (num > 10)){
+				 	throw new Exception("N410");
+				}
 
 			let codigo=this.obtenerCodigo();
 			if (!this.partidas[codigo]){
@@ -100,29 +100,29 @@ function Partida(num,owner,juego){
 	this.iniciarPersonajes = function(){
 		var spritesNumber = 8;
 		for (var i = 0; i <= spritesNumber; i++) {
-			personajes[i] = {"id":i,"elegido":false};
+			this.personajes[i] = {"id":i};
 		}
 	}
 	this.elegirPersonaje=function(usr,id){
 		if(id == "default"){
-			var lista = this.listarPartidasDisponibles();
+			var lista = this.listarPersonajesLibres();
 			this.elegirPersonaje(usr,lista[0]);
 		}
 		usr.setPersonaje(id);
-		personajes[id].elegido = true;
+		//console.log(this.personajes[id]);
 	}
 	this.listarPersonajesLibres=function(){
 		var result = [];
-		for (var id in this.personajes){
-			if(!this.personajes[id].elegido)
-				result.push(id);
+		for (var i = 0;i<this.personajes.length; i++){
+			if(!this.personajes[i].elegido)
+				result.push(this.personajes[i].id);
 		}
 		return result;
 	}
 	this.listarJugadores=function(){
 		var result = [];
 		for (var nick in this.usuarios){
-			result.push({"nick":this.usuarios[nick].getNick(),"personaje":this.usuairos[nick].getPersonaje()});
+			result.push({"nick":this.usuarios[nick].getNick(),"personaje":this.usuarios[nick].getPersonaje()});
 		}
 		return result;
 	}
@@ -248,7 +248,15 @@ function Inicial(){
 		}		
 	}
 	this.iniciarPartida=function(partida){
-		throw new Exception("N410C");
+		try{
+			throw new Exception("N410C");
+		}catch(Exception){
+		   /* El tratamiento esta realizado en
+			* Exception
+			*/
+			return partida;
+		}
+
 	}
 	this.abandonarPartida=function(nick,partida){
 		partida.eliminarUsuario(nick);
@@ -257,16 +265,41 @@ function Inicial(){
 		partida.eliminarUsuario(nick);
 	}
 	this.matar = function(nick,partida){
-		throw new Exception("IM01");
+		try{
+			throw new Exception("IM01");
+		}catch(Exception){
+		   /* El tratamiento esta realizado en
+			* Exception
+			*/
+		}
 	}
 	this.report = function(partida){
+		try{
+			throw new Exception("IM01");
+		}catch(Exception){
+		   /* El tratamiento esta realizado en
+			* Exception
+			*/
+		}
 		throw new Exception("IR01");
 	}
 	this.recuento = function(partida){
-		throw new Exception("IR02")
+		try{
+			throw new Exception("IR02");
+		}catch(Exception){
+		   /* El tratamiento esta realizado en
+			* Exception
+			*/
+		}
 	}
 	this.anunciarGanador= function(ganadores){
-		throw new Exception("IaG01");
+		try{
+			throw new Exception("IaG01");
+		}catch(Exception){
+		   /* El tratamiento esta realizado en
+			* Exception
+			*/
+		}
 	}
 }
 
@@ -280,7 +313,13 @@ function Completado(){
 			partida.puedeAgregarUsuario(nick);
 		}
 		else{
-			new Exception("S10J")
+			try{
+				throw new Exception("S10J");
+			}catch(Exception){
+			   /* El tratamiento esta realizado en
+				* Exception
+				*/
+			}
 		}
 	}
 	this.abandonarPartida=function(nick,partida){
@@ -293,25 +332,66 @@ function Completado(){
 		this.abandonarPartida(nick,partida);
 	}
 	this.matar = function(nick,partida){
-		throw new Exception("CM01");
+		try{
+				throw new Exception("CM01");
+			}catch(Exception){
+			   /* El tratamiento esta realizado en
+				* Exception
+				*/
+			}
+		
 	}
 	this.report = function(partida){
-		throw new Exception("CR01");
+		try{
+				throw new Exception("CR01");
+			}catch(Exception){
+			   /* El tratamiento esta realizado en
+				* Exception
+				*/
+			}
+		
 	}
 	this.recuento = function(partida){
-		throw new Exception("CR02");
+		try{
+				throw new Exception("CR02");
+			}catch(Exception){
+			   /* El tratamiento esta realizado en
+				* Exception
+				*/
+			}
+		
 	}
 	this.anunciarGanador= function(ganadores){
-		throw new Exception("CaG01");
+		try{
+				throw new Exception("CaG01");
+			}catch(Exception){
+			   /* El tratamiento esta realizado en
+				* Exception
+				*/
+			}
+		
 	}
 }
 
 function Jugando(){
 	this.nombre="jugando";
 	this.agregarUsuario=function(nick,partida){
-		throw new Exception("AUPC1")
+		try{
+				throw new Exception("AUPC1");
+			}catch(Exception){
+			   /* El tratamiento esta realizado en
+				* Exception
+				*/
+			}
 	}
 	this.iniciarPartida=function(partida){
+		try{
+			throw new Exception("N410C");
+		}catch(Exception){
+		   /* El tratamiento esta realizado en
+			* Exception
+			*/
+		}
 	}
 	this.abandonarPartida=function(nick,partida){
 		partida.eliminarUsuario(nick);
@@ -328,10 +408,22 @@ function Jugando(){
 		return partida.fase = new Votacion();
 	}
 	this.recuento = function(partida){
-		throw new Exception("JR01");
+		try{
+			throw new Exception("JR01");
+		}catch(Exception){
+		   /* El tratamiento esta realizado en
+			* Exception
+			*/
+		}
 	}
 	this.anunciarGanador= function(ganadores){
-		throw new Exception("JaG01");
+		try{
+			throw new Exception("JaG01");
+		}catch(Exception){
+		   /* El tratamiento esta realizado en
+			* Exception
+			*/
+		}
 	}
 }
 
@@ -342,23 +434,70 @@ function Final(ganadores){
 		console.log("Los ganadores son los "+ganadores+"!!");
 	}
 	this.agregarUsuario=function(nick,partida){
-		throw new Exception("AUPT1");
+		try{
+			throw new Exception("AUPT1");
+		}catch(Exception){
+		   /* El tratamiento esta realizado en
+			* Exception
+			*/
+		}
 	}
-	this.iniciarPartida=function(partida){} //absurdo
+	this.iniciarPartida=function(partida){
+		try{
+			throw new Exception("N410C");
+		}catch(Exception){
+		   /* El tratamiento esta realizado en
+			* Exception
+			*/
+		}
+	} //absurdo
 	this.abandonarPartida=function(nick,partida){
-		throw new Exception("UAP01");
+		try{
+			throw new Exception("UAP01");
+		}catch(Exception){
+		   /* El tratamiento esta realizado en
+			* Exception
+			*/
+		}
 	}
 	this.expulsarJugador=function(nick,partida){
-		throw new Exception("FeJ01");
+		try{
+			throw new Exception("FeJ01");
+		}catch(Exception){
+		   /* El tratamiento esta realizado en
+			* Exception
+			*/
+		}
+		
 	}
 	this.recuento = function(partida){
-		throw new Exception("FR02");
+		try{
+			throw new Exception("FR02");
+		}catch(Exception){
+		   /* El tratamiento esta realizado en
+			* Exception
+			*/
+		}
+		
 	}
 	this.matar = function(nick,partida){
-		throw new Exception("CM01");
+		try{
+			throw new Exception("CM01");
+		}catch(Exception){
+		   /* El tratamiento esta realizado en
+			* Exception
+			*/
+		}
+		
 	}
 	this.report = function(partida){
-		throw new Exception("CR01");
+		try{
+			throw new Exception("CR01");
+		}catch(Exception){
+		   /* El tratamiento esta realizado en
+			* Exception
+			*/
+		}
 	}
 
 	this.anunciarGanador(ganadores);
@@ -404,25 +543,68 @@ function Votacion(){
 		
 	this.agregarUsuario=function(nick,partida){
 		throw new Exception("VaU01");
+		try{
+			throw new Exception("CR01");
+		}catch(Exception){
+		   /* El tratamiento esta realizado en
+			* Exception
+			*/
+		}
 	}
 	this.iniciarPartida=function(partida){
-		throw new Exception("ViP01");	
+		try{
+			throw new Exception("ViP01");	
+		}catch(Exception){
+		   /* El tratamiento esta realizado en
+			* Exception
+			*/
+		}
 	} 
 	this.abandonarPartida=function(nick,partida){
-		throw new Exception("VaP01"); // Esto realmente es así comrpobar
+		try{
+			throw new Exception("VaP01"); // Esto realmente es así comrpobar
+		}catch(Exception){
+		   /* El tratamiento esta realizado en
+			* Exception
+			*/
+		}
 	}
 	this.expulsarJugador=function(nick,partida){
 		//TODO
-		throw new Exception("VeJ01"); // Esto no es cierto, debe ser implementado 
+		try{
+			throw new Exception("VeJ01"); // Esto no es cierto, debe ser implementado
+		}catch(Exception){
+		   /* El tratamiento esta realizado en
+			* Exception
+			*/
+		}
 	}
 	this.anunciarGanador= function(ganadores){
-		throw new Exception("VaG01");
+		try{
+			throw new Exception("VaG01");
+		}catch(Exception){
+		   /* El tratamiento esta realizado en
+			* Exception
+			*/
+		}
 	}
 	this.matar = function(nick,partida){
-		throw new Exception("VM01");
+		try{
+			throw new Exception("VM01");
+		}catch(Exception){
+		   /* El tratamiento esta realizado en
+			* Exception
+			*/
+		}
 	}
 	this.report = function(partida){
-		throw new Exception("VR01");
+		try{
+			throw new Exception("VR01");
+		}catch(Exception){
+		   /* El tratamiento esta realizado en
+			* Exception
+			*/
+		}
 	}
 	return this.nombre;
 }
@@ -435,12 +617,13 @@ function Usuario(nick,juego){
 	this.encargo ="ninguno";
 	this.impostor = false;
 	this.personaje = undefined;
-	//Permite establecer un personaje.
+	
 	this.getPersonaje=function(){
-		if(!personaje)
+		if(this.personaje == undefined)
 			this.setPersonaje(this.partida.elegirPersonaje(this,"default"));
 		return this.personaje;
 	}
+	//Permite establecer un personaje.
 	this.setPersonaje=function(personaje){
 		this.personaje = personaje;
 	} 
@@ -497,19 +680,41 @@ function Vivo(){
 function Fantasma(){
 	this.nombre =  "fantasma";
 	this.matar = function(nick,partida){
-		throw new Exception("FM01");
+		try{
+			throw new Exception("FM01");
+		}catch(Exception){
+		   /* El tratamiento esta realizado en
+			* Exception
+			*/
+		}
 	}
 	this.asesinado = function(usr){
-		throw new Exception("FA01");
+		try{
+			throw new Exception("FA01");
+		}catch(Exception){
+		   /* El tratamiento esta realizado en
+			* Exception
+			*/
+		}
 	}
 	this.votar=function(nick,partida){
-		throw new Exception("FV01");
+		try{
+			throw new Exception("FV01");
+		}catch(Exception){
+		   /* El tratamiento esta realizado en
+			* Exception
+			*/
+		}
 	}
 	this.report = function(partida){
-		throw new Exception("FR01")
-	}
-
-	
+		try{
+			throw new Exception("FR01");
+		}catch(Exception){
+		   /* El tratamiento esta realizado en
+			* Exception
+			*/
+		}
+	}	
 }
 
 function encargo(){
@@ -605,7 +810,7 @@ function Exception(code){
 			dic["VaG01"] = "Error IaG01: No se puede anunciar un ganador en la fase Votacion."
  		return dic[code];
 	}	
-
+	
 	this.toConsLog= function(code){
 		console.log(this.diccionario(code));
 	}
