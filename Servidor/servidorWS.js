@@ -44,9 +44,8 @@ function ServidorWS(){
 		    socket.on('iniciarPartida',function(nick,codigo){
 		    	var fase = juego.iniciarPartida(nick,codigo);
 		    	var data = {"codigo":codigo,"fase":fase.nombre};
-		    	fase.nombre == "Jugando" ? cli.enviarATodos(io,codigo,"partidaIniciada",data): cli.enviarRemitente(socket,"esperando",data);
-		    	fase.nombre == "Jugando" ? lanzarJuego():console.log("No se ha lanzado el juego");
-		    });
+		    	fase.nombre == "jugando" ? cli.enviarATodos(io,codigo,"partidaIniciada",data): cli.enviarRemitente(socket,"esperando",data);
+		    	 });
 		    socket.on('listaPartidas',function(nick,codigo){
 		    	var data = juego.listarPartidas();
 		    	cli.enviarRemitente(socket,"recibirListarPartidas",data);
@@ -57,14 +56,11 @@ function ServidorWS(){
 		    	console.log("ListaPartidasDisponibles:-->"+data);
 		    	cli.enviarRemitente(socket,"recibirListarPartidasDisponibles",data);
 		    });
-		    socket.on('meHeMovido',function(codigo,personaje,direccion){
-		    	cli.enviarATodosMenosRemitente(socket,codigo,"seHaMovido",{"personaje":personaje,"direccion":direccion});
+		    socket.on('movimiento',function(nick,codigo,direccion,x,y){
+		    	cli.enviarATodosMenosRemitente(socket,codigo,"moverRemoto",{"nick":nick,"direccion":{"nombre":direccion,"x":x,"y":y}});
 		    });
-		    socket.on('estoyDentro',function(nick,codigo){
-		    	var lista = juego.partida[codigo].obtenerListaJugadores();
-		    	/*var jugador = juego.getPartida(codigo).getUsuario(nick);
-		    	data={"nick":nick,"personaje":juegador.getPersonaje()};
-		    	cli.enviarATodosMenosRemitente(socket,codigo,"dibujarRemoto",data);*/
+		    socket.on('estoyDentro',function(codigo){
+		    	var lista = juego.listarJugadores(codigo);
 		    	cli.enviarRemitente(socket,"dibujarRemoto",lista);
 		    });
 		    socket.on('report',function(nick,codigo){
@@ -72,9 +68,15 @@ function ServidorWS(){
 		    	cli.enviarATodos(io,codigo,"activarReport",data);
 		    });
 		    socket.on('votar',function(nick,votado){
-		    	data = juego.usuario[nick].votar(votado);
+		    	var data = juego.usuario[nick].votar(votado);
 		    	cli.enviarATodos(socket,"recibirVotacion",data);
 		    });
+		    socket.on('establecerPersonajeServidor',function(codigo,nick,id){
+		    	var usr = juego.partidas[codigo].usuarios[nick];
+		    	usr.elegirPersonaje(id);
+		    	var personaje = usr.getPersonaje(); 
+		    	cli.enviarRemitente(socket,"recibirPersonaje",personaje);
+		    })
 		});
 	}
 }

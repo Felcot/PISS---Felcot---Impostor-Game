@@ -1,5 +1,4 @@
 function ControlWeb(){
-	var ws;
 	var me = this;
 	var ownerGame = false;
 	this.mainMenu= function(){
@@ -108,6 +107,13 @@ function ControlWeb(){
 		});
 	}
 	this.limpiarHTML=function(cadena){
+		if(cadena == "ALL"){
+			$('#mainRemove').remove();
+			$('#mUAP').remove();
+			$('#mostrarCP').remove();
+			$('#esperandoRemove').remove();
+			return;
+		}
 		if(cadena != "mainRemove")$('#mainRemove').remove();
 		if(cadena != "crearPartida")$('#crearPartida').remove();
 		if(cadena != "unirAPartida")$('#unirAPartida').remove();
@@ -120,5 +126,8 @@ function ControlWeb(){
 /*
  * Una vez pasados los test y demás
  * hacer commit y añadir a la rama
+ } Buscar información como hacer merge
+ * git branch -d nombreRama
  * 
  */
+

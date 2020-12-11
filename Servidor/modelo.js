@@ -1,15 +1,17 @@
+var minimo = 2;
 function Juego(){
 	this.partidas={};
 	this.usuario={};
 	this.crearPartida=function(num,nick){
 			try{
-				if((num < 4) || (num > 10)){
+				if((num < minimo) || (num > 10)){
 				 	throw new Exception("N410");
 				}
 
 			let codigo=this.obtenerCodigo();
 			if (!this.partidas[codigo]){
 				this.partidas[codigo]= new Partida(num,nick,this);
+				this.partidas[codigo].iniciarPersonajes();
 				var usr =  this.partidas[codigo].usuarios;
 				this.usuario[nick] = usr[nick];
 			}
@@ -62,7 +64,10 @@ function Juego(){
 	}
 	this.listarJugadores=function(codigo){
 		var partida = this.getPartida(codigo);
-		return partida.listarJugadores();
+		if(partida)
+			return partida.listarJugadores();
+		else
+			console.log("no existe ese codigo");
 	}
 	this.usuario=function(nick){
 		return this.usuario[nick];
@@ -96,26 +101,29 @@ function Partida(num,owner,juego){
 	this.usuarios={};
 	this.juego = juego;
 	this.contenedor = new contenedor();
-	this.personajes={};
+	this.sprites=[];
 	this.iniciarPersonajes = function(){
 		var spritesNumber = 8;
-		for (var i = 0; i <= spritesNumber; i++) {
-			this.personajes[i] = {"id":i};
-		}
+		for (var id = 0; id < spritesNumber; id++){
+			this.sprites.push({"id":id,"elegido":false});
+		} 
 	}
+	
 	this.elegirPersonaje=function(usr,id){
 		if(id == "default"){
 			var lista = this.listarPersonajesLibres();
 			this.elegirPersonaje(usr,lista[0]);
-		}
-		usr.setPersonaje(id);
-		//console.log(this.personajes[id]);
+		}else{
+			console.log("El id es --->"+this.sprites[id].id);
+			usr.setPersonaje(this.sprites[id].id);
+			this.sprites[id].elegido = true;
+		}	
 	}
 	this.listarPersonajesLibres=function(){
 		var result = [];
-		for (var i = 0;i<this.personajes.length; i++){
-			if(!this.personajes[i].elegido)
-				result.push(this.personajes[i].id);
+		for (var id = 0; id < this.sprites.length;id++){
+			if(!this.sprites[id].elegido)
+				result.push(this.sprites[id].id);
 		}
 		return result;
 	}
@@ -144,7 +152,7 @@ function Partida(num,owner,juego){
 		this.usuarios[nuevo].partida = this;
 	}
 	this.comprobarMinimo=function(){
-		return sizeDictionary(this.usuarios)>=4
+		return sizeDictionary(this.usuarios)>=minimo;
 	}
 	this.comprobarMaximo=function(){
 		return sizeDictionary(this.usuarios)<this.maximo
@@ -617,15 +625,16 @@ function Usuario(nick,juego){
 	this.encargo ="ninguno";
 	this.impostor = false;
 	this.personaje = undefined;
-	
+	this.elegirPersonaje=function(id){
+		this.partida.elegirPersonaje(this,id);
+	}
 	this.getPersonaje=function(){
-		if(this.personaje == undefined)
-			this.setPersonaje(this.partida.elegirPersonaje(this,"default"));
 		return this.personaje;
 	}
 	//Permite establecer un personaje.
 	this.setPersonaje=function(personaje){
 		this.personaje = personaje;
+		console.log("El usuario--->"+this.getNick()+" ha recibido el personaje:"+this.getPersonaje());
 	} 
 	this.getNick = function(){return this.nick;}
 	this.crearPartida=function(num){

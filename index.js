@@ -8,7 +8,7 @@ var bodyParser = require("body-parser"); // es necesario para parsear los formul
 // a través del cuerpo del index.
 var io = require("socket.io").listen(server);
 var modelo = require("./Servidor/modelo.js");
-
+//var min = process.argv.slice(2);
 var wss =  require("./Servidor/servidorWS.js");
 var servidorWS = new wss.ServidorWS(); // aquí se esta creando la capa instancia de webSocket
 

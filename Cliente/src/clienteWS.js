@@ -9,6 +9,14 @@ function ClienteWS (name,controlWeb){
 		this.socket=io.connect();
 		this.lanzarSocketSrv();
 	}
+	this.toString=function(){
+		var result = "Mi nombre es "+this.nick+"\n";
+		result += "Estoy en la partida "+this.codigo+"\n";
+		result+= "Mi personaje es "+this.personaje+"\n";
+		result += !this.owner ? "No":"Si";
+		result += " soy el propietario\n";
+		return result;
+	}
 	//esto permite llamar a esta funcion
 	//servidor WebSocket dentro del cliente
 	this.getCodigo =  function(){
@@ -60,8 +68,14 @@ function ClienteWS (name,controlWeb){
 	this.obtenerListaJugadores = function(){
 		this.socket.emit('EstoyDentro',this.getNick(),this.getCodigo());
 	}
-	this.movimiento=function(direccion){
-		this.socket.emit('meHeMovido',this.getPersonaje(),direccion)
+	this.movimiento=function(direccion,x,y){
+		this.socket.emit('movimiento',this.getNick(),this.getCodigo(),direccion,x,y);
+	}
+	this.establecePersonaje=function(id){
+		this.socket.emit('establecerPersonajeServidor',this.getCodigo(),this.getNick(),id);
+	}
+	this.estoyDentro = function(){
+		this.socket.emit('estoyDentro',this.getCodigo());
 	}
 	this.lanzarSocketSrv = function(){
 		var cli =  this; // capturar el objeto, porque se hace pisto manchego con las funciones de callback.
@@ -73,9 +87,6 @@ function ClienteWS (name,controlWeb){
 		this.socket.on('partidaCreada',function(data){
 			cli.setCodigo(data.codigo);
 			cli.owner = data.codigo != "fallo"; //Si no ha fallado se establece como owner
-console.log("----");
-			console.log(data);
-console.log("----");
 			data.codigo != "fallo"? cw.mostrarEsperandoRivales(data.lista): cw.mostrarCrearPartida();
 		});
 		this.socket.on('unidoAPartida',function(data){
@@ -96,6 +107,14 @@ console.log("----");
 		this.socket.on('partidaIniciada',function(data){
 			console.log("Partida "+data.codigo+" esta en fase "+ data.fase);
 			//Aquí va el inicio al juego
+			cw.limpiarHTML("ALL");
+			if(cli.getPersonaje()==undefined){
+				cli.establecePersonaje("default");
+			}
+			lanzarJuego();
+		});
+		this.socket.on('recibirPersonaje',function(personaje){
+			cli.setPersonaje(personaje);
 		});
 		this.socket.on('recibirListarPartidas',function(data){
 			console.log(data);
@@ -107,16 +126,28 @@ console.log("----");
 		});
 		this.socket.on('recibirVotacion',function(data){
 			console.log(data);
+
 		});
 		this.socket.on('activarReport',function(data){
 			console.log(data);
+			//Dibujar Votación --> un formulario, radioButton, etc...
 		});
 		this.socket.on('dibujarRemoto',function(data){
-			lanzarJugadorRemoto(data);
+			for(var jugador in data)
+				if(data[jugador].nick != cli.getNick()){
+					console.log(">>"+data[jugador]);
+					lanzarJugadorRemoto(data[jugador]);
+				}
 		});
-		this.socket.on('seHaMovido',function(data){
+		this.socket.on('moverRemoto',function(data){
 			moverRemoto(data);
 		});
+		/** COMPLETAR FALTA EMIT
+		this.socket.on('recibirEncargo',function(data){
+			console.log(data);
+			if(data.impostor)
+				$('#avisarImpostor').modal("show");
+		});**/
 	}
 
 	this.ini();
