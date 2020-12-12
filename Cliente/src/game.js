@@ -48,20 +48,11 @@
 function lanzarJuego(){
   console.log("Estoy aqui")
   game = new Phaser.Game(config);
-}//lanzarJuego();
+}
   function preload() {
-    this.load.image("tiles", "cliente/assets/tilesets/tuxmon-sample-32px-extruded.png");
-    this.load.tilemapTiledJSON("map", "cliente/assets/tilemaps/tuxemon-town.json");
-
-    // An atlas is a way to pack multiple images together into one texture. I'm using it to load all
-    // the player animations (walking left, walking right, etc.) in one image. For more info see:
-    //  https://labs.phaser.io/view.html?src=src/animation/texture%20atlas%20animation.js
-    // If you don't use an atlas, you can do the same thing with a spritesheet, see:
-    //  https://labs.phaser.io/view.html?src=src/animation/single%20sprite%20sheet.js
-    //this.load.atlas("atlas", "cliente/assets/atlas/atlas.png", "cliente/assets/atlas/atlas.json");
-    //this.load.spritesheet("gabe","cliente/assets/images/gabe.png",{frameWidth:24,frameHeight:24});
-    //this.load.spritesheet("gabe","cliente/assets/images/male01-2.png",{frameWidth:32,frameHeight:32});
-    this.load.spritesheet("personajes","cliente/assets/images/players.png",{frameWidth:32,frameHeight:48});
+    this.load.image("tiles", "Cliente/assets/tilesets/tuxmon-sample-32px-extruded.png");
+    this.load.tilemapTiledJSON("map", "Cliente/assets/tilemaps/tuxemon-town.json");
+    this.load.spritesheet("personajes","Cliente/assets/images/players.png",{frameWidth:32,frameHeight:48});
   }
 
   function create() {
