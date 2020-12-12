@@ -77,7 +77,6 @@ function lanzarJuego(){
     worldLayer = map.createStaticLayer("World", tileset, 0, 0);
     //capaTareas = map.createStaticLayer("Tareas", tileset, 0, 0);
     const aboveLayer = map.createStaticLayer("Above Player", tileset, 0, 0);
-
     worldLayer.setCollisionByProperty({ collides: true });
     //capaTareas.setCollisionByProperty({ collides: true });
 
