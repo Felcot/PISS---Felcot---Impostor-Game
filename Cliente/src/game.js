@@ -46,10 +46,10 @@
                 {frame:57,sprite:"Ursula"}];
   //var remotos.add.group();
 function lanzarJuego(){
+  console.log("Estoy aqui")
   game = new Phaser.Game(config);
 }//lanzarJuego();
   function preload() {
-    console.log("He pasado---");
     this.load.image("tiles", "cliente/assets/tilesets/tuxmon-sample-32px-extruded.png");
     this.load.tilemapTiledJSON("map", "cliente/assets/tilemaps/tuxemon-town.json");
 
