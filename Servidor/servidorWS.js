@@ -52,8 +52,6 @@ function ServidorWS(){
 		    });
 		    socket.on('listaPartidasDisponibles',function(nick,codigo){
 		    	var data = juego.listarPartidasDisponibles();
-
-		    	console.log("ListaPartidasDisponibles:-->"+data);
 		    	cli.enviarRemitente(socket,"recibirListarPartidasDisponibles",data);
 		    });
 		    socket.on('movimiento',function(nick,codigo,direccion,x,y){

@@ -114,7 +114,6 @@ function Partida(num,owner,juego){
 			var lista = this.listarPersonajesLibres();
 			this.elegirPersonaje(usr,lista[0]);
 		}else{
-			console.log("El id es --->"+this.sprites[id].id);
 			usr.setPersonaje(this.sprites[id].id);
 			this.sprites[id].elegido = true;
 		}	

@@ -46,7 +46,6 @@
                 {frame:57,sprite:"Ursula"}];
   //var remotos.add.group();
 function lanzarJuego(){
-  console.log("Estoy aqui")
   game = new Phaser.Game(config);
 }
   function preload() {
