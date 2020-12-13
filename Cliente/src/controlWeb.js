@@ -27,16 +27,19 @@ function ControlWeb(){
 	}
 	this.mostrarRegistrarse = function(){
 		var register =  '<div id="register" class="form-group">';
-					register+='<label for="usr">Nick:</label>';
-					register+='<input type="text" class="form-control" id="nick">';
-					register+='<button id = "btnRegister" type="button" class="btn btn-primary">Registrarse</button>';
-				register+='</div>';
+					register += '<div class="row">'
+					register+='<div class="col-md-4"></div><div class="col-md-4"><label id="label-nick" for="usr">Nick:</label></div>';
+					register+='</div><div class="col-md-4"></div><div class="row"><div class="col-md-4"><input type="text" class="form-control" id="nick"></div>';
+					register+='</div><div class="row">';
+					register+='<div class="col-md-5"></div><div id="d-btnRegister" class="col-md-2"><button id = "btnRegister" type="button" class="btn btn-primary">Registrarse</button>';
+				register+='</div></div></div>';
 		return register;
 	}
 	this.mostrarCrearPartida = function(){
+		this.limpiarHTML("mostrarCP");
 		var cadena =  '<div id="mostrarCP">' 
 				cadena+='<div class="form-group">';
-					cadena+='<label for="num">number:</label>';
+					cadena+='<label for="num">Número Máximo:</label>';
 					cadena+='<input type="text" class="form-control" id="num">';
 				cadena+='</div>';
 				cadena+='<button id = "btnCP" type="button" class="btn btn-primary">Crear</button>'
@@ -57,10 +60,13 @@ function ControlWeb(){
 
 	this.mostrarEsperandoRivales= function(lista){
 		$('#esperandoRemove').remove();
-		var esperandoRival = '<div id="esperandoRemove"><div id="jugadores" class = "list-group">';
+		this.limpiarHTML("esperandoRemove");
+		var esperandoRival = '<div id="esperandoRemove"><div class="row justify-content-center justify-content-md-start">';
+		esperandoRival += '<div class="col-md-4"><label for="num">Jugadores:</label><div id="jugadores" class = "list-group">';
 				for(var usr in lista)
-					esperandoRival+='<a href="#" class="list-group-item" value="'+lista[usr].nick+'">'+lista[usr].nick+'</a>';
-				
+					esperandoRival+='<a href="#" class="list-group-item list-group-item-light" value="'+lista[usr].nick+'">'+lista[usr].nick+'</a>';
+			esperandoRival += '</div></div><div class="col-md-4"><img id="waiting" src="Cliente/img/waiting.gif"></div>';
+			esperandoRival += '<div class = "col-md-4"></div>';	
 			esperandoRival += ws.isOwner()? '</div><div id="ownerGame"></div></div>':'</div></div>';
 
 		$('#esperandoRival').append(esperandoRival);
@@ -76,7 +82,9 @@ function ControlWeb(){
 		return cadena;
 	} 
 	this.mostrarUnirAPartida = function(lista){
+		this.limpiarHTML("mUAP");
 		var cadena= '<div id="mUAP" class ="list-group">';
+			cadena+='<label for="num">Elige y Juega:</label>';
 				cadena+=this.mostrarPartidasDisponibles(lista);
 			cadena+='<button id = "btnmUAP" type="button" class="btn btn-primary">Unirse</button>'
 			cadena+= '</div>';
@@ -107,17 +115,11 @@ function ControlWeb(){
 		});
 	}
 	this.limpiarHTML=function(cadena){
-		if(cadena == "ALL"){
-			$('#mainRemove').remove();
-			$('#mUAP').remove();
-			$('#mostrarCP').remove();
-			$('#esperandoRemove').remove();
-			return;
-		}
+		
 		if(cadena != "mainRemove")$('#mainRemove').remove();
-		if(cadena != "crearPartida")$('#crearPartida').remove();
-		if(cadena != "unirAPartida")$('#unirAPartida').remove();
-		if(cadena != "esperandoRival")$('#esperandoRival').remove();
+		if(cadena != "mostrarCP")$('#mostrarCP').remove();
+		if(cadena != "mUAP")$('#mUAP').remove();
+		if(cadena != "esperandoRemove")$('#esperandoRemove').remove();
 		if(cadena != "initialGame") $('#initialGame').remove();
 	}
 }
