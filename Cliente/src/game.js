@@ -245,8 +245,8 @@ function lanzarJuego(){
       player.body.setVelocityY(speed);
       direccion ="front";
     }
-    var x = player.body.x;
-    var y = player.body.y;
+    var x = player.x;
+    var y = player.y;
     ws.movimiento(direccion,x,y)
     // Normalize and scale the velocity so that player can't move faster along a diagonal
     player.body.velocity.normalize().scale(speed);
