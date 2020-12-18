@@ -1,3 +1,4 @@
+
 body{
 	position:relative; 
 	background: url(../img/backGround.gif) no-repeat center center fixed;
@@ -22,15 +23,19 @@ h3{
 #esperandoRemove{
 	padding-top: 5%;
 }
-label{
+#nick-chat{
+	
+}
+.labelGeneral{
 	font-family: Century Gothic;
 	font-size: 200%;
 	-webkit-text-stroke: 0.5px black;
 	color : white ;
 }
 canvas{
-	position:absolute;
-	left : 22%;
+	/*position:absolute;
+	left : 22%;*/
+	justify-content: space-around;
 }
 #register{
 	padding: 5% 5%;
@@ -39,4 +44,53 @@ canvas{
 }
 #d-btnRegister{
 	margin-top: 1%;
+}
+div#chat{
+	background-color: #848484; 
+	padding : 2% 2%;
+	border-radius: 20px;
+	border-style: solid;
+	border-color: #D8D8D8;
+	width: 50%;
+	height: 400px;
+
+}
+div#mensajes{
+  	height: 80%;
+  	margin-bottom: 5%;
+  	overflow: hidden;
+  	overflow-y: scroll;
+  	text-align: justify;
+}
+
+#nick-chat{
+	color : #58ACFA;
+}
+div#tmsg,input#msg{
+	resize: none;
+	height: 10%;
+	width: 90%;
+	
+}
+textarea#msg{
+	resize: none;
+	height: 10%;
+	width: 90%;
+}
+.scroll::-webkit-scrollbar{
+		display:none;
+	}
+div#btn-msg{
+	height: 50px;
+	width: 80px;
+	background-color: white; 
+	text-align: justify;
+	user-select: none;
+	margin-top:-15%; 
+	padding: 1%;
+	float:right;
+}
+#msg-chat{
+	color: #FFFFFF;
+	text-align: justify;
 }

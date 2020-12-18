@@ -1,6 +1,9 @@
 function ControlWeb(){
 	var me = this;
 	var ownerGame = false;
+	this.initHTML = function(){
+		this.mainMenu();
+	}
 	this.mainMenu= function(){
 		$('#mainRemove').remove();
 		var html = '<div id="mainRemove">';
@@ -28,7 +31,7 @@ function ControlWeb(){
 	this.mostrarRegistrarse = function(){
 		var register =  '<div id="register" class="form-group">';
 					register += '<div class="row">'
-					register+='<div class="col-md-4"></div><div class="col-md-4"><label id="label-nick" for="usr">Nick:</label></div>';
+					register+='<div class="col-md-4"></div><div class="col-md-4"><label id="Nnick" class="labelGeneral" for="usr">Nick:</label></div>';
 					register+='</div><div class="col-md-4"></div><div class="row"><div class="col-md-4"><input type="text" class="form-control" id="nick"></div>';
 					register+='</div><div class="row">';
 					register+='<div class="col-md-5"></div><div id="d-btnRegister" class="col-md-2"><button id = "btnRegister" type="button" class="btn btn-primary">Registrarse</button>';
@@ -39,7 +42,7 @@ function ControlWeb(){
 		this.limpiarHTML("mostrarCP");
 		var cadena =  '<div id="mostrarCP">' 
 				cadena+='<div class="form-group">';
-					cadena+='<label for="num">Número Máximo:</label>';
+					cadena+='<label class="labelGeneral" for="num">Número Máximo:</label>';
 					cadena+='<input type="text" class="form-control" id="num">';
 				cadena+='</div>';
 				cadena+='<button id = "btnCP" type="button" class="btn btn-primary">Crear</button>'
@@ -62,17 +65,27 @@ function ControlWeb(){
 		$('#esperandoRemove').remove();
 		this.limpiarHTML("esperandoRemove");
 		var esperandoRival = '<div id="esperandoRemove"><div class="row justify-content-center justify-content-md-start">';
-		esperandoRival += '<div class="col-md-4"><label for="num">Jugadores:</label><div id="jugadores" class = "list-group">';
+		esperandoRival += '<div class="col-md-4"><label class="labelGeneral" for="num">Jugadores:</label><div id="jugadores" class = "list-group">';
 				for(var usr in lista)
 					esperandoRival+='<a href="#" class="list-group-item list-group-item-light" value="'+lista[usr].nick+'">'+lista[usr].nick+'</a>';
-			esperandoRival += '</div></div><div class="col-md-4"><img id="waiting" src="Cliente/img/waiting.gif"></div>';
-			esperandoRival += '<div class = "col-md-4"></div>';	
+			esperandoRival += '</div></div><div class="col-md-4"><div id="waiting">';
+			esperandoRival+= '<div class="spinner-outside rotate-left"></div>';
+		esperandoRival+='<div class="spinner-inside rotate-rigth"></div>';
+		esperandoRival+='<h4 class="letterSpinner">Esperando </br>Jugadores</h4></div></div>';
+			esperandoRival += '<div class = "col-md-4">'
+			esperandoRival += this.mostrarChat();
+			esperandoRival +='</div>';	
 			esperandoRival += ws.isOwner()? '</div><div id="ownerGame"></div></div>':'</div></div>';
 
 		$('#esperandoRival').append(esperandoRival);
+		$('#btn-msg').on('click',function(){
+			ws.sendMensaje($('#msg').val());
+			$('#msg').val('');
+		});
 		this.mostrarInicarPartida();
 		
 	}
+
 	this.mostrarPartidasDisponibles = function(lista){
 		var cadena= '<div id = "listaPartidas"><div class = "list-group">';
 			for(var partida in lista){
@@ -84,7 +97,7 @@ function ControlWeb(){
 	this.mostrarUnirAPartida = function(lista){
 		this.limpiarHTML("mUAP");
 		var cadena= '<div id="mUAP" class ="list-group">';
-			cadena+='<label for="num">Elige y Juega:</label>';
+			cadena+='<label class="labelGeneral" for="num">Elige y Juega:</label>';
 				cadena+=this.mostrarPartidasDisponibles(lista);
 			cadena+='<button id = "btnmUAP" type="button" class="btn btn-primary">Unirse</button>'
 			cadena+= '</div>';
@@ -121,6 +134,32 @@ function ControlWeb(){
 		if(cadena != "mUAP")$('#mUAP').remove();
 		if(cadena != "esperandoRemove")$('#esperandoRemove').remove();
 		if(cadena != "initialGame") $('#initialGame').remove();
+	}
+
+	this.inyectarMensaje= function(data){
+		
+		$('#mensajes').append('<div id="mensaje"><label id=nick-chat>('+data.nick+')></label><label id="msg-chat">'+data.msg+'</label></div>');
+	};
+	this.mostrarChat = function(data){
+		var chat ='<div id="chat"> <div id="mensajes"></div>';
+				chat+='<input id="msg" type="text" value="">';
+				chat+='<button id="btn-msg">enviar</button>';
+			chat+='</div>';
+		return chat;
+
+	}
+	this.mostrarModalSimple=function(msg){
+		$('#avisarImpostor').remove();
+		var contenidoModal = '<p id="avisarImpostor">'+msg+'</p>';
+		$('#contenidoModal').append(contenidoModal);
+		$('#modalGeneral').modal("show");
+	}
+	this.mostrarModalTarea=function(msg){
+		$('#avisarImpostor').remove();
+		$('#viewTarea').remove();
+		var contenidoModal = '<p id="viewTarea">'+msg+'</p>';
+		$('#contenidoModal').append(contenidoModal);
+		$('#modalGeneral').modal("show");
 	}
 }
 

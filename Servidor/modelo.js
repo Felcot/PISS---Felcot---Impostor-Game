@@ -108,6 +108,12 @@ function Partida(num,owner,juego){
 			this.sprites.push({"id":id,"elegido":false});
 		} 
 	}
+	this.getImpostor = function(){
+		var result;
+		for(var usr in this.usuarios)
+			result= this.usuarios[usr].getImpostor()? usr: "";
+		return result;
+	}
 	
 	this.elegirPersonaje=function(usr,id){
 		if(id == "default"){
@@ -196,7 +202,6 @@ function Partida(num,owner,juego){
 		this.fase = new Jugando();
 		return this;
 	}
-
 	this.evaluarPartida = function(){
 		F =(impostores,crewmates) => {return impostores == crewmates;};
 		let cond = this.contenedor.evaluarIC(F);
@@ -208,7 +213,10 @@ function Partida(num,owner,juego){
 		if(cond)
 			this.fase = new Final('Tripulantes');
 	}
-
+	this.comprobarPartida = function(condition){
+		this.fase = condition ? new Final('Tripulantes'):this.fase;
+		return this.fase;
+	}
 	this.eyectar=function(nick){
 		if(this.usuarios[nick].impostor)
 			console.log("El usuario "+nick+" era el impostor");
@@ -234,6 +242,18 @@ function Partida(num,owner,juego){
 	this.sePuedeEntrar = function(){
 		return this.fase.nombre == "inicial" || this.fase.nombre == "completado";
 	}
+	this.realizarTarea = function(nick,tarea){
+		this.fase.realizarTarea(nick,tarea,this);
+	}
+	this.puedeRealizarTarea = function(nick,tarea){
+		this.usuarios[nick].realizarTarea(tarea) ? actualizarTareas(nick,tarea) 
+		: console.log("No se ha podido realizar la operacion");
+	}
+	this.actualizarTareas = function(nick,tarea){
+		delete Tareas[nick+Tarea];
+		sizeDictionary(Tareas) <= 0 ? comprobarPartida(true):console.log("Partida No terminada");
+	}
+
 	this.emptyFree= function(){
 		return this.maximo - this.comprobarUsuarios();
 	}
@@ -242,6 +262,13 @@ function Partida(num,owner,juego){
 	}
 	this.getCodigo= function(){
 		return this.codigo;
+	}
+	this.obtenerPorcentajeTareas=function(){
+		var realizadas = 0;
+		for ( var usr in this.usuarios){
+			realizadas = this.usuarios[usr].porcentajeRealizadas();
+		}
+		return (realizadas/total_tareas)*100;
 	}
 	this.agregarUsuario(owner);
 }
@@ -308,6 +335,7 @@ function Inicial(){
 			*/
 		}
 	}
+
 }
 
 function Completado(){
@@ -423,6 +451,9 @@ function Jugando(){
 			*/
 		}
 	}
+	this.realizarTarea = function(nick,tarea,partida){
+		partida.puedeRealizarTarea(nick,tarea);
+	}
 	this.anunciarGanador= function(ganadores){
 		try{
 			throw new Exception("JaG01");
@@ -532,20 +563,21 @@ function Votacion(){
 	this.recuento=function(partida){
 		let masVotado = "skipe";
 		this.votacion["skipe"] = 0;
-		let check = false;
+		let check = true;
 		for(var votado in this.votacion)
 			if(this.votacion[masVotado]<=this.votacion[votado]){
 				check = (this.votacion[masVotado] == this.votacion[votado]);
 				masVotado=votado;
 			}
-		if(masVotado != "skipe" && !check){
-			partida.eyectar(masVotado);
-		}else{
-			console.log("Nadie ha sido eyectado");
-		}
+		
+		(masVotado!= "skipe" && !check)? partida.eyectar(masVotado)
+		: console.log("Nadie ha sido eyectado");
 		
 		if(partida.fase.nombre != "final")
 			partida.fase = new Jugando();
+	}
+	this.comprobarVotacion =function(partida){
+		return sizeDictionary(votantes) == sizeDictionary(partida.usuarios);
 	}
 		
 	this.agregarUsuario=function(nick,partida){
@@ -616,6 +648,25 @@ function Votacion(){
 	return this.nombre;
 }
 
+function Tarea(name,coste){
+	this.data = {"name":name,"coste":coste,"realizado":0};
+	this.getNombre = function(){
+		return this.data.nombre;
+	}
+	this.getCoste= function(){
+		return this.data.coste;
+	}
+	this.realizarTarea = function(){
+		return this.comprobarTarea() ? puedeRealizarTarea():true;
+	}
+	this.puedeRealizarTarea = function(){
+		this.data.realizado +=1;
+		return this.comprobarTarea();
+	}
+	this.comprobarTarea= function(){
+		return this.data.realizado>=this.data.coste;
+	}
+}
 function Usuario(nick,juego){
 	this.nick=nick;
 	this.juego=juego;
@@ -624,17 +675,26 @@ function Usuario(nick,juego){
 	this.encargo ="ninguno";
 	this.impostor = false;
 	this.personaje = undefined;
-	this.elegirPersonaje=function(id){
-		this.partida.elegirPersonaje(this,id);
+	/*
+		Produccion
+	*/
+	this.getImpostor = function(){
+		return this.impostor;
 	}
-	this.getPersonaje=function(){
-		return this.personaje;
+	this.realizarTarea=function(tarea){
+		return this.encargo[tarea].realizarTarea();
 	}
-	//Permite establecer un personaje.
-	this.setPersonaje=function(personaje){
-		this.personaje = personaje;
-		console.log("El usuario--->"+this.getNick()+" ha recibido el personaje:"+this.getPersonaje());
-	} 
+	this.porcentajeRealizadas=function(){
+		var result;
+		for(var tarea in this.encargo){
+			if(this.encargo[tarea].comprobarTarea())
+				result++;
+		}
+		return result;
+	}
+	/*
+		Completado
+	*/
 	this.getNick = function(){return this.nick;}
 	this.crearPartida=function(num){
 		return this.juego.crearPartida(num,this);
@@ -667,6 +727,17 @@ function Usuario(nick,juego){
 	this.asesinado = function(){
 		this.estado.asesinado(this);
 	}
+	this.elegirPersonaje=function(id){
+		this.partida.elegirPersonaje(this,id);
+	}
+	this.getPersonaje=function(){
+		return this.personaje;
+	}
+	//Permite establecer un personaje.
+	this.setPersonaje=function(personaje){
+		this.personaje = personaje;
+		console.log("El usuario--->"+this.getNick()+" ha recibido el personaje:"+this.getPersonaje());
+	} 
 }
 
 
@@ -767,19 +838,6 @@ function contenedor(){
 		return F(this.sizeTam(true));
 	}
 }
-// function inicio(){
-// 	try{
-// 		juego = new Juego();
-// 		var usr =new Usuario("pepe",juego);
-// 		var codigo = usr.crearPartida(4);
-// 		juego.unirAPartida(codigo,"luis");
-// 		juego.unirAPartida(codigo,"luias");
-// 		juego.unirAPartida(codigo,"pepe");
-// 		juego.unirAPartida(codigo,"luisito");
-
-// 		usr.iniciarPartida();
-// 	}catch(Exception){}
-// }
 function sizeDictionary(dic){
 	return Object.keys(dic).length;
 }

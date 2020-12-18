@@ -44,6 +44,9 @@
                 {frame:51,sprite:"Rosa"},
                 {frame:54,sprite:"Morfeo"},
                 {frame:57,sprite:"Ursula"}];
+  var capaTareas;
+  var tareasOn = true;
+  var ataqueOn = true;
   //var remotos.add.group();
 function lanzarJuego(){
   game = new Phaser.Game(config);
@@ -65,10 +68,10 @@ function lanzarJuego(){
     // Parameters: layer name (or index) from Tiled, tileset, x, y
     const belowLayer = map.createStaticLayer("Below Player", tileset, 0, 0);
     worldLayer = map.createStaticLayer("World", tileset, 0, 0);
-    //capaTareas = map.createStaticLayer("Tareas", tileset, 0, 0);
+    capaTareas = map.createStaticLayer("capaTareas", tileset, 0, 0);
     const aboveLayer = map.createStaticLayer("Above Player", tileset, 0, 0);
     worldLayer.setCollisionByProperty({ collides: true });
-    //capaTareas.setCollisionByProperty({ collides: true });
+    capaTareas.setCollisionByProperty({ collides: true });
 
     // By default, everything gets depth sorted on the screen in the order we created things. Here, we
     // want the "Above Player" layer to sit on top of the player, so we explicitly give it a depth.
@@ -142,49 +145,32 @@ function lanzarJuego(){
     // const camera = this.cameras.main;
     // camera.startFollow(player);
     // camera.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
-    //remotos=crear.add.group();
     cursors = crear.input.keyboard.createCursorKeys();
-    //teclaA = crear.input.keyboard.addkey('a');
-    //teclaV = crear.input.keyboard.addkey('v');
-    //teclaT = crear.input.keyboard.addkey('t');
+    tareas=crear.add.group();
+    muertos = crear.add.group();
+    remotos = crear.add.group();
+    /*
+      TECLAS
+    */
+    teclaA = crear.input.keyboard.addKey('a');
+    teclaV = crear.input.keyboard.addKey('v');
+    teclaT = crear.input.keyboard.addKey('t');
 
-    console.log(ws.toString());
     lanzarJugador(ws.getPersonaje());
     ws.estoyDentro();
   }
-
-  function lanzarJugador(numJugador){
-    id = numJugador;
-    player = crear.physics.add.sprite(spawnPoint.x+20*id, spawnPoint.y,"personajes",recursos[id].frame);    
-    // Watch the player and worldLayer for collisions, for the duration of the scene:
-    crear.physics.add.collider(player, worldLayer);
-    //crear.physics.add.collider(player,capaTareas ,tareas);
-    //crear.physics.add.collider(player2, worldLayer);
-    camera = crear.cameras.main;
-    camera.startFollow(player);
-    camera.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
-  }
-  function tareas(sprite,tarea){
+  function tareas(sprite,input){
     //¿El sprite, el jugador local puede realizar la tarea?
     //En tal caso llamar al servidor que puede hacer la tarea, 
     //y permitir hacer la tarea.
-    console.log("realizar tarea");
-    /*tarea.nombre="jardines";
-    //controlar tecla en la seccion de teclas...
-    if(ws.encargo == tarea.nombre){
-      console.log("realizar tarea "+ws.encargo);
-     //ws.realizarTarea();
-    }*/
+    if(ws.encargo==objeto.properties.tarea && teclaT.isDown){
+      tareasOn=false;
+      console.log("realizar tarea");
+      cw.mostrarModalTarea(ws.encargo);
+    }
   }
-
-  function lanzarJugadorRemoto(jugador){
-    var frame=recursos[jugador.personaje].frame;
-    jugadores[jugador.nick]=crear.physics.add.sprite(spawnPoint.x+20*jugador.personaje, spawnPoint.y,"personajes",frame);   
-    crear.physics.add.collider(jugadores[jugador.nick], worldLayer);
-    jugadores[jugador.nick].nick = jugador.nick;
-    jugadores[jugador.nick].personaje=jugador.personaje;
-    //remotos.add(jugadores[jugador.nick]);
-  }
+  
+  
   function dibujarMuertos(inocente){
     var x = jugadores[inocente].x;
     var y = jugadores[inocente].y;
@@ -217,7 +203,37 @@ function lanzarJuego(){
           condition ? remoto.anims.play(sprite+"-"+direccion+"-walk",true):remoto.anims.stop();
     }
   }
-
+  function lanzarJugador(numJugador){
+    id = numJugador;
+    player = crear.physics.add.sprite(spawnPoint.x+20*id, spawnPoint.y,"personajes",recursos[id].frame);    
+    // Watch the player and worldLayer for collisions, for the duration of the scene:
+    crear.physics.add.collider(player, worldLayer);
+    crear.physics.add.collider(player,capaTareas ,tareas,()=>{return tareasOn});
+    camera = crear.cameras.main;
+    camera.startFollow(player);
+    camera.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
+  }
+  function crearColision(){
+      (crear && ws.impostor)?
+        crear.physics.add.overlap(player,remotos,kill,()=>{return ataqueOn})
+        : console.log("crearColision.false.crear["+(crear&&true)+"].impostor["+ws.impostor+"]");
+    }
+    function kill(impostor,tripulante){
+      var nick = tripulante.nick
+      console.log("sprite-->"+impostor+" --- "+"inocente:"+tripulante.nick);
+    if(teclaA.isDown){
+      ataqueOn=false;
+      ws.atacar(nick);
+    }
+  }
+  function lanzarJugadorRemoto(jugador){
+    var frame=recursos[jugador.personaje].frame;
+    jugadores[jugador.nick]=crear.physics.add.sprite(spawnPoint.x+20*jugador.personaje, spawnPoint.y,"personajes",frame);   
+    crear.physics.add.collider(jugadores[jugador.nick], worldLayer);
+    jugadores[jugador.nick].nick = jugador.nick;
+    jugadores[jugador.nick].personaje=jugador.personaje;
+    remotos.add(jugadores[jugador.nick]);
+  }
   function update(time, delta) {
     const speed = 175;
     const prevVelocity = player.body.velocity.clone();
@@ -254,16 +270,4 @@ function lanzarJuego(){
     // Update the animation last and give left/right animations precedence over up/down animations
     var condition = (direccion == "left"||direccion == "right"||direccion == "back"||direccion == "front");
           condition ? player.anims.play(sprite+"-"+direccion+"-walk",true):player.anims.stop();
-
-
-    function crearCollision(){
-      if(ws.impostor && crear){
-        crear.physics.add.overlap(player,remotos,kill);
-      }
-    }
-    function kill(impostor,tripulante){
-      //avisar al servidor -- ataque.
-      ws.atacar(tripulante.nick);
-      //dibujar inocente muerto.
-    }
-  }
+}

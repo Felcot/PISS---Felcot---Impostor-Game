@@ -1,0 +1,33 @@
+
+/*
+ + Todavía no hemos visto:
+ +
+ +
+ +
+ */
+- Persistencia, acceso a BBDD
+- Persistencia en lado cliente ( cookies o localStorage)
+- Gestión de usuarios :  registro e inicio de sesión
+- envio de email
+- empaquetado como app de escritorio (ElectronJS)
+- empaquetado como app movil (IONIC, cordova)
+- chat
+
+
+Ampliaciones:
+	- Interfaz gráfica y canvas
+	- Nuevas funciones:
+		- chat
+		- elegir entre mapas
+		- modificar skin
+		- permitir eralizar varias tareas
+		- cambiar el diseño de objetos de las tareas
+		- cambiar la lógica
+	- Nuevos clientes:
+		- App movil
+		- App escritorio
+		- Usar Angular JS o ReactJS
+	- Web:
+		- Cookies o LocalStorage
+	- Persistencia:
+		- Almacenar datos de las partidas y clientes (IP)

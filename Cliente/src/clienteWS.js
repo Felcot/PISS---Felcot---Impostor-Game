@@ -5,9 +5,16 @@ function ClienteWS (name,controlWeb){
 	this.personaje;
 	this.owner = false;
 	this.cw = controlWeb;
+	this.impostor = false;
 	this.ini=function(){
 		this.socket=io.connect();
 		this.lanzarSocketSrv();
+	}
+	this.getImpostor =function(){
+		return this.impostor;
+	}
+	this.setImpostor= function(impostor){
+		this.impostor = impostor;
 	}
 	this.toString=function(){
 		var result = "Mi nombre es "+this.nick+"\n";
@@ -16,6 +23,10 @@ function ClienteWS (name,controlWeb){
 		result += !this.owner ? "No":"Si";
 		result += " soy el propietario\n";
 		return result;
+	}
+	this.sendMensaje = function(msg){
+		console.log("Procedemos a enviar el mensaje ("+msg+")");
+		this.socket.emit('chat',this.getNick(),this.getCodigo(),msg);
 	}
 	//esto permite llamar a esta funcion
 	//servidor WebSocket dentro del cliente
@@ -77,6 +88,9 @@ function ClienteWS (name,controlWeb){
 	this.estoyDentro = function(){
 		this.socket.emit('estoyDentro',this.getCodigo());
 	}
+	this.realizarTarea = function(tarea){
+		this.socket.emit('realizarTarea',this.getNick(),this.getCodigo(),tarea);
+	}
 	this.lanzarSocketSrv = function(){
 		var cli =  this; // capturar el objeto, porque se hace pisto manchego con las funciones de callback.
 						 // y se puede llegar a perder. Se lanza una porcion de codigo que se encargad de escuchar
@@ -111,6 +125,8 @@ function ClienteWS (name,controlWeb){
 			if(cli.getPersonaje()==undefined){
 				cli.establecePersonaje("default");
 			}
+			if(data.impostor == cli.getNick())
+				cli.impostor = true;
 			lanzarJuego();
 		});
 		this.socket.on('recibirPersonaje',function(personaje){
@@ -142,6 +158,15 @@ function ClienteWS (name,controlWeb){
 		this.socket.on('moverRemoto',function(data){
 			moverRemoto(data);
 		});
+		/*this.socket.on('recibirEngargo',function(data){
+			cli.setEncargo(data.encargo);
+			cli.setImpostor(data.impostor);
+			cw.mostrarModalSimple();
+		});*/
+		this.socket.on('msgToChat',function(data){
+			console.log("me ha llegado: "+data.nick+" "+data.msg);
+			cw.inyectarMensaje(data);
+		});
 		/** COMPLETAR FALTA EMIT
 		this.socket.on('recibirEncargo',function(data){
 			console.log(data);
@@ -149,7 +174,6 @@ function ClienteWS (name,controlWeb){
 				$('#avisarImpostor').modal("show");
 		});**/
 	}
-
 	this.ini();
 }
 //En el lado del cliente, no tenemos que exportar, ya que en este lado es la anarquia.

@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html>
-	<header>
+	<head>
 		<title> Impostor Game</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 		<script src="Cliente/lib/bootstrap.min.js"></script>
 		<link rel="stylesheet" href="Cliente/lib/bootstrap.min.css">
+		<link rel="stylesheet" type="text/css" href="Cliente/css/spinner.css">
 		<link rel="stylesheet" type="text/css" href="Cliente/css/index.css">
 
 		
@@ -15,7 +16,7 @@
 		<script src="Cliente/src/controlWeb.js"></script>
 		<script src="//cdn.jsdelivr.net/npm/phaser@3.16.2/dist/phaser.js"></script>
     	<script src="../Cliente/src/game.js"></script>
-	</header>
+	</head>
 	<body>
 		<div id= "backgroundID" class="container">
 			<h3 id="General">Impostor Game</h3>
@@ -23,15 +24,15 @@
 				<div id="crearPartida"></div>
 				<div id="unirAPartida"></div>
 				<div id="esperandoRival"></div>
-				<div class="row justify-content-center justify-content-md-start">
+				<div id="initialGame">
+						<div class="row justify-content-center justify-content-md-start">
 					<div class="col-md-4"></div>
 					<div class="col-md-4">
-						<div id="initialGame">
 							<script type="text/javascript">
 								//var rest = new ClienteRest();
 								var ws;
 								var cw =  new ControlWeb();
-								cw.mainMenu();
+								cw.initHTML();
 									//ws.ini();
 							</script>
 						</div>
@@ -39,7 +40,7 @@
 					<div class="col-md-4"></div>
 				</div>
 				<!-- MODALES
-				<div class="modal" id ="avisarImpostor" tabindex="-1">
+				<div class="modal" id ="modalGeneral" tabindex="-1">
 				  <div class="modal-dialog">
 				    <div class="modal-content">
 				      <div class="modal-header">
@@ -48,8 +49,7 @@
 				          <span aria-hidden="true">&times;</span>
 				        </button>
 				      </div>
-				      <div class="modal-body">
-				        <p>Eres el impostor, que comience la purga!</p>
+				      <div class="modal-body" id="contenidoModal">
 				      </div>
 				      <div class="modal-footer">
 				        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
