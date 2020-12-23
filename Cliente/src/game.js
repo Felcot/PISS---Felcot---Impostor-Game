@@ -44,17 +44,37 @@
                 {frame:51,sprite:"Rosa"},
                 {frame:54,sprite:"Morfeo"},
                 {frame:57,sprite:"Ursula"}];
+var fantasmas=[{frame:0,sprite:"Europa-fantasma"},
+                {frame:3,sprite:"Gaia-fantasma"},
+                {frame:6,sprite:"Apolo-fantasma"},
+                {frame:9,sprite:"Afrodita-fantasma"},
+                {frame:48,sprite:"Edgar-fantasma"},
+                {frame:51,sprite:"Rosa-fantasma"},
+                {frame:54,sprite:"Morfeo-fantasma"},
+                {frame:57,sprite:"Ursula-fantasma"}];
+var tombstoneRecursos = [{frame:0,sprite:"Europa-death"},
+                         {frame:1,sprite:"Gaia-death"},
+                         {frame:2,sprite:"Apolo-death"},
+                         {frame:3,sprite:"Afrodita-death"},
+                         {frame:4,sprite:"Edgar-death"},
+                         {frame:5,sprite:"Rosa-death"},
+                         {frame:6,sprite:"Morfeo-death"},
+                         {frame:7,sprite:"Ursula-death"},
+                         {frame:8,sprite:"default-death"}]
   var capaTareas;
   var tareasOn = true;
   var ataqueOn = true;
-  //var remotos.add.group();
+  var remotos;
+  var muertos;
 function lanzarJuego(){
   game = new Phaser.Game(config);
 }
   function preload() {
     this.load.image("tiles", "Cliente/assets/tilesets/tuxmon-sample-32px-extruded.png");
     this.load.tilemapTiledJSON("map", "Cliente/assets/tilemaps/tuxemon-town.json");
-    this.load.spritesheet("personajes","Cliente/assets/images/players.png",{frameWidth:32,frameHeight:48});
+    this.load.spritesheet("personajes-vivo","Cliente/assets/images/players.png",{frameWidth:32,frameHeight:48});
+    this.load.spritesheet("personajes-fantasma","Cliente/assets/images/fantasmas.png",{frameWidth:32,frameHeight:32});
+    this.load.spritesheet("tombstone","Cliente/assets/images/tombstone.png",{frameWidth:64,frameHeight:32});
   }
 
   function create() {
@@ -91,35 +111,39 @@ function lanzarJuego(){
 
     // // Watch the player and worldLayer for collisions, for the duration of the scene:
     //this.physics.add.collider(player, worldLayer);
+    var estado = {"0":"vivo","1":"fantasma"}
+    const anims = [];
     for(var identificador = 0; identificador < recursos.length; identificador++){
+      for(var estadoSelector = 0; estadoSelector < 2; estadoSelector++){
       var cond = identificador <4? 0 : 48;
-      var spriteName = recursos[identificador].sprite;
+      var vivo =estado[""+estadoSelector] == "vivo";
+      var initFrame =  vivo? recursos[identificador].frame : fantasmas[identificador].frame;
+      var spriteName = vivo? recursos[identificador].sprite:fantasmas[identificador].sprite;
       var selector = (identificador%4); // Se encarga de seleccionar un bloque de sprites
       var left = cond + 12 + 3 * selector ;
       var rigth = cond + 24  + 3 * selector;
       var back = cond + 36 + 3 * selector;
-      var initFrame = recursos[identificador].frame;
-      const anims = [];
-      anims[identificador] = crear.anims;
-      anims[identificador].create({
+      var id =identificador+(estado[""+estadoSelector]!=vivo?9:0);
+      anims[id] = crear.anims;
+      anims[id].create({
         key: spriteName+"-left-walk",
-        frames: anims[identificador].generateFrameNames("personajes", {
+        frames: anims[id].generateFrameNames("personajes-"+estado[""+estadoSelector], {
           start: left,
           end: left + 2,
         }),
         repeat: -1
       });
-      anims[identificador].create({
+      anims[id].create({
         key: spriteName+"-right-walk",
-        frames: anims[identificador].generateFrameNames("personajes", {
+        frames: anims[id].generateFrameNames("personajes-"+estado[""+estadoSelector], {
           start: rigth,
           end: rigth + 2,
         }),
         repeat: -1
       });
-      anims[identificador].create({
+      anims[id].create({
         key: spriteName+"-front-walk",
-        frames: anims[identificador].generateFrameNames("personajes", {
+        frames: anims[id].generateFrameNames("personajes-"+estado[""+estadoSelector], {
           //prefix: "misa-left-walk.",
           start: initFrame,
           end: initFrame+2,
@@ -128,9 +152,9 @@ function lanzarJuego(){
         //frameRate: 10,
         repeat: -1
       });
-      anims[identificador].create({
+      anims[id].create({
         key: spriteName+"-back-walk",
-        frames: anims[identificador].generateFrameNames("personajes", {
+        frames: anims[id].generateFrameNames("personajes-"+estado[""+estadoSelector], {
           //prefix: "misa-left-walk.",
           start: back,
           end: back + 2,
@@ -139,6 +163,18 @@ function lanzarJuego(){
         //frameRate: 10,
         repeat: -1
       });
+      anims[id].create({
+        key: spriteName+"death",
+        frames: anims[id].generateFrameNames("tombstone", {
+          //prefix: "misa-left-walk.",
+          start: id,
+          end: id,
+          //zeroPad: 3
+        }),
+        //frameRate: 10,
+        repeat: -1
+      });
+  }
 }
       
 
@@ -156,7 +192,7 @@ function lanzarJuego(){
     teclaV = crear.input.keyboard.addKey('v');
     teclaT = crear.input.keyboard.addKey('t');
 
-    lanzarJugador(ws.getPersonaje());
+    lanzarJugador(ws.getPersonaje(),ws.getEstado());
     ws.estoyDentro();
   }
   function tareas(sprite,input){
@@ -176,7 +212,7 @@ function lanzarJuego(){
     var y = jugadores[inocente].y;
 
     var numJugador =  jugadores[inocente].numJugador;
-    var muerto = crear.physics.add.sprite(x,y,"muertos",recursos[numJugador].frame);
+    var muerto = crear.physics.add.sprite(x,y,"tombstone",0);
     //Alternativa
     // jugadores[inocente].setTexture()
     muertos.add(muerto);
@@ -189,23 +225,31 @@ function lanzarJuego(){
   }
 
   function moverRemoto(input){
-    const speed = 175;
-    var remoto=jugadores[input.nick];
-    if(remoto){
-      const prevVelocity = player.body.velocity.clone();
-      const sprite=recursos[remoto.personaje].sprite;
-      remoto.body.setVelocity(0);
-      remoto.setX(input.direccion.x);
-      remoto.setY(input.direccion.y);
-      remoto.body.velocity.normalize().scale(speed);
-      var direccion =input.direccion.nombre;
-      var condition = (direccion == "left"||direccion == "right"||direccion == "back"||direccion == "front");
-          condition ? remoto.anims.play(sprite+"-"+direccion+"-walk",true):remoto.anims.stop();
+    if(input.estado != "fantasma"){
+      const speed = 175;
+      var remoto=jugadores[input.nick];
+      if(remoto){
+        const prevVelocity = player.body.velocity.clone();
+        const sprite = input.estado == "vivo"?recursos[input.id].sprite:fantasmas[input.id].sprite;
+        remoto.body.setVelocity(0);
+        remoto.setX(input.direccion.x);
+        remoto.setY(input.direccion.y);
+        remoto.body.velocity.normalize().scale(speed);
+        var direccion =input.direccion.nombre;
+        var condition = (direccion == "left"||direccion == "right"||direccion == "back"||direccion == "front");
+            condition ? remoto.anims.play(sprite+"-"+direccion+"-walk",true):remoto.anims.stop();
+      }
+    }else{
+      var remoto=jugadores[input.nick];
+      if(remoto){
+        remoto.visible = false;
+      }
     }
   }
-  function lanzarJugador(numJugador){
+
+  function lanzarJugador(numJugador,estado){
     id = numJugador;
-    player = crear.physics.add.sprite(spawnPoint.x+20*id, spawnPoint.y,"personajes",recursos[id].frame);    
+    player = crear.physics.add.sprite(spawnPoint.x+20*id, spawnPoint.y,"personajes-"+estado,recursos[id].frame);    
     // Watch the player and worldLayer for collisions, for the duration of the scene:
     crear.physics.add.collider(player, worldLayer);
     crear.physics.add.collider(player,capaTareas ,tareas,()=>{return tareasOn});
@@ -214,21 +258,22 @@ function lanzarJuego(){
     camera.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
   }
   function crearColision(){
-      (crear && ws.impostor)?
-        crear.physics.add.overlap(player,remotos,kill,()=>{return ataqueOn})
-        : console.log("crearColision.false.crear["+(crear&&true)+"].impostor["+ws.impostor+"]");
+      if(crear && ws.impostor){
+        crear.physics.add.overlap(player,remotos,kill,()=>{return ataqueOn});
+      }
+        
+        //: console.log("crearColision.false.crear["+(crear&&true)+"].impostor["+ws.impostor+"]");
     }
-    function kill(impostor,tripulante){
-      var nick = tripulante.nick
-      console.log("sprite-->"+impostor+" --- "+"inocente:"+tripulante.nick);
-    if(teclaA.isDown){
-      ataqueOn=false;
-      ws.atacar(nick);
-    }
+    function kill (sprite,inocente){
+      var nick = inocente.nick
+      if(teclaA.isDown){
+        ataqueOn=false;
+        ws.atacar(nick);
+      }
   }
   function lanzarJugadorRemoto(jugador){
     var frame=recursos[jugador.personaje].frame;
-    jugadores[jugador.nick]=crear.physics.add.sprite(spawnPoint.x+20*jugador.personaje, spawnPoint.y,"personajes",frame);   
+    jugadores[jugador.nick]=crear.physics.add.sprite(spawnPoint.x+20*jugador.personaje, spawnPoint.y,"personajes-"+jugador.estado,frame);   
     crear.physics.add.collider(jugadores[jugador.nick], worldLayer);
     jugadores[jugador.nick].nick = jugador.nick;
     jugadores[jugador.nick].personaje=jugador.personaje;
@@ -237,9 +282,7 @@ function lanzarJuego(){
   function update(time, delta) {
     const speed = 175;
     const prevVelocity = player.body.velocity.clone();
-
-    const sprite=recursos[id].sprite;
-
+     const sprite = ws.getEstado() == "vivo"?recursos[id].sprite:fantasmas[id].sprite;
     // Stop any previous movement from the last frame
     player.body.setVelocity(0);
     //player2.body.setVelocity(0);

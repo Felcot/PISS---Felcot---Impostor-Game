@@ -44,8 +44,8 @@ function ServidorWS(){
 		    socket.on('iniciarPartida',function(nick,codigo){
 		    	var fase = juego.iniciarPartida(nick,codigo);
 		    	var partida = juego.getPartida(codigo);
+		    	console.log("Impostor ---_----->"+partida.getImpostor());
 		    	var data = {"codigo":codigo,"fase":fase.nombre,"impostor": partida.getImpostor()};
-		    	console.log("sWS.data"+data.Impostor);
 		    	fase.nombre == "jugando" ? cli.enviarATodos(io,codigo,"partidaIniciada",data): cli.enviarRemitente(socket,"esperando",data);
 		    	 });
 		    socket.on('listaPartidas',function(nick,codigo){
@@ -56,8 +56,8 @@ function ServidorWS(){
 		    	var data = juego.listarPartidasDisponibles();
 		    	cli.enviarRemitente(socket,"recibirListarPartidasDisponibles",data);
 		    });
-		    socket.on('movimiento',function(nick,codigo,direccion,x,y){
-		    	cli.enviarATodosMenosRemitente(socket,codigo,"moverRemoto",{"nick":nick,"direccion":{"nombre":direccion,"x":x,"y":y}});
+		    socket.on('movimiento',function(nick,codigo,direccion,x,y,estado,id){
+		    	cli.enviarATodosMenosRemitente(socket,codigo,"moverRemoto",{"nick":nick,"id":id,"direccion":{"nombre":direccion,"x":x,"y":y},"estado":estado});
 		    });
 		    socket.on('estoyDentro',function(codigo){
 		    	var lista = juego.listarJugadores(codigo);
@@ -70,6 +70,14 @@ function ServidorWS(){
 		    socket.on('votar',function(nick,votado){
 		    	var data = juego.usuario[nick].votar(votado);
 		    	cli.enviarATodos(socket,"recibirVotacion",data);
+		    });
+		    socket.on('enviarAtaque',function(impostor,codigo,tripulante){
+		    	var partida = juego.getPartida(codigo);
+		    	console.log("Impostor --> "+impostor+" Tripulanteeee --> "+tripulante);
+		    	if(partida.impostorMatar(impostor,tripulante)){
+		    		//console.log("enviarAtaque.tripulante["+tripulante+"]");
+		    		cli.enviarATodos(io,codigo,"recibirAtaque",tripulante);
+		    	}
 		    });
 		    socket.on('establecerPersonajeServidor',function(codigo,nick,id){
 		    	var usr = juego.partidas[codigo].usuarios[nick];

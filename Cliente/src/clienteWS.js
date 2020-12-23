@@ -5,7 +5,8 @@ function ClienteWS (name,controlWeb){
 	this.personaje;
 	this.owner = false;
 	this.cw = controlWeb;
-	this.impostor = false;
+	this.impostor;
+	this.estado;
 	this.ini=function(){
 		this.socket=io.connect();
 		this.lanzarSocketSrv();
@@ -30,6 +31,9 @@ function ClienteWS (name,controlWeb){
 	}
 	//esto permite llamar a esta funcion
 	//servidor WebSocket dentro del cliente
+	this.console=function(msg){
+		console.log(msg);
+	}
 	this.getCodigo =  function(){
 		return this.codigo;
 	}
@@ -48,7 +52,12 @@ function ClienteWS (name,controlWeb){
 	this.setPersonaje = function(personaje){
 		this.personaje=personaje;
 	}
-
+	this.getEstado=function(){
+		return this.estado;
+	}
+	this.setEstado = function(estado){
+		this.estado = estado;
+	}
 	this.crearPartida = function(number){
 		// emit genera una peticion al servidor, se puede paquetizar todo mas con objetos json
 		this.socket.emit('crearPartida',this.getNick(), number);
@@ -80,7 +89,7 @@ function ClienteWS (name,controlWeb){
 		this.socket.emit('EstoyDentro',this.getNick(),this.getCodigo());
 	}
 	this.movimiento=function(direccion,x,y){
-		this.socket.emit('movimiento',this.getNick(),this.getCodigo(),direccion,x,y);
+		this.socket.emit('movimiento',this.getNick(),this.getCodigo(),direccion,x,y,this.estado,this.personaje);
 	}
 	this.establecePersonaje=function(id){
 		this.socket.emit('establecerPersonajeServidor',this.getCodigo(),this.getNick(),id);
@@ -90,6 +99,9 @@ function ClienteWS (name,controlWeb){
 	}
 	this.realizarTarea = function(tarea){
 		this.socket.emit('realizarTarea',this.getNick(),this.getCodigo(),tarea);
+	}
+	this.atacar = function(tripulante){
+		this.socket.emit('enviarAtaque',this.getNick(),this.getCodigo(),tripulante);
 	}
 	this.lanzarSocketSrv = function(){
 		var cli =  this; // capturar el objeto, porque se hace pisto manchego con las funciones de callback.
@@ -122,11 +134,12 @@ function ClienteWS (name,controlWeb){
 			console.log("Partida "+data.codigo+" esta en fase "+ data.fase);
 			//Aquí va el inicio al juego
 			cw.limpiarHTML("ALL");
+			cli.console(data.impostor +" "+cli.getNick());
+			cli.impostor=data.impostor==cli.getNick();
 			if(cli.getPersonaje()==undefined){
 				cli.establecePersonaje("default");
-			}
-			if(data.impostor == cli.getNick())
-				cli.impostor = true;
+			}			
+			cli.estado="vivo";
 			lanzarJuego();
 		});
 		this.socket.on('recibirPersonaje',function(personaje){
@@ -154,6 +167,7 @@ function ClienteWS (name,controlWeb){
 					console.log(">>"+data[jugador]);
 					lanzarJugadorRemoto(data[jugador]);
 				}
+				crearColision();
 		});
 		this.socket.on('moverRemoto',function(data){
 			moverRemoto(data);
@@ -167,6 +181,10 @@ function ClienteWS (name,controlWeb){
 			console.log("me ha llegado: "+data.nick+" "+data.msg);
 			cw.inyectarMensaje(data);
 		});
+		this.socket.on('recibirAtaque',function(tripulante){
+			if(cli.getNick() == tripulante)
+				cli.setEstado("fantasma");
+		})
 		/** COMPLETAR FALTA EMIT
 		this.socket.on('recibirEncargo',function(data){
 			console.log(data);

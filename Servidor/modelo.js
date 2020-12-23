@@ -109,10 +109,14 @@ function Partida(num,owner,juego){
 		} 
 	}
 	this.getImpostor = function(){
-		var result;
-		for(var usr in this.usuarios)
-			result= this.usuarios[usr].getImpostor()? usr: "";
-		return result;
+		var user;
+		for(var usr in this.usuarios){
+			user=this.usuarios[usr];
+			if(user.getImpostor()){
+				return user.nick;
+			}
+		}
+		return "Error";
 	}
 	
 	this.elegirPersonaje=function(usr,id){
@@ -135,7 +139,8 @@ function Partida(num,owner,juego){
 	this.listarJugadores=function(){
 		var result = [];
 		for (var nick in this.usuarios){
-			result.push({"nick":this.usuarios[nick].getNick(),"personaje":this.usuarios[nick].getPersonaje()});
+			var usr = this.usuarios[nick];
+			result.push({"nick":usr.getNick(),"personaje":usr.getPersonaje(),"estado":usr.getEstado()});
 		}
 		return result;
 	}
@@ -222,11 +227,18 @@ function Partida(num,owner,juego){
 			console.log("El usuario "+nick+" era el impostor");
 		else
 			console.log("El usuario "+nick+" no era el impostor");
-		this.matar(nick);
+		this.fase.matar(nick);
+	}
+	this.impostorMatar=function(impostor,tripulante){
+		return this.fase.impostorMatar(impostor,tripulante,this);
+	}
+	this.impostorPuedeMatar=function(impostor,tripulante){
+		return this.usuarios[impostor].matar(tripulante);
 	}
 	this.matar=function(nick){
-		this.usuarios[nick].asesinado()
+		this.usuarios[nick].asesinado();
 		this.contenedor.eliminar(nick,this.usuarios[nick].impostor,this);
+		return true;
 	}
 
 	this.report = function(){
@@ -435,9 +447,11 @@ function Jugando(){
 		//TODO
 		//Solo cuando todos los jugadores votan por su expulsión de la partida.
 	}
-
+	this.impostorMatar=function(impostor,tripulante,partida){
+		return partida.impostorPuedeMatar(impostor,tripulante);
+	}
 	this.matar=function(nick,partida){
-		partida.matar(nick);
+		return partida.matar(nick);
 	}
 	this.report = function(partida){
 		return partida.fase = new Votacion();
@@ -678,9 +692,7 @@ function Usuario(nick,juego){
 	/*
 		Produccion
 	*/
-	this.getImpostor = function(){
-		return this.impostor;
-	}
+	
 	this.realizarTarea=function(tarea){
 		return this.encargo[tarea].realizarTarea();
 	}
@@ -695,7 +707,9 @@ function Usuario(nick,juego){
 	/*
 		Completado
 	*/
+	this.getImpostor = function(){return this.impostor;}
 	this.getNick = function(){return this.nick;}
+	this.getEstado=function(){return this.estado.getName();}
 	this.crearPartida=function(num){
 		return this.juego.crearPartida(num,this);
 	}
@@ -719,9 +733,9 @@ function Usuario(nick,juego){
 	this.report = function(){
 		this.estado.report(this.partida);
 	}
-	this.matar = function(nick){
+	this.matar = function(victima){
 		if(this.impostor)
-			this.estado.matar(nick,this.partida);
+			return this.estado.matar(victima,this.partida);
 	}
 
 	this.asesinado = function(){
@@ -744,7 +758,7 @@ function Usuario(nick,juego){
 function Vivo(){
 	this.nombre = "vivo";
 	this.matar = function(nick,partida){
-		partida.fase.matar(nick,partida);
+		return partida.fase.matar(nick,partida);
 	}
 	this.asesinado = function(usr){
 		usr.estado = new Fantasma();
@@ -755,9 +769,13 @@ function Vivo(){
 	this.report = function(partida){
 		partida.report();
 	}
+	this.getName=function(){
+		return this.nombre;
+	}
 }
 function Fantasma(){
 	this.nombre =  "fantasma";
+	this.getName=function(){return this.nombre;}
 	this.matar = function(nick,partida){
 		try{
 			throw new Exception("FM01");
