@@ -26,20 +26,7 @@ function Juego(){
 			this.partidas[codigo].agregarUsuario(nick);
 		}
 	}
-	/*
 
-
-this.obtenerCodigo=function(){
-		let cadena="ABCDEFGHIJKLMNOPQRSTUVXYZ";
-		let letras=cadena.split('');
-		let maxCadena=cadena.length;
-		let codigo=[];
-		for(i=0;i<6;i++){
-			codigo.push(letras[randomInt(1,maxCadena)-1]);
-		}
-		return codigo.join('');
-	}
-	*/
 	this.obtenerCodigo=function(){
 		let cadena="ABCDEFGHIJKLMNOPQRSTUVXYZ";
 		let letras=cadena.split('');
@@ -121,16 +108,7 @@ function Partida(num,owner,juego){
 			this.sprites.push({"id":id,"elegido":false});
 		} 
 	}
-	this.getImpostor = function(){
-		var user;
-		for(var usr in this.usuarios){
-			user=this.usuarios[usr];
-			if(user.getImpostor()){
-				return user.nick;
-			}
-		}
-		return "Error";
-	}
+	
 	
 	this.elegirPersonaje=function(usr,id){
 		if(id == "default"){
@@ -157,9 +135,7 @@ function Partida(num,owner,juego){
 		}
 		return result;
 	}
-	this.getUsuarios = function(nick){
-		return this.usuarios[nick];
-	}
+	
 	this.agregarUsuario=function(nick){
 		this.fase.agregarUsuario(nick,this);
 	}
@@ -240,7 +216,7 @@ function Partida(num,owner,juego){
 			console.log("El usuario "+nick+" era el impostor");
 		else
 			console.log("El usuario "+nick+" no era el impostor");
-		this.fase.matar(nick);
+		this.fase.matar(nick,this);
 	}
 	this.impostorMatar=function(impostor,tripulante){
 		return this.fase.impostorMatar(impostor,tripulante,this);
@@ -287,6 +263,19 @@ function Partida(num,owner,juego){
 	}
 	this.getCodigo= function(){
 		return this.codigo;
+	}
+	this.getImpostor = function(){
+		var user;
+		for(var usr in this.usuarios){
+			user=this.usuarios[usr];
+			if(user.getImpostor()){
+				return user.nick;
+			}
+		}
+		return "Error";
+	}
+	this.getUsuarios = function(nick){
+		return this.usuarios[nick];
 	}
 	this.obtenerPorcentajeTareas=function(){
 		var realizadas = 0;
@@ -655,13 +644,7 @@ function Votacion(){
 		}
 	}
 	this.matar = function(nick,partida){
-		try{
-			throw new Exception("VM01");
-		}catch(Exception){
-		   /* El tratamiento esta realizado en
-			* Exception
-			*/
-		}
+		return partida.matar(nick);
 	}
 	this.report = function(partida){
 		try{

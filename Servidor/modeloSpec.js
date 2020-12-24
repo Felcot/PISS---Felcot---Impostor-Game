@@ -269,28 +269,20 @@ describe("El juego del impostor", function() {
         expect(juego.partidas[codigo].fase.nombre).toEqual("completado");
         juego.usuario[nick].iniciarPartida();
         expect(juego.partidas[codigo].fase.nombre).toEqual("jugando");
-        var checked = false;
-        var expectImpostorName="";
-        var expectcrewmateName="";
+        var impostor = juego.getPartida(codigo).getImpostor();
+
+        
+        
+        juego.getPartida(codigo).usuarios[impostor].report();
+        expect(juego.getPartida(codigo).fase.nombre).toEqual("votacion");
 
         for(var usrExpected in juego.partidas[codigo].usuarios){
-           if(juego.partidas[codigo].usuarios[usrExpected].impostor){
-              expectImpostorName = usrExpected;
-           }else if(!checked){
-              checked = true;
-              expectcrewmateName = usrExpected;
-            }
+          juego.getPartida(codigo).usuarios[usrExpected].votar(impostor);
         }
-        juego.partidas[codigo].usuarios[expectcrewmateName].report();
-        expect(juego.partidas[codigo].fase.nombre).toEqual("votacion");
-
-        for(var usrExpected in juego.partidas[codigo].usuarios){
-          juego.partidas[codigo].usuarios[usrExpected].votar(expectImpostorName);
-        }
-        expect(juego.partidas[codigo].fase.votacion[expectImpostorName]).toEqual(4);
-        juego.partidas[codigo].recuento();
-        expect(juego.partidas[codigo].fase.nombre).toEqual("final");
-        expect(juego.partidas[codigo].fase.ganan).toEqual("Tripulantes");
+        expect(juego.getPartida(codigo).fase.votacion[impostor]).toEqual(4);
+        juego.getPartida(codigo).recuento();
+        expect(juego.getPartida(codigo).getFase().nombre).toEqual("final");
+        expect(juego.getPartida(codigo).fase.ganan).toEqual("Tripulantes");
     })
 
     it("Votar a tripulante",function(){
@@ -308,23 +300,14 @@ describe("El juego del impostor", function() {
         expect(juego.partidas[codigo].fase.nombre).toEqual("completado");
         juego.usuario[nick].iniciarPartida();
         expect(juego.partidas[codigo].fase.nombre).toEqual("jugando");
-        var checked = false;
-        var expectImpostorName="";
-        var expectcrewmateName="";
+        var impostor = juego.getPartida(codigo).getImpostor();
+        for(var usrExpected in juego.getPartida(codigo).usuarios)
+          if(usrExpected != impostor){ expectcrewmateName = usrExpected; break;}
 
-        for(var usrExpected in juego.partidas[codigo].usuarios){
-           if(juego.partidas[codigo].usuarios[usrExpected].impostor){
-              expectImpostorName = usrExpected;
-           }else if(!checked){
-              checked = true;
-              expectcrewmateName = usrExpected;
-            }
-        }
         juego.partidas[codigo].usuarios[expectcrewmateName].report();
         expect(juego.partidas[codigo].fase.nombre).toEqual("votacion");
-
         for(var usrExpected in juego.partidas[codigo].usuarios){
-          juego.partidas[codigo].usuarios[usrExpected].votar(expectcrewmateName);
+          juego.getPartida(codigo).usuarios[usrExpected].votar(expectcrewmateName);
         }
         expect(juego.partidas[codigo].fase.votacion[expectcrewmateName]).toEqual(4);
         juego.partidas[codigo].recuento();
