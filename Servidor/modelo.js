@@ -211,6 +211,7 @@ function Partida(num,owner,juego){
 		this.fase = condition ? new Final('Tripulantes'):this.fase;
 		return this.fase;
 	}
+	
 	this.eyectar=function(nick){
 		if(this.usuarios[nick].impostor)
 			console.log("El usuario "+nick+" era el impostor");
