@@ -1,4 +1,4 @@
-var minimo = 2;
+var minimo = 4;
 function Juego(){
 	this.partidas={};
 	this.usuario={};
