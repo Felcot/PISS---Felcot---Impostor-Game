@@ -26,7 +26,20 @@ function Juego(){
 			this.partidas[codigo].agregarUsuario(nick);
 		}
 	}
-	
+	/*
+
+
+this.obtenerCodigo=function(){
+		let cadena="ABCDEFGHIJKLMNOPQRSTUVXYZ";
+		let letras=cadena.split('');
+		let maxCadena=cadena.length;
+		let codigo=[];
+		for(i=0;i<6;i++){
+			codigo.push(letras[randomInt(1,maxCadena)-1]);
+		}
+		return codigo.join('');
+	}
+	*/
 	this.obtenerCodigo=function(){
 		let cadena="ABCDEFGHIJKLMNOPQRSTUVXYZ";
 		let letras=cadena.split('');
