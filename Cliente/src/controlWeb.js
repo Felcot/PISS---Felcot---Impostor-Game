@@ -70,7 +70,7 @@ function ControlWeb(){
 					esperandoRival+='<a href="#" class="list-group-item list-group-item-light" value="'+lista[usr].nick+'">'+lista[usr].nick+'</a>';
 			esperandoRival += '</div></div><div class="col-md-4"><div id="waiting">';
 			esperandoRival+= '<div class="spinner-outside rotate-left"></div>';
-		esperandoRival+='<div class="spinner-inside rotate-rigth"></div>';
+		esperandoRival+='<div class="spinner-inside rotate-right"></div>';
 		esperandoRival+='<h4 class="letterSpinner">Esperando </br>Jugadores</h4></div></div>';
 			esperandoRival += '<div class = "col-md-4">'
 			esperandoRival += this.mostrarChat();

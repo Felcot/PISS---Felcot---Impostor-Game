@@ -21,10 +21,10 @@
 	border-radius: 50%;
 	
 }
-.rotate-rigth{
+.rotate-right{
 	margin-top: -80px;
 	margin-left: 20px;
-	animation: SpinRigth 1s linear infinite;
+	animation: SpinRight 1s linear infinite;
 }
 .rotate-left{
 	animation: SpinLeft 1s linear infinite;
@@ -47,7 +47,7 @@
 		transform: rotate(0deg);
 	}
 }
-@keyframes SpinRigth{
+@keyframes SpinRight{
 	from{
 		transform: rotate(0deg)
 	}

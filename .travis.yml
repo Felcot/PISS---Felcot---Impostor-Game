@@ -3,6 +3,8 @@ sudo: false
 node_js:
   - "4.1"
   - "4.0"
+before_script:
+  - "npm i -g jasmine-node" 
 install:
   - npm install -g node-gyp
 script:
