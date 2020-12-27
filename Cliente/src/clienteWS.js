@@ -184,7 +184,11 @@ function ClienteWS (name,controlWeb){
 		this.socket.on('recibirAtaque',function(tripulante){
 			if(cli.getNick() == tripulante)
 				cli.setEstado("fantasma");
-		})
+			dibujarMuertos(tripulante);
+		});
+		this.socket.on('ataqueRealizado',function(data){
+			ataqueOn = data;
+		});
 		/** COMPLETAR FALTA EMIT
 		this.socket.on('recibirEncargo',function(data){
 			console.log(data);

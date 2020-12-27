@@ -74,7 +74,7 @@ function lanzarJuego(){
     this.load.tilemapTiledJSON("map", "Cliente/assets/tilemaps/tuxemon-town.json");
     this.load.spritesheet("personajes-vivo","Cliente/assets/images/players.png",{frameWidth:32,frameHeight:48});
     this.load.spritesheet("personajes-fantasma","Cliente/assets/images/fantasmas.png",{frameWidth:32,frameHeight:32});
-    this.load.spritesheet("tombstone","Cliente/assets/images/tombstone.png",{frameWidth:64,frameHeight:32});
+    this.load.spritesheet("tombstone","Cliente/assets/images/tombstone.png",{frameWidth:32,frameHeight:64});
   }
 
   function create() {
@@ -207,16 +207,20 @@ function lanzarJuego(){
   }
   
   
-  function dibujarMuertos(inocente){
-    var x = jugadores[inocente].x;
-    var y = jugadores[inocente].y;
-
-    var numJugador =  jugadores[inocente].numJugador;
-    var muerto = crear.physics.add.sprite(x,y,"tombstone",0);
+  function dibujarMuertos(tripulante){
+    ws.console("dibujarMuertos{");
+    var trip = jugadores[tripulante];
+    var x =  trip.x;
+    var y = trip.y;
+    ws.console(trip);
+    var numJugador =  trip.numJugador;
+    var muerto = crear.physics.add.sprite(x,y,"tombstone",5);
+    ws.console(muerto);
     //Alternativa
     // jugadores[inocente].setTexture()
     muertos.add(muerto);
     crear.physics.add.overlap(player,muertos,votacion); 
+    ws.console("}");
   }
   function votacion(sprite,muerto){
     //comprobar si el jugador local pulsa la tecla de votacion por ejemplo la V.

@@ -73,11 +73,12 @@ function ServidorWS(){
 		    });
 		    socket.on('enviarAtaque',function(impostor,codigo,tripulante){
 		    	var partida = juego.getPartida(codigo);
-		    	console.log("Impostor --> "+impostor+" Tripulanteeee --> "+tripulante);
+		    	console.log("serverWS.eviarAtaque: Impostor --> "+impostor+" Tripulanteeee --> "+tripulante);
 		    	if(partida.impostorMatar(impostor,tripulante)){
 		    		//console.log("enviarAtaque.tripulante["+tripulante+"]");
 		    		cli.enviarATodos(io,codigo,"recibirAtaque",tripulante);
 		    	}
+		    	cli.enviarRemitente(socket,"ataqueRealizado",true);
 		    });
 		    socket.on('establecerPersonajeServidor',function(codigo,nick,id){
 		    	var usr = juego.partidas[codigo].usuarios[nick];

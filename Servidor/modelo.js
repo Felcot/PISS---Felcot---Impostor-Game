@@ -350,7 +350,15 @@ function Inicial(){
 			*/
 		}
 	}
-
+	this.impostorMatar=function(impostor,tripulante){
+		try{
+			throw new Exception("CM01");
+		}catch(Exception){
+			/* El tratamiento esta realizado en
+			* Exception
+			*/
+		}
+	}
 }
 
 function Completado(){
@@ -419,7 +427,15 @@ function Completado(){
 				* Exception
 				*/
 			}
-		
+	}
+	this.impostorMatar=function(impostor,tripulante){
+		try{
+			throw new Exception("CM01");
+		}catch(Exception){
+			/* El tratamiento esta realizado en
+			* Exception
+			*/
+		}
 	}
 }
 
@@ -534,6 +550,15 @@ function Final(ganadores){
 			*/
 		}
 		
+	}
+	this.impostorMatar=function(impostor,tripulante){
+		try{
+			throw new Exception("CM01");
+		}catch(Exception){
+			/* El tratamiento esta realizado en
+			* Exception
+			*/
+		}
 	}
 	this.matar = function(nick,partida){
 		try{
@@ -652,6 +677,15 @@ function Votacion(){
 			throw new Exception("VR01");
 		}catch(Exception){
 		   /* El tratamiento esta realizado en
+			* Exception
+			*/
+		}
+	}
+	this.impostorMatar=function(impostor,tripulante){
+		try{
+			throw new Exception("CM01");
+		}catch(Exception){
+			/* El tratamiento esta realizado en
 			* Exception
 			*/
 		}
