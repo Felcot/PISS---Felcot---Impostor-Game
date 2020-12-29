@@ -80,6 +80,9 @@ function ServidorWS(){
 		    	}
 		    	cli.enviarRemitente(socket,"ataqueRealizado",true);
 		    });
+		    socket.on('pintarTumba',function(codigo,tripulante,personaje) {
+		    	cli.enviarATodos(io,codigo,"pintarTumba",{"tripulante":tripulante,"personaje":personaje});
+		    })
 		    socket.on('establecerPersonajeServidor',function(codigo,nick,id){
 		    	var usr = juego.partidas[codigo].usuarios[nick];
 		    	usr.elegirPersonaje(id);

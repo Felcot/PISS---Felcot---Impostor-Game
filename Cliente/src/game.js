@@ -64,6 +64,7 @@ var tombstoneRecursos = [{frame:0,sprite:"Europa-death"},
   var capaTareas;
   var tareasOn = true;
   var ataqueOn = true;
+  var votarOn = true;
   var remotos;
   var muertos;
 function lanzarJuego(){
@@ -207,32 +208,31 @@ function lanzarJuego(){
   }
   
   
-  function dibujarMuertos(tripulante){
-    ws.console("dibujarMuertos{");
-    var trip = jugadores[tripulante];
+  function dibujarMuertos(data){
+    var trip = jugadores[data.tripulante] ? jugadores[data.tripulante] : player;
     var x =  trip.x;
     var y = trip.y;
-    ws.console(trip);
     var numJugador =  trip.numJugador;
-    var muerto = crear.physics.add.sprite(x,y,"tombstone",5);
-    ws.console(muerto);
+    var muerto = crear.physics.add.sprite(x,y,"tombstone",data.personaje);
     //Alternativa
     // jugadores[inocente].setTexture()
     muertos.add(muerto);
-    crear.physics.add.overlap(player,muertos,votacion); 
-    ws.console("}");
+    crear.physics.add.overlap(player,muertos,votacion,()=>{return votarOn}); 
   }
   function votacion(sprite,muerto){
     //comprobar si el jugador local pulsa la tecla de votacion por ejemplo la V.
     //Si pulsa la V  entonces se lanza la votación
-    teclaV.isDown? ws.report():console.log("se ha pulsado la tecla v");
+    if(ws.getEstado() == "vivo"){
+      votarOn = false;
+      teclaV.isDown? ws.report():console.log("se ha pulsado la tecla v");
+    }
   }
 
   function moverRemoto(input){
-    if(input.estado != "fantasma"){
-      const speed = 175;
-      var remoto=jugadores[input.nick];
+    var remoto=jugadores[input.nick];
       if(remoto){
+    if(input.estado != "fantasma" || ws.getEstado()=="fantasma"){
+      const speed = 175;
         const prevVelocity = player.body.velocity.clone();
         const sprite = input.estado == "vivo"?recursos[input.id].sprite:fantasmas[input.id].sprite;
         remoto.body.setVelocity(0);
@@ -242,10 +242,7 @@ function lanzarJuego(){
         var direccion =input.direccion.nombre;
         var condition = (direccion == "left"||direccion == "right"||direccion == "back"||direccion == "front");
             condition ? remoto.anims.play(sprite+"-"+direccion+"-walk",true):remoto.anims.stop();
-      }
-    }else{
-      var remoto=jugadores[input.nick];
-      if(remoto){
+      }else{
         remoto.visible = false;
       }
     }

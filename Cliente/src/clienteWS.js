@@ -103,6 +103,9 @@ function ClienteWS (name,controlWeb){
 	this.atacar = function(tripulante){
 		this.socket.emit('enviarAtaque',this.getNick(),this.getCodigo(),tripulante);
 	}
+	this.heMuerto= function(tripulante){
+		this.socket.emit('pintarTumba',this.getCodigo(),tripulante,this.personaje);
+	}
 	this.lanzarSocketSrv = function(){
 		var cli =  this; // capturar el objeto, porque se hace pisto manchego con las funciones de callback.
 						 // y se puede llegar a perder. Se lanza una porcion de codigo que se encargad de escuchar
@@ -182,9 +185,14 @@ function ClienteWS (name,controlWeb){
 			cw.inyectarMensaje(data);
 		});
 		this.socket.on('recibirAtaque',function(tripulante){
-			if(cli.getNick() == tripulante)
+			if(cli.getNick() == tripulante){
 				cli.setEstado("fantasma");
-			dibujarMuertos(tripulante);
+				cli.heMuerto(tripulante);
+			}
+		});
+		this.socket.on('pintarTumba',function(data){
+			cli.console(data);
+			dibujarMuertos(data);
 		});
 		this.socket.on('ataqueRealizado',function(data){
 			ataqueOn = data;
