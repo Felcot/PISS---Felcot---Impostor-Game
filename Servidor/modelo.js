@@ -10,7 +10,7 @@ function Juego(){
 
 			let codigo=this.obtenerCodigo();
 			if (!this.partidas[codigo]){
-				this.partidas[codigo]= new Partida(num,nick,this);
+				this.partidas[codigo]= new Partida(num,nick,codigo,this);
 				this.partidas[codigo].iniciarPersonajes();
 				var usr =  this.partidas[codigo].usuarios;
 				this.usuario[nick] = usr[nick];
@@ -90,12 +90,21 @@ function Juego(){
 	}
 	this.report=function(nick,codigo){
 		var usuario = this.usuario(nick);
-		return (usuario && usuario.Partida == this.getPartida(codigo))? usuario.report(): {"Error": "No reportado"};
+		console.log(">>juego.report.nick'"+nick+"'.codigo'"+codigo+"'{");
+		var result = (usuario && this.getPartida(codigo))? usuario.report(): {"Error": "No reportado"};
+		console.log("}.result:")
+		console.log(result);
+		console.log("<<");
+		return result;
+	}
+	this.listarVivos=function(codigo){
+		return this.getPartida(codigo).listarVivos();
 	}
 }
 
-function Partida(num,owner,juego){
+function Partida(num,owner,codigo,juego){
 	this.maximo=num;
+	this.codigo = codigo;
 	this.nickOwner=owner;
 	this.fase=new Inicial();
 	this.usuarios={};
@@ -108,7 +117,16 @@ function Partida(num,owner,juego){
 			this.sprites.push({"id":id,"elegido":false});
 		} 
 	}
-	
+	this.comprobarVotacion = function(){
+		return this.fase.comprobarVotacion(this);
+	}
+	this.listarVivos=function(){
+		var result = [];
+		for(var usr in this.usuarios)
+			if(this.usuarios[usr].getEstado() == "vivo")
+				result.push(usr);
+		return result;
+	}
 	
 	this.elegirPersonaje=function(usr,id){
 		if(id == "default"){
@@ -213,11 +231,11 @@ function Partida(num,owner,juego){
 	}
 	
 	this.eyectar=function(nick){
-		if(this.usuarios[nick].impostor)
-			console.log("El usuario "+nick+" era el impostor");
-		else
-			console.log("El usuario "+nick+" no era el impostor");
+		console.log("partida.eyectar.params("+nick+")");
 		this.fase.matar(nick,this);
+		var result = this.usuarios[nick].impostor? "El usuario "+nick+" era el impostor":"El usuario "+nick+" no era el impostor";
+		console.log("partida("+this.codigo+").eyectar>>"+result+"<<");
+		return result;
 	}
 	this.impostorMatar=function(impostor,tripulante){
 		return this.fase.impostorMatar(impostor,tripulante,this);
@@ -232,14 +250,15 @@ function Partida(num,owner,juego){
 	}
 
 	this.report = function(){
-		return {"Fase":this.fase.report(this)};
+		console.log("\t>>partida.report>>DelegaFase>>");
+		return {"fase":this.fase.report(this)};
 	}
 
 	this.votar = function(usr,nick){
 		return this.fase.votar(usr,nick);
 	}
 	this.recuento = function(){
-		this.fase.recuento(this);
+		return this.fase.recuento(this);
 	}
 	this.sePuedeEntrar = function(){
 		return this.fase.nombre == "inicial" || this.fase.nombre == "completado";
@@ -359,6 +378,15 @@ function Inicial(){
 			*/
 		}
 	}
+	this.comprobarVotacion =function(partida){
+		try{
+			throw new Exception("CB01");
+		}catch(Exception){
+		   /* El tratamiento esta realizado en
+			* Exception
+			*/
+		}
+	}
 }
 
 function Completado(){
@@ -437,6 +465,15 @@ function Completado(){
 			*/
 		}
 	}
+	this.comprobarVotacion =function(partida){
+		try{
+			throw new Exception("CB01");
+		}catch(Exception){
+		   /* El tratamiento esta realizado en
+			* Exception
+			*/
+		}
+	}
 }
 
 function Jugando(){
@@ -473,7 +510,11 @@ function Jugando(){
 		return partida.matar(nick);
 	}
 	this.report = function(partida){
-		return partida.fase = new Votacion();
+		var msgC = "\t\t>>fase.nombre'"+partida.fase.nombre+"'.report.partida.fase.nombre'";
+		partida.fase = new Votacion();
+		console.log(msgC+partida.fase.nombre+"'<<");
+		console.log("\t<<")
+		return partida.fase.nombre;
 	}
 	this.recuento = function(partida){
 		try{
@@ -490,6 +531,15 @@ function Jugando(){
 	this.anunciarGanador= function(ganadores){
 		try{
 			throw new Exception("JaG01");
+		}catch(Exception){
+		   /* El tratamiento esta realizado en
+			* Exception
+			*/
+		}
+	}
+	this.comprobarVotacion =function(partida){
+		try{
+			throw new Exception("CB01");
 		}catch(Exception){
 		   /* El tratamiento esta realizado en
 			* Exception
@@ -579,7 +629,15 @@ function Final(ganadores){
 			*/
 		}
 	}
-
+	this.comprobarVotacion =function(partida){
+		try{
+			throw new Exception("CB01");
+		}catch(Exception){
+		   /* El tratamiento esta realizado en
+			* Exception
+			*/
+		}
+	}
 	this.anunciarGanador(ganadores);
 }
 
@@ -603,8 +661,8 @@ function Votacion(){
 		return {"check":true,"Votado":nick};
 	}
 	this.recuento=function(partida){
-		let masVotado = "skipe";
-		this.votacion["skipe"] = 0;
+		let masVotado = "skip";
+		this.votacion["skip"] = 0;
 		let check = true;
 		for(var votado in this.votacion)
 			if(this.votacion[masVotado]<=this.votacion[votado]){
@@ -612,14 +670,15 @@ function Votacion(){
 				masVotado=votado;
 			}
 		
-		(masVotado!= "skipe" && !check)? partida.eyectar(masVotado)
-		: console.log("Nadie ha sido eyectado");
-		
+		var result = (masVotado!= "skip" && !check)? partida.eyectar(masVotado)
+		:"Nadie ha sido eyectado";
+		console.log("VOTACION-"+masVotado+"-RECUENTO--->"+result);
 		if(partida.fase.nombre != "final")
 			partida.fase = new Jugando();
+		return result;
 	}
 	this.comprobarVotacion =function(partida){
-		return sizeDictionary(votantes) == sizeDictionary(partida.usuarios);
+		return sizeDictionary(this.votantes) == sizeDictionary(partida.listarVivos());
 	}
 		
 	this.agregarUsuario=function(nick,partida){
@@ -762,7 +821,7 @@ function Usuario(nick,juego){
 		return this.estado.votar(this,nick,this.partida);
 	}
 	this.report = function(){
-		this.estado.report(this.partida);
+		return this.estado.report(this.partida);
 	}
 	this.matar = function(victima){
 		if(this.impostor)
@@ -798,7 +857,7 @@ function Vivo(){
 		partida.votar(usr,nick);
 	}
 	this.report = function(partida){
-		partida.report();
+		return partida.report();
 	}
 	this.getName=function(){
 		return this.nombre;
@@ -923,6 +982,7 @@ function Exception(code){
 			dic["CaG01"] = "Error IaG01: No se puede anunciar un ganador en la fase Completado."
 			dic["JaG01"] = "Error IaG01: No se puede anunciar un ganador en la fase Jugando."
 			dic["VaG01"] = "Error IaG01: No se puede anunciar un ganador en la fase Votacion."
+			dic["CB01"] = "Error CB01: No se puede comprobarVotacion fuera de la fase Votacion"
  		return dic[code];
 	}	
 	

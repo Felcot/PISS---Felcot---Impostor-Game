@@ -80,10 +80,12 @@ function ClienteWS (name,controlWeb){
 		this.socket.emit('listaPartidasDisponibles');
 	}
 	this.report = function(){
+		console.log("report."+this.nick+"."+this.codigo);
 		this.socket.emit('report',this.getNick(),this.getCodigo());
 	}
 	this.votar = function(votado){
-		this.socket.emit('votar',this.getNick(),votado);
+		this.console(this.getNick()+" Estoy votando:"+votado+" En la partida:"+this.getCodigo());
+		this.socket.emit('votar',this.getNick(),votado,this.getCodigo());
 	}	
 	this.obtenerListaJugadores = function(){
 		this.socket.emit('EstoyDentro',this.getNick(),this.getCodigo());
@@ -158,11 +160,14 @@ function ClienteWS (name,controlWeb){
 		});
 		this.socket.on('recibirVotacion',function(data){
 			console.log(data);
-
+			$('#viewVotacion').remove();
+			cw.mostrarModalSimple(data);
 		});
 		this.socket.on('activarReport',function(data){
+			console.log(cli.getNick() + ".activarReport");
 			console.log(data);
-			//Dibujar Votación --> un formulario, radioButton, etc...
+			if(data.fase =="votacion")
+				cw.mostrarVotaciones(data.lista);
 		});
 		this.socket.on('dibujarRemoto',function(data){
 			for(var jugador in data)

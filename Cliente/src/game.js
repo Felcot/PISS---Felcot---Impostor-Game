@@ -219,12 +219,15 @@ function lanzarJuego(){
     muertos.add(muerto);
     crear.physics.add.overlap(player,muertos,votacion,()=>{return votarOn}); 
   }
+
   function votacion(sprite,muerto){
     //comprobar si el jugador local pulsa la tecla de votacion por ejemplo la V.
     //Si pulsa la V  entonces se lanza la votación
-    if(ws.getEstado() == "vivo"){
+    if(ws.getEstado() == "vivo" && teclaV.isDown){
       votarOn = false;
-      teclaV.isDown? ws.report():console.log("se ha pulsado la tecla v");
+      ws.report();
+    }else{
+      ws.console("se ha pulsado la tecla v");
     }
   }
 

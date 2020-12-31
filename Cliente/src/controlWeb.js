@@ -148,6 +148,13 @@ function ControlWeb(){
 		return chat;
 
 	}
+	this.mostrarVotaciones = function(lista){
+		var votaciones = '<div id="votaciones"><div class = "list-group">';
+			for(var nick in lista)
+				votaciones+='<a href="#" class="list-group-item" value="'+lista[nick]+'">'+lista[nick]+'</a>';
+			votaciones +='</div></div>';
+		this.mostrarModalVotacion(votaciones);
+	}
 	this.mostrarModalSimple=function(msg){
 		$('#avisarImpostor').remove();
 		var contenidoModal = '<p id="avisarImpostor">'+msg+'</p>';
@@ -160,6 +167,33 @@ function ControlWeb(){
 		var contenidoModal = '<p id="viewTarea">'+msg+'</p>';
 		$('#contenidoModal').append(contenidoModal);
 		$('#modalGeneral').modal("show");
+	}
+	this.mostrarModalVotacion=function(msg){
+		$('#avisarImpostor').remove();
+		$('#viewTarea').remove();
+		var contenidoModal = '<div id="viewVotacion">'+msg+'</div>';
+		var button ='<div id="btnVotar"><button id="btnModalExec" type="button" class="btn btn-secondary" data-dismiss="modal">votar</button>';
+			button += '<button id="btnModalExecSkip" type="button" class="btn btn-secondary" data-dismiss="modal">skip</button></div>';
+		if(ws.getEstado()!="fantasma")
+			$('#modalFooter').append(button);
+		$('#contenidoModal').append(contenidoModal);
+		$('#modalGeneral').modal("show");
+
+		StoreValue = [];
+		$(".list-group-item").on('click',function(){
+	        StoreValue = [];
+	        StoreValue.push($(this).attr("value")); // add text to array
+	    });
+		$('#btnModalExec').on('click',function(){
+			var votado = StoreValue[0];
+			ws.votar(votado);
+			$('#btnVotar').remove();
+		});
+		$('#btnModalExecSkip').on('click',function(){
+			StoreValue = [];
+			ws.votar("skip");
+			$('#btnVotar').remove();
+		});
 	}
 }
 

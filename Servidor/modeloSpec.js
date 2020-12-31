@@ -316,7 +316,7 @@ describe("El juego del impostor", function() {
         expect(juego.partidas[codigo].contenedor.crewmate[expectcrewmateName]).toEqual(undefined);
     })
 
-    it("Votar a skipe",function(){
+    it("Votar skip",function(){
         juego.unirAPartida(codigo,"ana");
         var num=Object.keys(juego.partidas[codigo].usuarios).length;
         expect(num).toEqual(2);
@@ -347,9 +347,9 @@ describe("El juego del impostor", function() {
         expect(juego.partidas[codigo].fase.nombre).toEqual("votacion");
 
         for(var usrExpected in juego.partidas[codigo].usuarios){
-          juego.partidas[codigo].usuarios[usrExpected].votar("skipe");
+          juego.partidas[codigo].usuarios[usrExpected].votar("skip");
         }
-        expect(juego.partidas[codigo].fase.votacion["skipe"]).toEqual(4);
+        expect(juego.partidas[codigo].fase.votacion["skip"]).toEqual(4);
         juego.partidas[codigo].recuento();
         expect(juego.partidas[codigo].fase.nombre).toEqual("jugando");
         for(var usrExpected in juego.partidas[codigo].usuarios){

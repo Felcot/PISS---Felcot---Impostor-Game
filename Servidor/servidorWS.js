@@ -65,11 +65,24 @@ function ServidorWS(){
 		    });
 		    socket.on('report',function(nick,codigo){
 		    	var data = juego.report(nick,codigo);
+		    	data.lista = juego.listarVivos(codigo);
+		    	console.log(">>ServidorWS.juego.");
+		    	console.log(data);
+		    	console.log("<<");
 		    	cli.enviarATodos(io,codigo,"activarReport",data);
 		    });
-		    socket.on('votar',function(nick,votado){
-		    	var data = juego.usuario[nick].votar(votado);
-		    	cli.enviarATodos(socket,"recibirVotacion",data);
+		    socket.on('votar',function(nick,votado,codigo){
+		    	juego.usuario[nick].votar(votado);
+		    	var cond = juego.getPartida(codigo).comprobarVotacion();
+		    	console.log("ServidorWS.votar.comprobarVotacion("+cond+")");
+		    	if(cond){
+		    		var data = juego.getPartida(codigo).recuento();
+		    		console.log("ServidorWS.votar>>");
+			    	console.log(data);
+			    	console.log("<<");
+			    	
+					cli.enviarATodos(io,codigo,"recibirVotacion",data);
+		    	}
 		    });
 		    socket.on('enviarAtaque',function(impostor,codigo,tripulante){
 		    	var partida = juego.getPartida(codigo);
