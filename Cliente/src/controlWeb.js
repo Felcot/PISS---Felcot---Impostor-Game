@@ -135,7 +135,14 @@ function ControlWeb(){
 		if(cadena != "esperandoRemove")$('#esperandoRemove').remove();
 		if(cadena != "initialGame") $('#initialGame').remove();
 	}
-
+	this.mostrarBarra=function(){
+		$('#barra').append('<div id="barraProgreso" class="row"></div>');
+	}
+	this.mostrarPorcentaje=function(porcentaje){
+		$('#barraProgresoItem').remove();
+		var barraProgreso = '<div id="barraProgresoItem" sytle="width:'+(porcentaje*10)+'px">'+porcentaje+'</div>';
+		$('#barraProgreso').append(barraProgreso);
+	}
 	this.inyectarMensaje= function(data){
 		
 		$('#mensajes').append('<div id="mensaje"><label id=nick-chat>('+data.nick+')></label><label id="msg-chat">'+data.msg+'</label></div>');

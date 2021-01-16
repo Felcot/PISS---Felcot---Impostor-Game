@@ -7,6 +7,7 @@ function ClienteWS (name,controlWeb){
 	this.cw = controlWeb;
 	this.impostor;
 	this.estado;
+	this.encargo;
 	this.ini=function(){
 		this.socket=io.connect();
 		this.lanzarSocketSrv();
@@ -45,6 +46,16 @@ function ClienteWS (name,controlWeb){
 	}
 	this.getPersonaje=function(){
 		return this.personaje;
+	}
+	this.tengoEncargo=function(name){
+		if(this.getEncargo()[name]) return true;
+		return false;
+	}
+	this.getEncargo=function(){
+		return this.encargo;
+	}
+	this.setEncargo=function(encargo){
+		this.encargo=encargo;
 	}
 	this.isOwner=function(){
 		return this.owner;
@@ -99,8 +110,8 @@ function ClienteWS (name,controlWeb){
 	this.estoyDentro = function(){
 		this.socket.emit('estoyDentro',this.getCodigo());
 	}
-	this.realizarTarea = function(tarea){
-		this.socket.emit('realizarTarea',this.getNick(),this.getCodigo(),tarea);
+	this.realizarTarea = function(nombre){
+		this.socket.emit('realizarTarea',this.getNick(),this.getCodigo(),nombre);
 	}
 	this.atacar = function(tripulante){
 		this.socket.emit('enviarAtaque',this.getNick(),this.getCodigo(),tripulante);
@@ -108,12 +119,18 @@ function ClienteWS (name,controlWeb){
 	this.heMuerto= function(tripulante){
 		this.socket.emit('pintarTumba',this.getCodigo(),tripulante,this.personaje);
 	}
+	this.obtenerEncargo=function(){
+		this.socket.emit('obtenerEncargo',this.getCodigo(),this.getNick());
+	}
 	this.lanzarSocketSrv = function(){
 		var cli =  this; // capturar el objeto, porque se hace pisto manchego con las funciones de callback.
 						 // y se puede llegar a perder. Se lanza una porcion de codigo que se encargad de escuchar
 						 // el listener.
 		this.socket.on('connect',function(){
 			console.log("Conectado al servidor de WS");
+		});
+		this.socket.on('recibirEncargo',function(data){
+			cli.setEncargo(data.encargo);
 		});
 		this.socket.on('partidaCreada',function(data){
 			cli.setCodigo(data.codigo);
@@ -145,7 +162,9 @@ function ClienteWS (name,controlWeb){
 				cli.establecePersonaje("default");
 			}			
 			cli.estado="vivo";
+			cli.obtenerEncargo();
 			lanzarJuego();
+			cw.mostrarBarra();
 		});
 		this.socket.on('recibirPersonaje',function(personaje){
 			cli.setPersonaje(personaje);
@@ -201,6 +220,13 @@ function ClienteWS (name,controlWeb){
 		});
 		this.socket.on('ataqueRealizado',function(data){
 			ataqueOn = data;
+		});
+		this.socket.on('mostrarPorcentaje',function(porcentaje){
+			cw.mostrarPorcentaje(porcentaje);
+		});
+		this.socket.on('actualizarEncargo',function(encargo){
+			cli.getEncargo()[encargo.name]= encargo;
+			tareasOn = true;
 		});
 		/** COMPLETAR FALTA EMIT
 		this.socket.on('recibirEncargo',function(data){

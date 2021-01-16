@@ -102,9 +102,22 @@ function ServidorWS(){
 		    	var personaje = usr.getPersonaje(); 
 		    	cli.enviarRemitente(socket,"recibirPersonaje",personaje);
 		    });
+		    socket.on('obtenerEncargo',function(codigo,nick){
+		    	data = {"encargo":juego.usuario(nick).getEncargo()};
+		    	cli.enviarRemitente(socket,"recibirEncargo",data);
+		    });
 		    socket.on('realizarTarea',function(nick,codigo,tarea){
 		    	var partida = juego.getPartida(codigo);
-		    	estadoPartida = partida.realizarTarea(nick,tarea); 
+		    	var estadoPartida = partida.realizarTarea(nick,tarea); 
+		    	var data = juego.usuario(nick).getEncargo()[tarea];
+		    	console.log("WS - Realizar Tarea");
+		    	console.log(estadoPartida);
+		    	cli.enviarRemitente(socket,"actualizarEncargo",data.data);
+		    	if(estadoPartida.fase=="final"){
+		    		cli.enviarATodos(io,codigo,"mostrarFinal",estadoPartida.fase);
+		    	}else{
+		    		cli.enviarATodos(io,codigo,"mostrarPorcentaje",estadoPartida.porcentaje);
+		    	}
 		    	/*estadoPartida ? cli.enviarATodos(socket,"terminarPartida",data):console.log(estadoPartida);*/
 		    });
 		    socket.on('chat',function(nick,codigo,msg){

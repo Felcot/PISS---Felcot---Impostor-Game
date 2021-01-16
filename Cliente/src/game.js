@@ -183,7 +183,6 @@ function lanzarJuego(){
     // camera.startFollow(player);
     // camera.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
     cursors = crear.input.keyboard.createCursorKeys();
-    tareas=crear.add.group();
     muertos = crear.add.group();
     remotos = crear.add.group();
     /*
@@ -196,16 +195,7 @@ function lanzarJuego(){
     lanzarJugador(ws.getPersonaje(),ws.getEstado());
     ws.estoyDentro();
   }
-  function tareas(sprite,input){
-    //¿El sprite, el jugador local puede realizar la tarea?
-    //En tal caso llamar al servidor que puede hacer la tarea, 
-    //y permitir hacer la tarea.
-    if(ws.encargo==objeto.properties.tarea && teclaT.isDown){
-      tareasOn=false;
-      console.log("realizar tarea");
-      cw.mostrarModalTarea(ws.encargo);
-    }
-  }
+  
   
   
   function dibujarMuertos(data){
@@ -250,17 +240,28 @@ function lanzarJuego(){
       }
     }
   }
-
+  function realizarTareas(sprite,objeto){
+      //¿El sprite, el jugador local puede realizar la tarea?
+      //En tal caso llamar al servidor que puede hacer la tarea, 
+      //y permitir hacer la tarea.
+      if(ws.tengoEncargo(objeto.properties.tarea) && teclaT.isDown){
+        tareasOn=false;
+        ws.console("realizar tarea");
+        ws.realizarTarea(objeto.properties.tarea);
+        //cw.mostrarModalTarea(ws.encargo);
+      }
+  }
   function lanzarJugador(numJugador,estado){
     id = numJugador;
     player = crear.physics.add.sprite(spawnPoint.x+20*id, spawnPoint.y,"personajes-"+estado,recursos[id].frame);    
     // Watch the player and worldLayer for collisions, for the duration of the scene:
     crear.physics.add.collider(player, worldLayer);
-    crear.physics.add.collider(player,capaTareas ,tareas,()=>{return tareasOn});
+    crear.physics.add.collider(player,capaTareas ,realizarTareas,()=>{return tareasOn});
     camera = crear.cameras.main;
     camera.startFollow(player);
     camera.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
   }
+
   function crearColision(){
       if(crear && ws.impostor){
         crear.physics.add.overlap(player,remotos,kill,()=>{return ataqueOn});

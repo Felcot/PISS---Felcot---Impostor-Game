@@ -94,3 +94,21 @@ div#btn-msg{
 	color: #FFFFFF;
 	text-align: justify;
 }
+
+#barraProgreso{
+	border-radius: 5px;
+	border-color: black;
+	border-style: solid;
+	background: grey;
+	height: 20px;
+	width: 1000px;
+}
+#barraProgresoItem{
+	border-radius: 5px;
+	border-color: black;
+	border-style: solid;
+	background: blue;
+	height: 20px;
+	text-align: justify;
+	color:white;
+}

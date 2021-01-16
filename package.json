@@ -19,6 +19,7 @@
   "dependencies": {
     "express": "^4.17.1",
     "jasmine-node": "^3.0.0",
+    "mongodb": "^3.6.3",
     "socket.io": "^2.3.0"
   }
 }
