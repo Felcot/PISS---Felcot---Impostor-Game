@@ -12,6 +12,12 @@ function ServidorWS(){
     this.enviarGlobal= function(socket,mens,datos){
     	socket.broadcast.emit(mens,datos);
     }
+    this.evaluarPartida=function(io,juego,codigo){
+    	var fase = juego.getPartida(codigo).evaluarPartida()
+		if(fase.nombre == "final"){
+			this.enviarATodos(io,codigo,"anunciarGanadores",fase.anunciarGanador());
+		}
+    }
 	this.lanzarSocketSrv = function(io,juego){
 		var cli = this;
 		io.on('connection',function(socket){	// bloques io.on primer mensaje "connection" socket referencia al cliente que lo ha pedido	    
@@ -23,7 +29,7 @@ function ServidorWS(){
 				var result = codigo != "fallo"?{"codigo":codigo,"owner":nick,"lista":lista}: {"Error":codigo};
 				 		
 		       	cli.enviarRemitente(socket,"partidaCreada",result);
-		       	//cli.enviarGlobal(socket,"recibirListarPartidasDisponibles",lista);		        		        
+		       	cli.enviarGlobal(socket,"actualizarListarPartidasDisponibles",juego.listarPartidasDisponibles());		        		        
 		    });
 
 		    socket.on('unirAPartida',function(nick,codigo){
@@ -82,6 +88,7 @@ function ServidorWS(){
 			    	console.log("<<");
 			    	
 					cli.enviarATodos(io,codigo,"recibirVotacion",data);
+					cli.evaluarPartida(io,juego,codigo);
 		    	}
 		    });
 		    socket.on('enviarAtaque',function(impostor,codigo,tripulante){
@@ -92,6 +99,7 @@ function ServidorWS(){
 		    		cli.enviarATodos(io,codigo,"recibirAtaque",tripulante);
 		    	}
 		    	cli.enviarRemitente(socket,"ataqueRealizado",true);
+		    	cli.evaluarPartida(io,juego,codigo);
 		    });
 		    socket.on('pintarTumba',function(codigo,tripulante,personaje) {
 		    	cli.enviarATodos(io,codigo,"pintarTumba",{"tripulante":tripulante,"personaje":personaje});
@@ -112,16 +120,19 @@ function ServidorWS(){
 		    	var data = juego.usuario(nick).getEncargo()[tarea];
 		    	console.log("WS - Realizar Tarea");
 		    	console.log(estadoPartida);
-		    	cli.enviarRemitente(socket,"actualizarEncargo",data.data);
-		    	if(estadoPartida.fase=="final"){
-		    		cli.enviarATodos(io,codigo,"mostrarFinal",estadoPartida.fase);
-		    	}else{
-		    		cli.enviarATodos(io,codigo,"mostrarPorcentaje",estadoPartida.porcentaje);
-		    	}
+		    	
+		    	if(estadoPartida!=undefined){/*Solo sera undefined cuando la fase sea distinta de jugando*/
+		    		cli.enviarRemitente(socket,"actualizarEncargo",data.data);
+			    	if(estadoPartida.fase=="final"){
+			    		cli.enviarATodos(io,codigo,"mostrarFinal",estadoPartida.fase);
+			    	}else{
+			    		cli.enviarATodos(io,codigo,"mostrarPorcentaje",estadoPartida.porcentaje);
+			    	}
+			    }
 		    	/*estadoPartida ? cli.enviarATodos(socket,"terminarPartida",data):console.log(estadoPartida);*/
 		    });
-		    socket.on('chat',function(nick,codigo,msg){
-		    	var data = {"nick": nick, "msg": msg};
+		    socket.on('chat',function(nick,codigo,msg,estado){
+		    	var data = {"nick": nick, "msg": msg,"estado":estado};
 		    	console.log(data);
 		    	cli.enviarATodos(io,codigo,"msgToChat",data);
 		    });

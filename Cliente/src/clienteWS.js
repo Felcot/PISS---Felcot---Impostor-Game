@@ -28,7 +28,7 @@ function ClienteWS (name,controlWeb){
 	}
 	this.sendMensaje = function(msg){
 		console.log("Procedemos a enviar el mensaje ("+msg+")");
-		this.socket.emit('chat',this.getNick(),this.getCodigo(),msg);
+		this.socket.emit('chat',this.getNick(),this.getCodigo(),msg,this.getEstado());
 	}
 	//esto permite llamar a esta funcion
 	//servidor WebSocket dentro del cliente
@@ -122,6 +122,9 @@ function ClienteWS (name,controlWeb){
 	this.obtenerEncargo=function(){
 		this.socket.emit('obtenerEncargo',this.getCodigo(),this.getNick());
 	}
+	this.estamosJugando=function(){
+		return this.fase == "jugando";
+	}
 	this.lanzarSocketSrv = function(){
 		var cli =  this; // capturar el objeto, porque se hace pisto manchego con las funciones de callback.
 						 // y se puede llegar a perder. Se lanza una porcion de codigo que se encargad de escuchar
@@ -129,9 +132,7 @@ function ClienteWS (name,controlWeb){
 		this.socket.on('connect',function(){
 			console.log("Conectado al servidor de WS");
 		});
-		this.socket.on('recibirEncargo',function(data){
-			cli.setEncargo(data.encargo);
-		});
+		
 		this.socket.on('partidaCreada',function(data){
 			cli.setCodigo(data.codigo);
 			cli.owner = data.codigo != "fallo"; //Si no ha fallado se establece como owner
@@ -162,9 +163,15 @@ function ClienteWS (name,controlWeb){
 				cli.establecePersonaje("default");
 			}			
 			cli.estado="vivo";
+			cli.fase="jugando";
 			cli.obtenerEncargo();
 			lanzarJuego();
 			cw.mostrarBarra();
+			
+		});
+		this.socket.on('recibirEncargo',function(data){
+			cli.setEncargo(data.encargo);
+			cw.anunciarTareas(cli.encargo);
 		});
 		this.socket.on('recibirPersonaje',function(personaje){
 			cli.setPersonaje(personaje);
@@ -177,21 +184,31 @@ function ClienteWS (name,controlWeb){
 			if(!cli.codigo)
 				cw.mostrarUnirAPartida(data);
 		});
-		this.socket.on('recibirVotacion',function(data){
-			console.log(data);
-			$('#viewVotacion').remove();
-			cw.mostrarModalSimple(data);
+		this.socket.on('actualizarListarPartidasDisponibles',function(lista){
+			cw.actualizarMostrarUnirAPartidas(lista);
 		});
+		this.socket.on('recibirVotacion',function(data){
+			cli.setEstado(data.votado == cli.getNick()?"fantasma":cli.getEstado());
+			votarOn = true;
+			ws.fase="jugando";
+			cw.anunciarVotacion(data.msg);
+		});
+		
 		this.socket.on('activarReport',function(data){
 			console.log(cli.getNick() + ".activarReport");
 			console.log(data);
-			if(data.fase =="votacion")
+			if(data.fase =="votacion"){
+				votarOn=false;
+				ws.fase="votacion";
 				cw.mostrarVotaciones(data.lista);
+			}
 		});
 		this.socket.on('dibujarRemoto',function(data){
 			for(var jugador in data)
 				if(data[jugador].nick != cli.getNick()){
-					console.log(">>"+data[jugador]);
+					console.log(">>DibujarRemoto");
+					console.log(data[jugador]);
+					console.log("<<");
 					lanzarJugadorRemoto(data[jugador]);
 				}
 				crearColision();
@@ -199,11 +216,7 @@ function ClienteWS (name,controlWeb){
 		this.socket.on('moverRemoto',function(data){
 			moverRemoto(data);
 		});
-		/*this.socket.on('recibirEngargo',function(data){
-			cli.setEncargo(data.encargo);
-			cli.setImpostor(data.impostor);
-			cw.mostrarModalSimple();
-		});*/
+		
 		this.socket.on('msgToChat',function(data){
 			console.log("me ha llegado: "+data.nick+" "+data.msg);
 			cw.inyectarMensaje(data);
@@ -228,27 +241,10 @@ function ClienteWS (name,controlWeb){
 			cli.getEncargo()[encargo.name]= encargo;
 			tareasOn = true;
 		});
-		/** COMPLETAR FALTA EMIT
-		this.socket.on('recibirEncargo',function(data){
-			console.log(data);
-			if(data.impostor)
-				$('#avisarImpostor').modal("show");
-		});**/
+		this.socket.on('anunciarGanadores',function(msg){
+			ws.fase="final";
+			cw.mostrarModalSimple(msg);
+		});
 	}
 	this.ini();
-}
-//En el lado del cliente, no tenemos que exportar, ya que en este lado es la anarquia.
-
-var ws,ws2,ws3,ws4,ws5;
-function pruebasWS(){
-	ws2 = new ClienteWS("Juani");
-	ws3 = new ClienteWS("Juana");
-	ws4 = new ClienteWS("Juanan");
-	ws5 = new ClienteWS("YoAbandono");
-	codigo = ws.getCodigo();
-	ws5.unirAPartida(codigo);
-	ws2.unirAPartida(codigo);
-	ws5.abandonarPartida();
-	ws3.unirAPartida(codigo);
-	ws4.unirAPartida(codigo);
 }

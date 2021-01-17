@@ -199,7 +199,8 @@ function lanzarJuego(){
   
   
   function dibujarMuertos(data){
-    var trip = jugadores[data.tripulante] ? jugadores[data.tripulante] : player;
+    var cond = jugadores[data.tripulante]?true:false;
+    var trip = cond ? jugadores[data.tripulante] : player;
     var x =  trip.x;
     var y = trip.y;
     var numJugador =  trip.numJugador;
@@ -208,19 +209,24 @@ function lanzarJuego(){
     // jugadores[inocente].setTexture()
     muertos.add(muerto);
     crear.physics.add.overlap(player,muertos,votacion,()=>{return votarOn}); 
+    cond? trip.visible=false:trip.setTexture("personajes-fantasma");
   }
 
   function votacion(sprite,muerto){
     //comprobar si el jugador local pulsa la tecla de votacion por ejemplo la V.
     //Si pulsa la V  entonces se lanza la votación
     if(ws.getEstado() == "vivo" && teclaV.isDown){
-      votarOn = false;
+      votarOn = false;     
+      report();
       ws.report();
-    }else{
-      ws.console("se ha pulsado la tecla v");
     }
   }
-
+  function report(){
+    for(var i in muertos.children.entries){
+        muertos.children.entries[i].visible=false;
+      }
+      crear.physics.destroy(muertos);
+  }
   function moverRemoto(input){
     var remoto=jugadores[input.nick];
       if(remoto){
@@ -285,6 +291,7 @@ function lanzarJuego(){
     remotos.add(jugadores[jugador.nick]);
   }
   function update(time, delta) {
+    if(!ws.estamosJugando())return;
     const speed = 175;
     const prevVelocity = player.body.velocity.clone();
      const sprite = ws.getEstado() == "vivo"?recursos[id].sprite:fantasmas[id].sprite;

@@ -12,7 +12,7 @@ function Juego(){
 
 			let codigo=this.obtenerCodigo();
 			if (!this.partidas[codigo]){
-				this.partidas[codigo]= new Partida(num,nick,codigo,this);
+				this.partidas[codigo]= new Partida(num,nick,codigo,this,1,2,"publica");
 				this.partidas[codigo].iniciarPersonajes();
 				var usr =  this.partidas[codigo].usuarios;
 				this.usuario[nick] = usr[nick];
@@ -48,13 +48,14 @@ function Juego(){
 		var huecos = 0;
 		for (var key in this.partidas){
 			var partida = this.partidas[key];
-			if(partida.sePuedeEntrar() && partida.comprobarMaximo()){
+			if(partida.esPublica()&&partida.sePuedeEntrar() && partida.comprobarMaximo()){
 				huecos = partida.emptyFree();
 				result.push({"codigo":key,"ocupado":(partida.maximo-huecos),"maximo":partida.maximo});
 			}
 		}
 		return result;
 	}
+
 	this.listarPartidas=function(){
 		var result = [];
 		var huecos = 0;
@@ -107,8 +108,32 @@ function Juego(){
 		console.log("conectado a Atlas");
 	});
 }
-
-function Partida(num,owner,codigo,juego){
+function confContainer(num,NumImpostores,NumTareas,propiedad){
+	this.MaxJugadores=num;
+	this.NumImpostores=NumImpostores;
+	this.NumTareas=NumTareas;
+	this.propiedad=propiedad;
+	this.getMaxJugadores=function(){
+		return this.MaxJugadores;
+	}
+	this.getNumImpostores=function(){
+		return this.MaxJugadores;
+	}
+	this.getNumTareas=function(){
+		return this.NumTareas;
+	}
+	this.getPropiedad=function(){
+		return this.propiedad;
+	}
+	this.setPropiedad=function(propiedad){
+		this.propiedad=propiedad;
+	}
+	this.esPublica=function(){
+		return this.propiedad=="publica";
+	}
+}
+function Partida(num,owner,codigo,juego,NumImpostores,NumTareas,propiedad){
+	this.confContainer = new confContainer(num,NumImpostores,NumTareas,propiedad);
 	this.maximo=num;
 	this.codigo = codigo;
 	this.nickOwner=owner;
@@ -162,7 +187,9 @@ function Partida(num,owner,codigo,juego){
 		}
 		return result;
 	}
-	
+	this.esPublica=function(){
+		return this.confContainer.esPublica();
+	}
 	this.agregarUsuario=function(nick){
 		this.fase.agregarUsuario(nick,this);
 	}
@@ -206,11 +233,19 @@ function Partida(num,owner,codigo,juego){
 	this.AsignarTarea = function(){
 		for(var usr in this.usuarios){
 			if(!this.usuarios[usr].impostor){
-				var enc = encargo();
-				this.usuarios[usr].addEncargo(enc);
-				this.Tareas[usr+enc.getNombre()] = "No Completado"; 
-				this.contenedor.declarar(this.usuarios[usr]);
-			}
+				console.log("AsignarTarea.confContainer("+this.confContainer.getNumTareas()+")");
+				for (var tareaNum = 0; tareaNum < this.confContainer.getNumTareas();) {
+					//TODO - > Configuración
+					var enc = encargo();
+					if(!this.Tareas[usr+enc.getNombre()]){
+						this.usuarios[usr].addEncargo(enc);
+						this.Tareas[usr+enc.getNombre()] = "No Completado"; 
+						this.contenedor.declarar(this.usuarios[usr]);
+						tareaNum+=1;
+					}
+				}
+		    }
+			
 		}
 		console.log(this.Tareas);
 		this.total_tareas =sizeDictionary(this.Tareas);
@@ -229,6 +264,10 @@ function Partida(num,owner,codigo,juego){
 		return this;
 	}
 	this.evaluarPartida = function(){
+		return this.fase.evaluarPartida(this);
+		
+	}
+	this.puedeEvaluarPartida=function(){
 		F =(impostores,crewmates) => {return impostores == crewmates;};
 		let cond = this.contenedor.evaluarIC(F);
 		this.comprobarPartida(cond,'impostores');
@@ -238,6 +277,7 @@ function Partida(num,owner,codigo,juego){
 		this.comprobarPartida(cond,'Tripulantes');
 		if(cond)
 			this.fase = new Final('Tripulantes');
+		return this.fase;
 	}
 	this.comprobarPartida = function(condition,ganan){
 		this.fase = condition ? new Final(ganan):this.fase;
@@ -341,7 +381,16 @@ function Inicial(){
 			*/
 			return partida;
 		}
-
+	}
+	this.evaluarPartida=function(partida){
+		try{
+			throw new Exception("eP01");
+		}catch(Exception){
+		   /* El tratamiento esta realizado en
+			* Exception
+			*/
+			return partida;
+		}
 	}
 	this.abandonarPartida=function(nick,partida){
 		partida.eliminarUsuario(nick);
@@ -404,6 +453,15 @@ function Inicial(){
 			*/
 		}
 	}
+	this.realizarTarea = function(nick,tarea,partida){
+		try{
+			throw new Exception("rT01");
+		}catch(Exception){
+		   /* El tratamiento esta realizado en
+			* Exception
+			*/
+		}
+	}
 }
 
 function Completado(){
@@ -423,6 +481,16 @@ function Completado(){
 				* Exception
 				*/
 			}
+		}
+	}
+	this.evaluarPartida=function(partida){
+		try{
+			throw new Exception("eP02");
+		}catch(Exception){
+		   /* El tratamiento esta realizado en
+			* Exception
+			*/
+			return partida;
 		}
 	}
 	this.abandonarPartida=function(nick,partida){
@@ -491,6 +559,15 @@ function Completado(){
 			*/
 		}
 	}
+	this.realizarTarea = function(nick,tarea,partida){
+		try{
+			throw new Exception("rT02");
+		}catch(Exception){
+		   /* El tratamiento esta realizado en
+			* Exception
+			*/
+		}
+	}
 }
 
 function Jugando(){
@@ -526,12 +603,16 @@ function Jugando(){
 	this.matar=function(nick,partida){
 		return partida.matar(nick);
 	}
+
 	this.report = function(partida){
 		var msgC = "\t\t>>fase.nombre'"+partida.fase.nombre+"'.report.partida.fase.nombre'";
 		partida.fase = new Votacion();
 		console.log(msgC+partida.fase.nombre+"'<<");
 		console.log("\t<<")
 		return partida.fase.nombre;
+	}
+	this.evaluarPartida=function(partida){
+		return partida.puedeEvaluarPartida();
 	}
 	this.recuento = function(partida){
 		try{
@@ -568,8 +649,9 @@ function Jugando(){
 function Final(ganadores){
 	this.nombre="final";
 	this.ganan=ganadores;
-	this.anunciarGanador=function(ganadores){
-		console.log("Los ganadores son los "+ganadores+"!!");
+	this.anunciarGanador=function(){
+		console.log("Los ganadores son los "+this.ganan+"!!");
+		return "Los ganadores son los "+this.ganan+"!!";
 	}
 	this.agregarUsuario=function(nick,partida){
 		try{
@@ -579,6 +661,9 @@ function Final(ganadores){
 			* Exception
 			*/
 		}
+	}
+	this.evaluarPartida=function(partida){
+		return this;
 	}
 	this.iniciarPartida=function(partida){
 		try{
@@ -655,7 +740,15 @@ function Final(ganadores){
 			*/
 		}
 	}
-	this.anunciarGanador(ganadores);
+	this.realizarTarea = function(nick,tarea,partida){
+		try{
+			throw new Exception("rT03");
+		}catch(Exception){
+		   /* El tratamiento esta realizado en
+			* Exception
+			*/
+		}
+	}
 }
 
 /*
@@ -677,6 +770,9 @@ function Votacion(){
 
 		return {"check":true,"Votado":nick};
 	}
+	this.evaluarPartida=function(partida){
+		return partida.puedeEvaluarPartida();
+	}
 	this.recuento=function(partida){
 		let masVotado = "skip";
 		this.votacion["skip"] = 0;
@@ -692,7 +788,8 @@ function Votacion(){
 		console.log("VOTACION-"+masVotado+"-RECUENTO--->"+result);
 		if(partida.fase.nombre != "final")
 			partida.fase = new Jugando();
-		return result;
+		var data = {"votado":masVotado,"msg":result};
+		return data;
 	}
 	this.comprobarVotacion =function(partida){
 		return sizeDictionary(this.votantes) == sizeDictionary(partida.listarVivos());
@@ -762,6 +859,15 @@ function Votacion(){
 			throw new Exception("CM01");
 		}catch(Exception){
 			/* El tratamiento esta realizado en
+			* Exception
+			*/
+		}
+	}
+	this.realizarTarea = function(nick,tarea,partida){
+		try{
+			throw new Exception("rT04");
+		}catch(Exception){
+		   /* El tratamiento esta realizado en
 			* Exception
 			*/
 		}
@@ -998,11 +1104,15 @@ function Exception(code){
 			dic["CR02"] = "Error CR02: No se puede realizar el recuento en la fase Completado.";
 			dic["JR01"] = "Error JR01: No se puede realizar el recuento en la fase Jugando.";
 			dic["FR02"] = "Error FR02: No se puede realizar el recuento en la fase Final.";
-			dic["IaG01"] = "Error IaG01: No se puede anunciar un ganador en la fase Inicial."
-			dic["CaG01"] = "Error IaG01: No se puede anunciar un ganador en la fase Completado."
-			dic["JaG01"] = "Error IaG01: No se puede anunciar un ganador en la fase Jugando."
-			dic["VaG01"] = "Error IaG01: No se puede anunciar un ganador en la fase Votacion."
-			dic["CB01"] = "Error CB01: No se puede comprobarVotacion fuera de la fase Votacion"
+			dic["IaG01"] = "Error IaG01: No se puede anunciar un ganador en la fase Inicial.";
+			dic["CaG01"] = "Error IaG01: No se puede anunciar un ganador en la fase Completado.";
+			dic["JaG01"] = "Error IaG01: No se puede anunciar un ganador en la fase Jugando.";
+			dic["VaG01"] = "Error IaG01: No se puede anunciar un ganador en la fase Votacion.";
+			dic["CB01"] = "Error CB01: No se puede comprobarVotacion fuera de la fase Votacion";
+			dic["rT01"] = "Error rT01: No se puede realizarTarea en la fase Inicial";
+			dic["rT02"] = "Error rT01: No se puede realizarTarea en la fase Completado";
+			dic["rT03"] = "Error rT01: No se puede realizarTarea en la fase Final";
+			dic["rT04"] = "Error rT01: No se puede realizarTarea en la fase Votancion";
  		return dic[code];
 	}	
 	

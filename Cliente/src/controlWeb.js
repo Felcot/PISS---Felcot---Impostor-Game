@@ -94,11 +94,18 @@ function ControlWeb(){
 			cadena+= '</div></div>';
 		return cadena;
 	} 
+	this.actualizarMostrarUnirAPartidas=function(lista){
+		$('#listaPartidas').remove();
+		$('#listaPartidasContainer').append(this.mostrarPartidasDisponibles(lista));
+	}
 	this.mostrarUnirAPartida = function(lista){
 		this.limpiarHTML("mUAP");
-		var cadena= '<div id="mUAP" class ="list-group">';
+		var cadena= '';
+		cadena +='<div id="mUAP" class ="list-group">';
 			cadena+='<label class="labelGeneral" for="num">Elige y Juega:</label>';
+			cadena+='<div id="listaPartidasContainer">';
 				cadena+=this.mostrarPartidasDisponibles(lista);
+			cadena+='</div>';
 			cadena+='<button id = "btnmUAP" type="button" class="btn btn-primary">Unirse</button>'
 			cadena+= '</div>';
 		//this.limpiarHTML("unirAPartida");
@@ -143,11 +150,12 @@ function ControlWeb(){
 		var barraProgreso = '<div id="barraProgresoItem" sytle="width:'+(porcentaje*10)+'px">'+porcentaje+'</div>';
 		$('#barraProgreso').append(barraProgreso);
 	}
+	
 	this.inyectarMensaje= function(data){
-		
+		if(data.estado==undefined || (data.estado == "vivo" || ws.getEstado()=="fantasma"))
 		$('#mensajes').append('<div id="mensaje"><label id=nick-chat>('+data.nick+')></label><label id="msg-chat">'+data.msg+'</label></div>');
 	};
-	this.mostrarChat = function(data){
+	this.mostrarChat = function(){
 		var chat ='<div id="chat"> <div id="mensajes"></div>';
 				chat+='<input id="msg" type="text" value="">';
 				chat+='<button id="btn-msg">enviar</button>';
@@ -163,22 +171,32 @@ function ControlWeb(){
 		this.mostrarModalVotacion(votaciones);
 	}
 	this.mostrarModalSimple=function(msg){
-		$('#avisarImpostor').remove();
+		this.clearModal();
 		var contenidoModal = '<p id="avisarImpostor">'+msg+'</p>';
 		$('#contenidoModal').append(contenidoModal);
 		$('#modalGeneral').modal("show");
+
+	}
+	this.anunciarTareas=function(lista){
+		var listaEncargos = '<ul id="listaEncargos">';
+		ws.console(lista);
+		for(var enc in lista){
+			listaEncargos+='<li>'+enc+'</li>'
+		}
+		listaEncargos +='</ul>';
+		this.mostrarModalTarea(listaEncargos);
 	}
 	this.mostrarModalTarea=function(msg){
-		$('#avisarImpostor').remove();
-		$('#viewTarea').remove();
-		var contenidoModal = '<p id="viewTarea">'+msg+'</p>';
+		this.clearModal();
+		var contenidoModal = '<div id="viewTarea">'+msg+'</p>';
 		$('#contenidoModal').append(contenidoModal);
 		$('#modalGeneral').modal("show");
 	}
 	this.mostrarModalVotacion=function(msg){
-		$('#avisarImpostor').remove();
-		$('#viewTarea').remove();
-		var contenidoModal = '<div id="viewVotacion">'+msg+'</div>';
+		this.clearModal();
+		var contenidoModal = '<div id="viewVotacion" class="modal-body"><div class="container-fluid">';
+    	contenidoModal +='<div class="row"><div class="col-md-2">'+msg+'</div>';
+		contenidoModal += '<div class="col-md-4">'+this.mostrarChat()+'</div></div></div></div>';
 		var button ='<div id="btnVotar"><button id="btnModalExec" type="button" class="btn btn-secondary" data-dismiss="modal">votar</button>';
 			button += '<button id="btnModalExecSkip" type="button" class="btn btn-secondary" data-dismiss="modal">skip</button></div>';
 		if(ws.getEstado()!="fantasma")
@@ -201,6 +219,19 @@ function ControlWeb(){
 			ws.votar("skip");
 			$('#btnVotar').remove();
 		});
+		$('#btn-msg').on('click',function(){
+			ws.sendMensaje($('#msg').val());
+			$('#msg').val('');
+		});
+	}
+	this.anunciarVotacion=function(msg){
+		this.clearModal();
+		this.mostrarModalSimple(msg);
+	}
+	this.clearModal=function(){
+		$('#avisarImpostor').remove();
+		$('#viewTarea').remove();
+		$('#viewVotacion').remove();
 	}
 }
 
@@ -212,4 +243,3 @@ function ControlWeb(){
  * git branch -d nombreRama
  * 
  */
-
