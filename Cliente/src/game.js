@@ -36,6 +36,28 @@
   var crear;
   var spawnPoint;
   var id;
+  function resetGame(){
+    if(!game)return; 
+    game.destroy();
+    cursors=null;
+    player=null;
+    jugadores={}; //la colección de jugadores remotos
+    showDebug = false;
+    camera=null;
+    worldLayer=null;
+    map=null;
+    crear=null;
+    spawnPoint=null;
+    id=null;
+    capaTareas=null;
+    capaLayout=null;
+    tareasOn = true;
+    layoutOn=true;
+    ataqueOn = true;
+    votarOn = true;
+    remotos=null;
+    muertos=null;
+  }
   var recursos=[{frame:0,sprite:"Europa"},
                 {frame:3,sprite:"Gaia"},
                 {frame:6,sprite:"Apolo"},
@@ -62,6 +84,8 @@ var tombstoneRecursos = [{frame:0,sprite:"Europa-death"},
                          {frame:7,sprite:"Ursula-death"},
                          {frame:8,sprite:"default-death"}]
   var capaTareas;
+  var capaLayout;
+  var layoutOn = true;
   var tareasOn = true;
   var ataqueOn = true;
   var votarOn = true;
@@ -85,19 +109,26 @@ function lanzarJuego(){
     // Parameters are the name you gave the tileset in Tiled and then the key of the tileset image in
     // Phaser's cache (i.e. the name you used in preload)
     const tileset = map.addTilesetImage("tuxmon-sample-32px-extruded", "tiles");
-
+     
     // Parameters: layer name (or index) from Tiled, tileset, x, y
+    
     const belowLayer = map.createStaticLayer("Below Player", tileset, 0, 0);
+    const abovebelowLayer = map.createStaticLayer("AboveBelow Player", tileset, 0, 0);
     worldLayer = map.createStaticLayer("World", tileset, 0, 0);
     capaTareas = map.createStaticLayer("capaTareas", tileset, 0, 0);
+    capaLayout = map.createStaticLayer("capaLayout", tileset, 0, 0);
+
     const aboveLayer = map.createStaticLayer("Above Player", tileset, 0, 0);
+    const aboveAboveLayer = map.createStaticLayer("AboveAbove Player", tileset, 0, 0);
     worldLayer.setCollisionByProperty({ collides: true });
     capaTareas.setCollisionByProperty({ collides: true });
+    capaLayout.setCollisionByProperty({ collides: true });
 
     // By default, everything gets depth sorted on the screen in the order we created things. Here, we
     // want the "Above Player" layer to sit on top of the player, so we explicitly give it a depth.
     // Higher depths will sit on top of lower depth objects.
     aboveLayer.setDepth(10);
+    aboveAboveLayer.setDepth(15);
 
     // Object layers in Tiled let you embed extra info into a map - like a spawn point or custom
     // collision shapes. In the tmx file, there's an object layer with a point named "Spawn Point"
@@ -191,6 +222,7 @@ function lanzarJuego(){
     teclaA = crear.input.keyboard.addKey('a');
     teclaV = crear.input.keyboard.addKey('v');
     teclaT = crear.input.keyboard.addKey('t');
+    teclaI = crear.input.keyboard.addKey('i');
 
     lanzarJugador(ws.getPersonaje(),ws.getEstado());
     ws.estoyDentro();
@@ -216,22 +248,30 @@ function lanzarJuego(){
     //comprobar si el jugador local pulsa la tecla de votacion por ejemplo la V.
     //Si pulsa la V  entonces se lanza la votación
     if(ws.getEstado() == "vivo" && teclaV.isDown){
-      votarOn = false;     
-      report();
+      votarOn = false;    
+      // ws.console(sprite);
+      // ws.console("MUERTO Todo lo de arriba antes era Sprite");
+      ws.console(muertos); 
       ws.report();
     }
   }
   function report(){
-    for(var i in muertos.children.entries){
-        muertos.children.entries[i].visible=false;
+    /*Esta funcion se encarga de eliminar todos las tumbas, 
+      si se ha llamado ha reportar*/
+    var i = 0;
+    for(i=0;i<muertos.children.size;i++){
+        muertos.children.entries[0].destroy();
       }
-      crear.physics.destroy(muertos);
+  }
+  function abandonarPartida(nick){
+    //Elimina a un jugador del juego
+    jugadores[nick].destroy();
   }
   function moverRemoto(input){
     var remoto=jugadores[input.nick];
-      if(remoto){
-    if(input.estado != "fantasma" || ws.getEstado()=="fantasma"){
-      const speed = 175;
+    if(remoto){
+      if(input.estado != "fantasma" || ws.getEstado()=="fantasma"){
+        const speed = 175;
         const prevVelocity = player.body.velocity.clone();
         const sprite = input.estado == "vivo"?recursos[input.id].sprite:fantasmas[input.id].sprite;
         remoto.body.setVelocity(0);
@@ -257,12 +297,23 @@ function lanzarJuego(){
         //cw.mostrarModalTarea(ws.encargo);
       }
   }
+  function consultarLayout(sprite,objeto){
+      //¿El sprite, el jugador local puede realizar la tarea?
+      //En tal caso llamar al servidor que puede hacer la tarea, 
+      //y permitir hacer la tarea.
+      if(teclaI.isDown){
+        layoutOn=false;
+        ws.console("game.consultarLayout."+objeto.properties.info);
+        ws.consultarLayout(objeto.properties.info);
+      }
+  }
   function lanzarJugador(numJugador,estado){
     id = numJugador;
     player = crear.physics.add.sprite(spawnPoint.x+20*id, spawnPoint.y,"personajes-"+estado,recursos[id].frame);    
     // Watch the player and worldLayer for collisions, for the duration of the scene:
     crear.physics.add.collider(player, worldLayer);
     crear.physics.add.collider(player,capaTareas ,realizarTareas,()=>{return tareasOn});
+    crear.physics.add.collider(player,capaLayout ,consultarLayout,()=>{return layoutOn});
     camera = crear.cameras.main;
     camera.startFollow(player);
     camera.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
@@ -294,7 +345,7 @@ function lanzarJuego(){
     if(!ws.estamosJugando())return;
     const speed = 175;
     const prevVelocity = player.body.velocity.clone();
-     const sprite = ws.getEstado() == "vivo"?recursos[id].sprite:fantasmas[id].sprite;
+    const sprite = ws.getEstado() == "vivo"?recursos[id].sprite:fantasmas[id].sprite;
     // Stop any previous movement from the last frame
     player.body.setVelocity(0);
     //player2.body.setVelocity(0);

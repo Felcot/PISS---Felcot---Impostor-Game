@@ -1,18 +1,21 @@
-var minimo = 1;
 var moduleCad= require('./cad.js');
-function Juego(){
+function Juego(min){
+	this.minimo=min;
+	console.log("Se ha establecido el minimo en: "+this.minimo);
 	this.partidas={};
 	this.usuario={};
 	this.cad =  new moduleCad.Cad();
-	this.crearPartida=function(num,nick){
+	this.crearPartida=function(nick,max,numImpos,numTarea,propiedad){
 			try{
-				if((num < minimo) || (num > 10)){
+		console.log("modelo.Juego.crearPartida("+nick+"."+max+"."+numImpos+"."+numTarea+"."+propiedad+")");
+				if((max < this.minimo) || (max > 10)){
 				 	throw new Exception("N410");
 				}
 
 			let codigo=this.obtenerCodigo();
+
 			if (!this.partidas[codigo]){
-				this.partidas[codigo]= new Partida(num,nick,codigo,this,1,2,"publica");
+				this.partidas[codigo]= new Partida(max,this.minimo,nick,codigo,this,numImpos,numTarea,propiedad?"privada":"publica");
 				this.partidas[codigo].iniciarPersonajes();
 				var usr =  this.partidas[codigo].usuarios;
 				this.usuario[nick] = usr[nick];
@@ -44,15 +47,22 @@ function Juego(){
 		delete this.partida[codigo];
 	}
 	this.listarPartidasDisponibles=function(){
+
 		var result = [];
 		var huecos = 0;
 		for (var key in this.partidas){
 			var partida = this.partidas[key];
 			if(partida.esPublica()&&partida.sePuedeEntrar() && partida.comprobarMaximo()){
 				huecos = partida.emptyFree();
-				result.push({"codigo":key,"ocupado":(partida.maximo-huecos),"maximo":partida.maximo});
+				console.log("juego.huecos:"+huecos)
+				console.log("juego.partida.confContainer:"+partida.confContainer.getMaximo())
+
+				result.push({"codigo":key,"ocupado":(partida.confContainer.getMaximo()-huecos),"maximo":partida.confContainer.getMaximo()});
 			}
 		}
+		console.log("modelo.juego.listarPartidasDisponibles.result{");
+		console.log(result);
+		console.log("}");
 		return result;
 	}
 
@@ -100,21 +110,25 @@ function Juego(){
 		console.log("<<");
 		return result;
 	}
-	this.listarVivos=function(codigo){
-		return this.getPartida(codigo).listarVivos();
+	this.listarJugadorBy=function(codigo,estado){
+		return this.getPartida(codigo).listarJugadorBy(estado);
 	}
 	// se realiza la llamada a la conexion con la capa de acceso a datos
 	this.cad.connect(function(db){
 		console.log("conectado a Atlas");
 	});
 }
-function confContainer(num,NumImpostores,NumTareas,propiedad){
-	this.MaxJugadores=num;
+function confContainer(max,min,NumImpostores,NumTareas,propiedad){
+	this.MaxJugadores=max;
+	this.MinJugadores=min;
 	this.NumImpostores=NumImpostores;
 	this.NumTareas=NumTareas;
 	this.propiedad=propiedad;
-	this.getMaxJugadores=function(){
+	this.getMaximo=function(){
 		return this.MaxJugadores;
+	}
+	this.getMinimo=function(){
+		return this.MinJugadores;
 	}
 	this.getNumImpostores=function(){
 		return this.MaxJugadores;
@@ -132,9 +146,8 @@ function confContainer(num,NumImpostores,NumTareas,propiedad){
 		return this.propiedad=="publica";
 	}
 }
-function Partida(num,owner,codigo,juego,NumImpostores,NumTareas,propiedad){
-	this.confContainer = new confContainer(num,NumImpostores,NumTareas,propiedad);
-	this.maximo=num;
+function Partida(max,min,owner,codigo,juego,NumImpostores,NumTareas,propiedad){
+	this.confContainer = new confContainer(max,min,NumImpostores,NumTareas,propiedad);
 	this.codigo = codigo;
 	this.nickOwner=owner;
 	this.fase=new Inicial();
@@ -154,10 +167,11 @@ function Partida(num,owner,codigo,juego,NumImpostores,NumTareas,propiedad){
 	this.comprobarVotacion = function(){
 		return this.fase.comprobarVotacion(this);
 	}
-	this.listarVivos=function(){
+	this.listarJugadorBy=function(estado){
+		console.log(">>modelo.partida.listarJugadorBy."+estado);
 		var result = [];
 		for(var usr in this.usuarios)
-			if(this.usuarios[usr].getEstado() == "vivo")
+			if(this.usuarios[usr].getEstado() == estado)
 				result.push(usr);
 		return result;
 	}
@@ -205,15 +219,16 @@ function Partida(num,owner,codigo,juego,NumImpostores,NumTareas,propiedad){
 		this.usuarios[nuevo].partida = this;
 	}
 	this.comprobarMinimo=function(){
-		return sizeDictionary(this.usuarios)>=minimo;
+		return sizeDictionary(this.usuarios)>=this.confContainer.getMinimo();
 	}
 	this.comprobarMaximo=function(){
-		return sizeDictionary(this.usuarios)<this.maximo
+		return sizeDictionary(this.usuarios)<this.confContainer.getMaximo();
 	}
 	this.iniciarPartida=function(){
 			return this.fase.iniciarPartida(this);
 	}
 	this.abandonarPartida=function(nick){
+		console.log("abandonarPartida."+this.fase.nombre+"."+nick);
 		this.fase.abandonarPartida(nick,this);
 		return this.getUsuarios(nick);
 	}
@@ -221,10 +236,9 @@ function Partida(num,owner,codigo,juego,NumImpostores,NumTareas,propiedad){
 		this.fase.expulsarJugador(nick,this);
 	}
 	this.eliminarUsuario=function(nick){
-		this.contenedor.eliminar(nick,this.usuarios[nick].impostor,this);
+		if(this.contenedor.isEnable(this))
+			this.contenedor.eliminar(nick,this.usuarios[nick].impostor,this);
 		delete this.usuarios[nick];
-		// if(this.comprobarUsuarios()<0)
-		// 	this.juego.eliminarPartida(this.codigo);
 		return this.comprobarUsuarios()<0 ? this.eliminarPartida(this.codigo) : false;
 	}
 	this.comprobarUsuarios=function(){
@@ -268,15 +282,19 @@ function Partida(num,owner,codigo,juego,NumImpostores,NumTareas,propiedad){
 		
 	}
 	this.puedeEvaluarPartida=function(){
-		F =(impostores,crewmates) => {return impostores == crewmates;};
-		let cond = this.contenedor.evaluarIC(F);
-		this.comprobarPartida(cond,'impostores');
-		
-		F = (impostores) => {return impostores == 0;};
-		cond = this.contenedor.evaluarI(F)
-		this.comprobarPartida(cond,'Tripulantes');
-		if(cond)
-			this.fase = new Final('Tripulantes');
+		if(this.tareasCompletadas==this.total_tareas){
+			this.fase = new Final('Tripulantes')
+		}else{
+			F =(impostores,crewmates) => {return impostores == crewmates;};
+			let cond = this.contenedor.evaluarIC(F);
+			this.comprobarPartida(cond,'impostores');
+			
+			F = (impostores) => {return impostores == 0;};
+			cond = this.contenedor.evaluarI(F)
+			this.comprobarPartida(cond,'Tripulantes');
+			if(cond)
+				this.fase = new Final('Tripulantes');
+		}
 		return this.fase;
 	}
 	this.comprobarPartida = function(condition,ganan){
@@ -339,7 +357,7 @@ function Partida(num,owner,codigo,juego,NumImpostores,NumTareas,propiedad){
 		return (this.tareasCompletadas/this.total_tareas)*100;
 	}
 	this.emptyFree= function(){
-		return this.maximo - this.comprobarUsuarios();
+		return this.confContainer.getMaximo() - this.comprobarUsuarios();
 	}
 	this.getFase =function(){
 		return this.fase;
@@ -360,7 +378,12 @@ function Partida(num,owner,codigo,juego,NumImpostores,NumTareas,propiedad){
 	this.getUsuarios = function(nick){
 		return this.usuarios[nick];
 	}
-	
+	this.esJugando=function(){
+		return this.fase.esJugando();
+	}
+	this.esVotando=function(){
+		return this.fase.esVotando();
+	}
 	this.agregarUsuario(owner);
 }
 
@@ -371,6 +394,12 @@ function Inicial(){
 		if (partida.comprobarMinimo()){
 			partida.fase=new Completado();
 		}		
+	}
+	this.esJugando=function(){
+		return false;
+	}
+	this.esVotando=function(){
+		return false;
 	}
 	this.iniciarPartida=function(partida){
 		try{
@@ -568,6 +597,12 @@ function Completado(){
 			*/
 		}
 	}
+	this.esJugando=function(){
+		return false;
+	}
+	this.esVotando=function(){
+		return false;
+	}
 }
 
 function Jugando(){
@@ -644,6 +679,12 @@ function Jugando(){
 			*/
 		}
 	}
+	this.esJugando=function(){
+		return true;
+	}
+	this.esVotando=function(){
+		return false;
+	}
 }
 
 function Final(ganadores){
@@ -711,6 +752,12 @@ function Final(ganadores){
 			* Exception
 			*/
 		}
+	}
+	this.esJugando=function(){
+		return false;
+	}
+	this.esVotando=function(){
+		return false;
 	}
 	this.matar = function(nick,partida){
 		try{
@@ -792,7 +839,7 @@ function Votacion(){
 		return data;
 	}
 	this.comprobarVotacion =function(partida){
-		return sizeDictionary(this.votantes) == sizeDictionary(partida.listarVivos());
+		return sizeDictionary(this.votantes) == sizeDictionary(partida.listarJugadorBy("vivo"));
 	}
 		
 	this.agregarUsuario=function(nick,partida){
@@ -872,10 +919,18 @@ function Votacion(){
 			*/
 		}
 	}
+	this.esJugando=function(){
+		return false;
+	}
+	this.esVotando=function(){
+		return true;
+	}
 	return this.nombre;
 }
 function encargo(){
-	let encargos = [{"nombre":"Basuras","coste":10},{"nombre":"Calles","coste":5},{"nombre":"Jardines","coste":8},{"nombre":"Mobiliario","coste":7}];
+	let encargos = [{"nombre":"Comprar","coste":20},{"nombre":"encontrarLlave","coste":5},
+					{"nombre":"Jardines","coste":18},{"nombre":"Entrenar","coste":17},
+					{"nombre":"abrirCofre","coste":15},{"nombre":"Colada","coste":17}];
 	return new Tarea(encargos[randomInt(0, encargos.length)]);
 }
 function Tarea(tarea){
@@ -1049,6 +1104,7 @@ function contenedor(){
 	this.crewmate = {}
 
 	this.eliminar=function(nick,cond,partida){
+		if(!partida.fase.esJugando())return;
 		if(cond)
 			delete this.impostor[nick];
 		else
@@ -1061,6 +1117,9 @@ function contenedor(){
 			this.impostor[usr.nick] = usr;
 		else
 			this.crewmate[usr.nick] = usr;
+	}
+	this.isEnable=function(partida){
+		return partida.esJugando()||partida.esVotando();
 	}
 	this.sizeTam= function(impostor){
 		return impostor? sizeDictionary(this.impostor):sizeDictionary(this.crewmate);

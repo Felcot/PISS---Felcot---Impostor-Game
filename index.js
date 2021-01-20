@@ -11,11 +11,11 @@ var modelo = require("./Servidor/modelo.js");
 //var min = process.argv.slice(2);
 var wss =  require("./Servidor/servidorWS.js");
 var servidorWS = new wss.ServidorWS(); // aquí se esta creando la capa instancia de webSocket
-
+var min = process.argv.slice(2);
 app.set('port', process.env.PORT || 5000); // Nuestro servidor va a escuchar en caso de no estar definido
 //El puerto en la variable de entorno $PORT, escuchara por el puerto 5000
 
-var juego = new modelo.Juego();
+var juego = new modelo.Juego(min);
 
 //Las siguientes lineas hacen referencia a la raíz del servidor
 app.use(express.static(__dirname + '/'));

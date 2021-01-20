@@ -13,7 +13,9 @@ function ServidorWS(){
     	socket.broadcast.emit(mens,datos);
     }
     this.evaluarPartida=function(io,juego,codigo){
-    	var fase = juego.getPartida(codigo).evaluarPartida()
+    	var partida = juego.getPartida(codigo);
+    	if(!partida)return;
+    	var fase = partida.evaluarPartida()
 		if(fase.nombre == "final"){
 			this.enviarATodos(io,codigo,"anunciarGanadores",fase.anunciarGanador());
 		}
@@ -21,8 +23,8 @@ function ServidorWS(){
 	this.lanzarSocketSrv = function(io,juego){
 		var cli = this;
 		io.on('connection',function(socket){	// bloques io.on primer mensaje "connection" socket referencia al cliente que lo ha pedido	    
-		    socket.on('crearPartida', function(nick,num) {
-		        var codigo=juego.crearPartida(num,nick);	
+		    socket.on('crearPartida', function(nick,max,numImpos,numTarea,propiedad) {
+		        var codigo=juego.crearPartida(nick,max,numImpos,numTarea,propiedad);	
 				socket.join(codigo);	      
 				console.log('Usuario: '+nick+" crea partida codigo: "+codigo);
 				var lista = juego.listarJugadores(codigo);
@@ -41,10 +43,19 @@ function ServidorWS(){
 		    	cli.enviarRemitente(socket,"unidoAPartida",{"codigo" : codigo,"lista":lista});
 		    	cli.enviarATodosMenosRemitente(socket,codigo,"nuevoJugador",lista);
 		    });
-		    socket.on('abandonarPartida',function(nick,codigo){
+		    socket.on('abandonarPartida',function(nick,codigo,condition){
 		    	console.log("El usuario: "+ nick+ " quiere abandonar la partida" + codigo);
 		    	var result = juego.abandonarPartida(nick);
-		    	cli.enviarATodosMenosRemitente(socket,codigo,"haAbandonadoPartida",{"nick":nick,"check":result});
+		    	var data = {"nick":nick,"check":result,"condition":condition}
+		    	cli.enviarATodosMenosRemitente(socket,codigo,"haAbandonadoPartida",data);
+		    	cli.enviarRemitente(socket,"hasAbandonadoPartida",data);
+		    	if(condition){ 
+		    		console.log("entra por aqui");
+		    		cli.evaluarPartida(io,juego,codigo);
+		    	}else{
+		    		var lista =  juego.listarJugadores(codigo);
+		    		cli.enviarATodosMenosRemitente(socket,codigo,"nuevoJugador",lista);
+		    	}
 		    });
 
 		    socket.on('iniciarPartida',function(nick,codigo){
@@ -71,7 +82,7 @@ function ServidorWS(){
 		    });
 		    socket.on('report',function(nick,codigo){
 		    	var data = juego.report(nick,codigo);
-		    	data.lista = juego.listarVivos(codigo);
+		    	data.lista = juego.listarJugadorBy(codigo,"vivo");
 		    	console.log(">>ServidorWS.juego.");
 		    	console.log(data);
 		    	console.log("<<");
@@ -129,7 +140,18 @@ function ServidorWS(){
 			    		cli.enviarATodos(io,codigo,"mostrarPorcentaje",estadoPartida.porcentaje);
 			    	}
 			    }
+			    cli.evaluarPartida(io,juego,codigo);
 		    	/*estadoPartida ? cli.enviarATodos(socket,"terminarPartida",data):console.log(estadoPartida);*/
+		    });
+		    socket.on('consultarLayout',function(nick,codigo,info){
+		    	console.log("ServidorWS.consultarLayout."+nick+"."+codigo+"."+info);
+		    	var partida = juego.getPartida(codigo);
+		    	cli.enviarRemitente(socket,"consultarLayout",true);
+		    	if(partida.esJugando()){
+		    		info=="tareas"?cli.enviarRemitente(socket,"anunciarTareas",""):
+		    		info=="muertos"?cli.enviarRemitente(socket,"anunciarMuertos",partida.listarJugadorBy("fantasma")):
+		    		info=="report"?cli.enviarRemitente(socket,"iniciarReport",""):console.log("error.consultarLayout.NoneItsEquals");
+		    	}
 		    });
 		    socket.on('chat',function(nick,codigo,msg,estado){
 		    	var data = {"nick": nick, "msg": msg,"estado":estado};

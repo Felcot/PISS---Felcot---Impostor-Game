@@ -18,6 +18,9 @@ function ClienteWS (name,controlWeb){
 	this.setImpostor= function(impostor){
 		this.impostor = impostor;
 	}
+	this.puedoLeer=function(data){
+		return data.estado==undefined || (data.estado == "vivo" || ws.getEstado()=="fantasma");
+	}
 	this.toString=function(){
 		var result = "Mi nombre es "+this.nick+"\n";
 		result += "Estoy en la partida "+this.codigo+"\n";
@@ -69,9 +72,18 @@ function ClienteWS (name,controlWeb){
 	this.setEstado = function(estado){
 		this.estado = estado;
 	}
-	this.crearPartida = function(number){
+	this.reset=function(){
+		this.codigo=undefined;
+		this.personaje=undefined;
+		this.owner = false;
+		this.impostor=false;
+		this.estado=undefined;
+		this.encargo=undefined;
+		resetGame();
+	}
+	this.crearPartida = function(max,numImpos,numTarea,propiedad){
 		// emit genera una peticion al servidor, se puede paquetizar todo mas con objetos json
-		this.socket.emit('crearPartida',this.getNick(), number);
+		this.socket.emit('crearPartida',this.getNick(), max,numImpos,numTarea,propiedad);
 	}
 	this.unirAPartida = function(codigo){
 		this.setCodigo(codigo);
@@ -80,8 +92,9 @@ function ClienteWS (name,controlWeb){
 	this.iniciarPartida = function(){
 		this.socket.emit('iniciarPartida',this.getNick(),this.getCodigo());
 	}
-	this.abandonarPartida = function(){
-		this.socket.emit('abandonarPartida',this.getNick(),this.getCodigo());
+	this.abandonarPartida = function(condition){
+		ws.console("Abandonando");
+		this.socket.emit('abandonarPartida',this.getNick(),this.getCodigo(),condition);
 	}
 
 	this.listaPartidas = function(){
@@ -112,6 +125,9 @@ function ClienteWS (name,controlWeb){
 	}
 	this.realizarTarea = function(nombre){
 		this.socket.emit('realizarTarea',this.getNick(),this.getCodigo(),nombre);
+	}
+	this.consultarLayout = function(nombre){
+		this.socket.emit('consultarLayout',this.getNick(),this.getCodigo(),nombre);
 	}
 	this.atacar = function(tripulante){
 		this.socket.emit('enviarAtaque',this.getNick(),this.getCodigo(),tripulante);
@@ -147,9 +163,19 @@ function ClienteWS (name,controlWeb){
 			cw.mostrarEsperandoRivales(data);
 			});
 		this.socket.on('haAbandonadoPartida',function(data){
-			if(data.check)
-				console.log("Ha abandondo Partida "+data.nick)
+			if(data.check){
+				if(data.condition)abandonarPartida(data.nick);
+				cw.mostrarModalAbandonarPartida("Ha abandondo Partida "+data.nick,false);
+			}
 		});
+		this.socket.on('hasAbandonadoPartida',function(data){
+			if(data.check){
+				cli.console("Hola Abandonando");
+				cw.mostrarModalAbandonarPartida(data.nick+" has abandondo Partida",true);
+				cli.reset();
+			}
+		});
+		
 		this.socket.on('esperando',function(data){
 			console.log("esperando");
 		});
@@ -165,6 +191,7 @@ function ClienteWS (name,controlWeb){
 			cli.estado="vivo";
 			cli.fase="jugando";
 			cli.obtenerEncargo();
+			cw.mostrarJuego();
 			lanzarJuego();
 			cw.mostrarBarra();
 			
@@ -181,6 +208,7 @@ function ClienteWS (name,controlWeb){
 		});
 		this.socket.on('recibirListarPartidasDisponibles',function(data){
 			console.log(data);
+			console.log("codigo ="+ cli.codigo);
 			if(!cli.codigo)
 				cw.mostrarUnirAPartida(data);
 		});
@@ -200,6 +228,7 @@ function ClienteWS (name,controlWeb){
 			if(data.fase =="votacion"){
 				votarOn=false;
 				ws.fase="votacion";
+				report();
 				cw.mostrarVotaciones(data.lista);
 			}
 		});
@@ -243,8 +272,23 @@ function ClienteWS (name,controlWeb){
 		});
 		this.socket.on('anunciarGanadores',function(msg){
 			ws.fase="final";
-			cw.mostrarModalSimple(msg);
+			cw.mostrarModalGanadores(msg);
 		});
+		this.socket.on('anunciarTareas',function(data){
+			console.log("anunciarTareas");
+			cw.anunciarTareas(cli.encargo);
+		});
+		this.socket.on('anunciarMuertos',function(data){
+			console.log("anunciarMuertos");
+			cw.mostrarMuertos(data);
+		});
+		this.socket.on('iniciarReport',function(data){
+			console.log("iniciarReport");
+			ws.report();
+		});
+		this.socket.on('consultarLayout',function(data){
+			layoutOn=data;
+		})
 	}
 	this.ini();
 }

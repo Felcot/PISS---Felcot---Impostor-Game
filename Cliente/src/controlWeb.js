@@ -5,7 +5,7 @@ function ControlWeb(){
 		this.mainMenu();
 	}
 	this.mainMenu= function(){
-		$('#mainRemove').remove();
+		this.limpiarHTML("mainRemove");
 		var html = '<div id="mainRemove">';
 		if(ws == undefined){
 			html += this.mostrarRegistrarse();
@@ -15,12 +15,16 @@ function ControlWeb(){
 		}
 		html += '</div>'; 
 		$('#mainMenu').append(html);
+
 		$('#btnRegister').on('click',function(){
 			var nick = $('#nick').val();
-			ws =  new ClienteWS(nick);
-			$('#register').remove();
-			me.mainMenu();
+			if(nick){
+				ws =  new ClienteWS(nick);
+				$('#register').remove();
+				me.mainMenu();
+			}
 		});
+
 		$('#btnmmCP').on('click',function(){
 			me.mostrarCrearPartida();
 		});
@@ -43,9 +47,15 @@ function ControlWeb(){
 		var cadena =  '<div id="mostrarCP">' 
 				cadena+='<div class="form-group">';
 					cadena+='<label class="labelGeneral" for="num">Número Máximo:</label>';
-					cadena+='<input type="text" class="form-control" id="num">';
+					cadena+='<input type="number" class="form-control" id="max" min="4" max="8" value="4">';
+					cadena+='<label class="labelGeneral" for="num">Número de Impostores:</label>';
+					cadena+='<input type="number" class="form-control" id="numImpos" min="1" max="3" value="1">';
+					cadena+='<label class="labelGeneral" for="num">Número Tareas:</label>';
+					cadena+='<input type="number" class="form-control" id="numTarea" min="1" max="4" value="1">';
+					cadena+='<label class="labelGeneral" for="num">Partida propiedad:</label>';
+					cadena+='<input type="checkbox" id="propiedad">';
 				cadena+='</div>';
-				cadena+='<button id = "btnCP" type="button" class="btn btn-primary">Crear</button>'
+				cadena+='<button id = "btnCP" type="button" class="btn btn-primary">Crear</button><button id = "btnMainMenu" type="button" data-dismiss="modal" class="btn btn-primary">Volver al Menú</button>'
 			cadena+='</div>';
 
 		
@@ -53,12 +63,20 @@ function ControlWeb(){
 		//#crearPartida busca un id
 		//.crearPartida busca una clase
 		// solo # busca etiqueta html
-		$('#btnCP').on('click',function(){
-			var num = $('#num').val();
-			$('#mostrarCP').remove();
-			ws.crearPartida(num);
+
+		$('#btnMainMenu').on('click',function(){
+			me.mainMenu();
 		});
-			}
+		$('#btnCP').on('click',function(){
+			var max = $('#max').val();
+			var numImpos = $('#numImpos').val();
+			var numTarea = $('#numTarea').val();
+			var propiedad = document.getElementById('propiedad').checked;
+			console.log(max+"."+numImpos+"."+numTarea+"."+propiedad);
+			$('#mostrarCP').remove();
+			ws.crearPartida(max,numImpos,numTarea,propiedad);
+		});
+	}
 
 
 	this.mostrarEsperandoRivales= function(lista){
@@ -75,18 +93,24 @@ function ControlWeb(){
 			esperandoRival += '<div class = "col-md-4">'
 			esperandoRival += this.mostrarChat();
 			esperandoRival +='</div>';	
-			esperandoRival += ws.isOwner()? '</div><div id="ownerGame"></div></div>':'</div></div>';
-
+			esperandoRival += ws.isOwner()? '</div><div id="ownerGame"></div></div>':'<button id="btnAbandonarPartida" type="button" class="btn btn-primary">Abandonar Partida</button></div></div>';
+		
 		$('#esperandoRival').append(esperandoRival);
 		$('#btn-msg').on('click',function(){
-			ws.sendMensaje($('#msg').val());
+			var msg = $('#msg').val();
+			if(msg!= '')
+				ws.sendMensaje(msg);
 			$('#msg').val('');
+		});
+		$('#btnAbandonarPartida').on('click',function(){
+			ws.abandonarPartida(false);
 		});
 		this.mostrarInicarPartida();
 		
 	}
 
 	this.mostrarPartidasDisponibles = function(lista){
+		console.log("mostrarPartidasDisponibles."+lista);
 		var cadena= '<div id = "listaPartidas"><div class = "list-group">';
 			for(var partida in lista){
 					cadena+='<a href="#" class="list-group-item" value="'+lista[partida].codigo+'">'+lista[partida].codigo+'<span class="badge">'+lista[partida].ocupado+'/'+lista[partida].maximo+'</span></a>';
@@ -95,10 +119,12 @@ function ControlWeb(){
 		return cadena;
 	} 
 	this.actualizarMostrarUnirAPartidas=function(lista){
+		console.log("actualizarMostrarUnirAPartidas."+lista);
 		$('#listaPartidas').remove();
 		$('#listaPartidasContainer').append(this.mostrarPartidasDisponibles(lista));
 	}
 	this.mostrarUnirAPartida = function(lista){
+		console.log("mostrarUnirAPartida."+lista);
 		this.limpiarHTML("mUAP");
 		var cadena= '';
 		cadena +='<div id="mUAP" class ="list-group">';
@@ -106,9 +132,9 @@ function ControlWeb(){
 			cadena+='<div id="listaPartidasContainer">';
 				cadena+=this.mostrarPartidasDisponibles(lista);
 			cadena+='</div>';
-			cadena+='<button id = "btnmUAP" type="button" class="btn btn-primary">Unirse</button>'
+			cadena+='<button id = "btnmUAP" type="button" class="btn btn-primary">Unirse</button><button id = "btnMainMenu" type="button" class="btn btn-primary">Volver al Menú</button>'
 			cadena+= '</div>';
-		//this.limpiarHTML("unirAPartida");
+
 		$('#unirAPartida').append(cadena);
 
 		 StoreValue = [];
@@ -119,10 +145,14 @@ function ControlWeb(){
 
 		$('#btnmUAP').on('click',function(){
 			var codigo = StoreValue[0];
-			console.log(codigo);
-			$('#unirAPartida').remove();
-			ws.unirAPartida(codigo);
-			me.mostrarEsperandoRivales();
+			if(codigo){
+				ws.unirAPartida(codigo);
+				me.mostrarEsperandoRivales();
+			}
+		});
+
+		$('#btnMainMenu').on('click',function(){
+			me.mainMenu();
 		});
 	}
 	this.mostrarInicarPartida=function(){
@@ -132,6 +162,9 @@ function ControlWeb(){
 		$('#ownerGame').append(ownerGame);
 		$('#btnInitGame').on('click',function(){
 			ws.iniciarPartida();
+		});
+		$('#btnAbandonarPartida').on('click',function(){
+			ws.abandonarPartida(false);
 		});
 	}
 	this.limpiarHTML=function(cadena){
@@ -143,18 +176,28 @@ function ControlWeb(){
 		if(cadena != "initialGame") $('#initialGame').remove();
 	}
 	this.mostrarBarra=function(){
+		this.clearModal();
 		$('#barra').append('<div id="barraProgreso" class="row"></div>');
 	}
 	this.mostrarPorcentaje=function(porcentaje){
 		$('#barraProgresoItem').remove();
-		var barraProgreso = '<div id="barraProgresoItem" sytle="width:'+(porcentaje*10)+'px">'+porcentaje+'</div>';
+		var barraProgreso = '<div id="barraProgresoItem">'+(porcentaje?porcentaje%100:0)+'%</div>';
 		$('#barraProgreso').append(barraProgreso);
 	}
 	
 	this.inyectarMensaje= function(data){
-		if(data.estado==undefined || (data.estado == "vivo" || ws.getEstado()=="fantasma"))
-		$('#mensajes').append('<div id="mensaje"><label id=nick-chat>('+data.nick+')></label><label id="msg-chat">'+data.msg+'</label></div>');
+		if(ws.puedoLeer(data))
+			$('#mensajes').append('<div id="mensaje"><label id=nick-chat>('+data.nick+')></label><label id="msg-chat">'+data.msg+'</label></div>');
 	};
+	this.mostrarJuego=function(){
+		$('game-container').remove();
+		var game = '<div id="game-container">';
+		var button = '<button id="btnAbandonarPartida" type="button" class="btn btn-primary">Abandonar Partida</button></div>';
+		$('#game').append(game+button)
+		$('#btnAbandonarPartida').on('click',function(){
+			ws.abandonarPartida(true);
+		});
+	}
 	this.mostrarChat = function(){
 		var chat ='<div id="chat"> <div id="mensajes"></div>';
 				chat+='<input id="msg" type="text" value="">';
@@ -163,12 +206,18 @@ function ControlWeb(){
 		return chat;
 
 	}
-	this.mostrarVotaciones = function(lista){
-		var votaciones = '<div id="votaciones"><div class = "list-group">';
+	this.buildListaJugadores=function(lista){
+		var jugadores = '<div id="votaciones"><div class = "list-group">';
 			for(var nick in lista)
-				votaciones+='<a href="#" class="list-group-item" value="'+lista[nick]+'">'+lista[nick]+'</a>';
-			votaciones +='</div></div>';
-		this.mostrarModalVotacion(votaciones);
+				jugadores+='<a href="#" class="list-group-item" value="'+lista[nick]+'">'+lista[nick]+'</a>';
+			jugadores +='</div></div>';
+		return jugadores;
+	}
+	this.mostrarVotaciones = function(lista){
+		this.mostrarModalVotacion(this.buildListaJugadores(lista));
+	}
+	this.mostrarMuertos = function(lista){
+		this.mostrarModalMuertos(this.buildListaJugadores(lista));
 	}
 	this.mostrarModalSimple=function(msg){
 		this.clearModal();
@@ -178,6 +227,8 @@ function ControlWeb(){
 
 	}
 	this.anunciarTareas=function(lista){
+		this.clearModal();
+		ws.console("HOLA MUNDO");
 		var listaEncargos = '<ul id="listaEncargos">';
 		ws.console(lista);
 		for(var enc in lista){
@@ -185,10 +236,17 @@ function ControlWeb(){
 		}
 		listaEncargos +='</ul>';
 		this.mostrarModalTarea(listaEncargos);
+		$('#modalGeneral').modal("show");
 	}
 	this.mostrarModalTarea=function(msg){
 		this.clearModal();
 		var contenidoModal = '<div id="viewTarea">'+msg+'</p>';
+		$('#contenidoModal').append(contenidoModal);
+		$('#modalGeneral').modal("show");
+	}
+	this.mostrarModalMuertos=function(msg){
+		this.clearModal();
+		var contenidoModal = '<div id="viewMuertos">'+msg+'</p>';
 		$('#contenidoModal').append(contenidoModal);
 		$('#modalGeneral').modal("show");
 	}
@@ -197,7 +255,7 @@ function ControlWeb(){
 		var contenidoModal = '<div id="viewVotacion" class="modal-body"><div class="container-fluid">';
     	contenidoModal +='<div class="row"><div class="col-md-2">'+msg+'</div>';
 		contenidoModal += '<div class="col-md-4">'+this.mostrarChat()+'</div></div></div></div>';
-		var button ='<div id="btnVotar"><button id="btnModalExec" type="button" class="btn btn-secondary" data-dismiss="modal">votar</button>';
+		var button ='<div id="modalFooterRemove"><button id="btnModalExec" type="button" class="btn btn-secondary" data-dismiss="modal">votar</button>';
 			button += '<button id="btnModalExecSkip" type="button" class="btn btn-secondary" data-dismiss="modal">skip</button></div>';
 		if(ws.getEstado()!="fantasma")
 			$('#modalFooter').append(button);
@@ -224,6 +282,40 @@ function ControlWeb(){
 			$('#msg').val('');
 		});
 	}
+	this.mostrarModalAbandonarPartida=function(msg,condition){
+		this.clearModal();
+		var contenidoModal = '<p id="abandonarPartida">'+msg+'</p>';
+		var button='<div id="modalFooterRemove">';
+		button+=condition?'<button id="btnMenu" type="button" data-dismiss="modal" aria-label="Close" class="btn btn-primary">Volver al Menú</button>'
+		:'<button type="button" class="close" data-dismiss="modal" aria-label="Close">Cerrar</button>';
+		button +='</div>';
+
+		$('#contenidoModal').append(contenidoModal);
+		$('#modalFooter').append(button);
+		$('#modalGeneral').modal("show");
+		$('#btnMenu').on('click',function(){
+			$('#game-container').remove();
+			ws.reset();
+			me.clearModal();
+			me.mainMenu();
+		});
+	}
+	this.mostrarModalGanadores=function(msg,condition){
+		this.clearModal();
+		var contenidoModal = '<p id="ganadores">'+msg+'</p>';
+	    var button='<div id="modalFooterRemove"><button id = "btnMenu" type="button" aria-label="Close" data-dismiss="modal" class="btn btn-primary">Volver al Menú</button></div>';
+
+				
+		$('#contenidoModal').append(contenidoModal);
+		$('#modalFooter').append(button);
+		$('#modalGeneral').modal("show");
+		$('#btnMenu').on('click',function(){
+			$('#game-container').remove();
+			ws.reset();
+			me.clearModal();
+			me.mainMenu();
+		});
+	}
 	this.anunciarVotacion=function(msg){
 		this.clearModal();
 		this.mostrarModalSimple(msg);
@@ -232,6 +324,13 @@ function ControlWeb(){
 		$('#avisarImpostor').remove();
 		$('#viewTarea').remove();
 		$('#viewVotacion').remove();
+		$('#btnVotar').remove();
+		$('#abandonarPartida').remove();
+		$('#ganadores').remove();
+		$('#btnMenu').remove();
+		$('#viewMuertos').remove();
+		$('#barraProgreso').remove();
+		$('#modalFooterRemove').remove();
 	}
 }
 
