@@ -83,7 +83,7 @@ function ControlWeb(){
 		$('#esperandoRemove').remove();
 		this.limpiarHTML("esperandoRemove");
 		var esperandoRival = '<div id="esperandoRemove"><div class="row justify-content-center justify-content-md-start">';
-		esperandoRival += '<div class="col-md-4"><label class="labelGeneral" for="num">Jugadores:</label><div id="jugadores" class = "list-group">';
+		esperandoRival += '<div class="col-md-4"><label class="labelGeneral" for="num">Código:'+ws.getCodigo()+'</label><label class="labelGeneral" for="num">Jugadores:</label><div id="jugadores" class = "list-group">';
 				for(var usr in lista)
 					esperandoRival+='<a href="#" class="list-group-item list-group-item-light" value="'+lista[usr].nick+'">'+lista[usr].nick+'</a>';
 			esperandoRival += '</div></div><div class="col-md-4"><div id="waiting">';
@@ -111,7 +111,9 @@ function ControlWeb(){
 
 	this.mostrarPartidasDisponibles = function(lista){
 		console.log("mostrarPartidasDisponibles."+lista);
-		var cadena= '<div id = "listaPartidas"><div class = "list-group">';
+		var cadena= '<div id = "listaPartidas"><div><label id="Nnick" class="labelGeneral" for="usr">Partida Privada:</label>';
+			cadena+='<input id="codePrivate" type="text" placeholder="Introduce aquí el código" value="">';
+			cadena+='</div><div class = "list-group">';
 			for(var partida in lista){
 					cadena+='<a href="#" class="list-group-item" value="'+lista[partida].codigo+'">'+lista[partida].codigo+'<span class="badge">'+lista[partida].ocupado+'/'+lista[partida].maximo+'</span></a>';
 				}
@@ -144,9 +146,9 @@ function ControlWeb(){
 	    });
 
 		$('#btnmUAP').on('click',function(){
-			var codigo = StoreValue[0];
+			var codigo = $('#codePrivate').val()!=""?$('#codePrivate').val():StoreValue[0];
 			if(codigo){
-				ws.unirAPartida(codigo);
+				ws.unirAPartida(codigo.toUpperCase());
 				me.mostrarEsperandoRivales();
 			}
 		});
@@ -174,9 +176,12 @@ function ControlWeb(){
 		if(cadena != "mUAP")$('#mUAP').remove();
 		if(cadena != "esperandoRemove")$('#esperandoRemove').remove();
 		if(cadena != "initialGame") $('#initialGame').remove();
+		if(cadena != "barraProgreso") $('#barraProgreso').remove();
+
 	}
 	this.mostrarBarra=function(){
 		this.clearModal();
+		this.limpiarHTML("#barraProgreso");
 		$('#barra').append('<div id="barraProgreso" class="row"></div>');
 	}
 	this.mostrarPorcentaje=function(porcentaje){
@@ -191,8 +196,8 @@ function ControlWeb(){
 	};
 	this.mostrarJuego=function(){
 		$('game-container').remove();
-		var game = '<div id="game-container">';
-		var button = '<button id="btnAbandonarPartida" type="button" class="btn btn-primary">Abandonar Partida</button></div>';
+		var game = '<div id="game-container"><div id="barra"></div><div>';
+		var button = '<button id="btnAbandonarPartida" type="button" class="btn btn-primary">Abandonar Partida</button></div></div>';
 		$('#game').append(game+button)
 		$('#btnAbandonarPartida').on('click',function(){
 			ws.abandonarPartida(true);
@@ -329,7 +334,6 @@ function ControlWeb(){
 		$('#ganadores').remove();
 		$('#btnMenu').remove();
 		$('#viewMuertos').remove();
-		$('#barraProgreso').remove();
 		$('#modalFooterRemove').remove();
 	}
 }

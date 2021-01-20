@@ -259,7 +259,11 @@ function lanzarJuego(){
     /*Esta funcion se encarga de eliminar todos las tumbas, 
       si se ha llamado ha reportar*/
     var i = 0;
-    for(i=0;i<muertos.children.size;i++){
+    ws.console(muertos)
+    ws.console(muertos.children.size)
+    for(i=0;i<=muertos.children.size;i++){
+      ws.console(muertos)
+    ws.console(muertos.children.size)
         muertos.children.entries[0].destroy();
       }
   }

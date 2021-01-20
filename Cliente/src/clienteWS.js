@@ -127,7 +127,7 @@ function ClienteWS (name,controlWeb){
 		this.socket.emit('realizarTarea',this.getNick(),this.getCodigo(),nombre);
 	}
 	this.consultarLayout = function(nombre){
-		this.socket.emit('consultarLayout',this.getNick(),this.getCodigo(),nombre);
+		this.socket.emit('consultarLayout',this.getNick(),this.getCodigo(),nombre,this.estado);
 	}
 	this.atacar = function(tripulante){
 		this.socket.emit('enviarAtaque',this.getNick(),this.getCodigo(),tripulante);
@@ -227,7 +227,7 @@ function ClienteWS (name,controlWeb){
 			console.log(data);
 			if(data.fase =="votacion"){
 				votarOn=false;
-				ws.fase="votacion";
+				ws.fase=data.fase;
 				report();
 				cw.mostrarVotaciones(data.lista);
 			}
@@ -288,7 +288,7 @@ function ClienteWS (name,controlWeb){
 		});
 		this.socket.on('consultarLayout',function(data){
 			layoutOn=data;
-		})
+		});
 	}
 	this.ini();
 }

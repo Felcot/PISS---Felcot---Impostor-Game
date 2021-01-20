@@ -50,7 +50,6 @@ function ServidorWS(){
 		    	cli.enviarATodosMenosRemitente(socket,codigo,"haAbandonadoPartida",data);
 		    	cli.enviarRemitente(socket,"hasAbandonadoPartida",data);
 		    	if(condition){ 
-		    		console.log("entra por aqui");
 		    		cli.evaluarPartida(io,juego,codigo);
 		    	}else{
 		    		var lista =  juego.listarJugadores(codigo);
@@ -106,7 +105,6 @@ function ServidorWS(){
 		    	var partida = juego.getPartida(codigo);
 		    	console.log("serverWS.eviarAtaque: Impostor --> "+impostor+" Tripulanteeee --> "+tripulante);
 		    	if(partida.impostorMatar(impostor,tripulante)){
-		    		//console.log("enviarAtaque.tripulante["+tripulante+"]");
 		    		cli.enviarATodos(io,codigo,"recibirAtaque",tripulante);
 		    	}
 		    	cli.enviarRemitente(socket,"ataqueRealizado",true);
@@ -143,14 +141,14 @@ function ServidorWS(){
 			    cli.evaluarPartida(io,juego,codigo);
 		    	/*estadoPartida ? cli.enviarATodos(socket,"terminarPartida",data):console.log(estadoPartida);*/
 		    });
-		    socket.on('consultarLayout',function(nick,codigo,info){
+		    socket.on('consultarLayout',function(nick,codigo,info,estado){
 		    	console.log("ServidorWS.consultarLayout."+nick+"."+codigo+"."+info);
 		    	var partida = juego.getPartida(codigo);
 		    	cli.enviarRemitente(socket,"consultarLayout",true);
 		    	if(partida.esJugando()){
 		    		info=="tareas"?cli.enviarRemitente(socket,"anunciarTareas",""):
 		    		info=="muertos"?cli.enviarRemitente(socket,"anunciarMuertos",partida.listarJugadorBy("fantasma")):
-		    		info=="report"?cli.enviarRemitente(socket,"iniciarReport",""):console.log("error.consultarLayout.NoneItsEquals");
+		    		info=="report"&& estado == "vivo"?cli.enviarRemitente(socket,"iniciarReport",""):console.log("error.consultarLayout.NoneItsEquals");
 		    	}
 		    });
 		    socket.on('chat',function(nick,codigo,msg,estado){

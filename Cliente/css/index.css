@@ -9,12 +9,15 @@ body{
 }
 h3{
 	font-family: Century Gothic;
-	font-size: 1000%;
+	font-size: 125px;
 	-webkit-text-stroke: 2px black;
 	text-shadow: 0.1em 0.1em 0.2em black;
 	color: white;
 	padding-top: 2%;
 	padding-bottom: 5%
+}
+#icon{
+	width:100px;height: 100px;float: left;margin-top: 6%;
 }
 #waiting{
 	width: 40%;

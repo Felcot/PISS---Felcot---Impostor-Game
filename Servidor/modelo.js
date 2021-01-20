@@ -283,9 +283,9 @@ function Partida(max,min,owner,codigo,juego,NumImpostores,NumTareas,propiedad){
 	}
 	this.puedeEvaluarPartida=function(){
 		if(this.tareasCompletadas==this.total_tareas){
-			this.fase = new Final('Tripulantes')
+			this.fase = new Final('Tripulantes');
 		}else{
-			F =(impostores,crewmates) => {return impostores == crewmates;};
+			F =(impostores,crewmates) => {return impostores >= crewmates;};
 			let cond = this.contenedor.evaluarIC(F);
 			this.comprobarPartida(cond,'impostores');
 			
@@ -316,9 +316,9 @@ function Partida(max,min,owner,codigo,juego,NumImpostores,NumTareas,propiedad){
 		return this.usuarios[impostor].matar(tripulante);
 	}
 	this.matar=function(nick){
-		this.usuarios[nick].asesinado();
+		var result = this.usuarios[nick].asesinado();
 		this.contenedor.eliminar(nick,this.usuarios[nick].impostor,this);
-		return true;
+		return result;
 	}
 
 	this.report = function(){
@@ -1009,7 +1009,7 @@ function Usuario(nick,juego){
 	}
 
 	this.asesinado = function(){
-		this.estado.asesinado(this);
+		return this.estado.asesinado(this);
 	}
 	this.elegirPersonaje=function(id){
 		this.partida.elegirPersonaje(this,id);
@@ -1032,6 +1032,7 @@ function Vivo(){
 	}
 	this.asesinado = function(usr){
 		usr.estado = new Fantasma();
+		return true;
 	}
 	this.votar = function(usr,nick,partida){
 		partida.votar(usr,nick);
@@ -1059,9 +1060,7 @@ function Fantasma(){
 		try{
 			throw new Exception("FA01");
 		}catch(Exception){
-		   /* El tratamiento esta realizado en
-			* Exception
-			*/
+		   return false;
 		}
 	}
 	this.votar=function(nick,partida){
