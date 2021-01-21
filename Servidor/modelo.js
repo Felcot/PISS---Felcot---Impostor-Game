@@ -196,10 +196,15 @@ function Partida(max,min,owner,codigo,juego,NumImpostores,NumTareas,propiedad,co
 			var lista = this.listarPersonajesLibres();
 			this.elegirPersonaje(usr,lista[0]);
 		}else{
+			var personaje =usr.getPersonaje();
+			if(personaje != undefined){
+				this.sprites[personaje].elegido=false;
+			}
 			usr.setPersonaje(this.sprites[id].id);
 			this.sprites[id].elegido = true;
 		}	
 	}
+
 	this.listarPersonajesLibres=function(){
 		var result = [];
 		for (var id = 0; id < this.sprites.length;id++){
@@ -242,8 +247,11 @@ function Partida(max,min,owner,codigo,juego,NumImpostores,NumTareas,propiedad,co
 	this.iniciarPartida=function(){
 			return this.fase.iniciarPartida(this);
 	}
-	this.abandonarPartida=function(nick){
+	this.abandonarPartida=function(nick,personaje){
 		console.log("abandonarPartida."+this.fase.nombre+"."+nick);
+		if(personaje != undefined){
+				this.sprites[personaje].elegido=false;
+			}
 		this.fase.abandonarPartida(nick,this);
 		return this.getUsuarios(nick);
 	}
@@ -1010,7 +1018,7 @@ function Usuario(nick,juego){
 		return this.partida.getCodigo();
 	}
 	this.abandonarPartida=function(){
-		return (!this.partida.abandonarPartida(this.nick)); // si true entonces abandona partida
+		return (!this.partida.abandonarPartida(this.nick,this.personaje)); // si true entonces abandona partida
 	}
 	this.expulsarJugador=function(nick){
 		this.partida.expulsarJugador(nick);
@@ -1037,6 +1045,7 @@ function Usuario(nick,juego){
 	}
 	//Permite establecer un personaje.
 	this.setPersonaje=function(personaje){
+		if(personaje != undefined) 
 		this.personaje = personaje;
 		console.log("El usuario--->"+this.getNick()+" ha recibido el personaje:"+this.getPersonaje());
 	} 
