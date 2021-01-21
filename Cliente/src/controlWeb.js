@@ -50,10 +50,14 @@ function ControlWeb(){
 					cadena+='<input type="number" class="form-control" id="max" min="4" max="8" value="4">';
 					cadena+='<label class="labelGeneral" for="num">Número de Impostores:</label>';
 					cadena+='<input type="number" class="form-control" id="numImpos" min="1" max="3" value="1">';
+					cadena+='<label class="labelGeneral" for="num">Kill cooldown:</label>';
+					cadena+='<input type="number" class="form-control" id="cooldown" min="20" max="30" value="20">';
 					cadena+='<label class="labelGeneral" for="num">Número Tareas:</label>';
 					cadena+='<input type="number" class="form-control" id="numTarea" min="1" max="4" value="1">';
 					cadena+='<label class="labelGeneral" for="num">Partida propiedad:</label>';
 					cadena+='<input type="checkbox" id="propiedad">';
+					
+					
 				cadena+='</div>';
 				cadena+='<button id = "btnCP" type="button" class="btn btn-primary">Crear</button><button id = "btnMainMenu" type="button" data-dismiss="modal" class="btn btn-primary">Volver al Menú</button>'
 			cadena+='</div>';
@@ -71,10 +75,11 @@ function ControlWeb(){
 			var max = $('#max').val();
 			var numImpos = $('#numImpos').val();
 			var numTarea = $('#numTarea').val();
+			var cooldown = $('#cooldown').val();
 			var propiedad = document.getElementById('propiedad').checked;
-			console.log(max+"."+numImpos+"."+numTarea+"."+propiedad);
+			console.log(max+"."+numImpos+"."+numTarea+"."+propiedad+"."+cooldown);
 			$('#mostrarCP').remove();
-			ws.crearPartida(max,numImpos,numTarea,propiedad);
+			ws.crearPartida(max,numImpos,numTarea,propiedad,cooldown);
 		});
 	}
 
@@ -191,7 +196,7 @@ function ControlWeb(){
 	this.mostrarBarra=function(){
 		this.clearModal();
 		this.limpiarHTML("#barraProgreso");
-		$('#barra').append('<div id="barraProgreso" class="row"></div><div id="reloj" class="row"></div>');
+		$('#barra').append('<div id="barraProgreso" class="row"></div>'+(ws.impostor?'<div id="reloj" class="row"></div>':''));
 	}
 	this.mostrarPorcentaje=function(porcentaje){
 		$('#barraProgresoItem').remove();
@@ -200,7 +205,7 @@ function ControlWeb(){
 	}
 	this.mostrarReloj=function(mseg){
 		$('#relojItem').remove();
-		var relojItem = '<div id="relojItem">Podrás matar'+mseg+'</div>';
+		var relojItem = '<div id="relojItem">'+mseg+'</div>';
 		$('#reloj').append(relojItem);
 	}
 	

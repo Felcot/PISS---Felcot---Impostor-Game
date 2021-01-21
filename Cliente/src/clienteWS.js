@@ -8,16 +8,21 @@ function ClienteWS (name,controlWeb){
 	this.impostor;
 	this.estado;
 	this.encargo;
+	this.time=0;
 	this.heVotado=false;
 	this.ini=function(){
 		this.socket=io.connect();
 		this.lanzarSocketSrv();
 	}
 	this.reloj=function(cont){
-		this.mostrarReloj(cont);
+		setTimeout(function(){ws.mostrarReloj(cont)},1000);
 	}
-	this.mostrarReloj=function(){
-		if(cont!=-1)return;
+	this.mostrarReloj=function(cont){
+		if(cont==-1){
+			ataqueOn=true;
+			return;
+		}
+		cw.mostrarReloj(cont);
 		this.reloj(cont-1);
 	}
 
@@ -90,9 +95,9 @@ function ClienteWS (name,controlWeb){
 		this.encargo=undefined;
 		resetGame();
 	}
-	this.crearPartida = function(max,numImpos,numTarea,propiedad){
+	this.crearPartida = function(max,numImpos,numTarea,propiedad,cooldown){
 		// emit genera una peticion al servidor, se puede paquetizar todo mas con objetos json
-		this.socket.emit('crearPartida',this.getNick(), max,numImpos,numTarea,propiedad);
+		this.socket.emit('crearPartida',this.getNick(), max,numImpos,numTarea,propiedad,cooldown);
 	}
 	this.unirAPartida = function(codigo){
 		this.setCodigo(codigo);
@@ -205,6 +210,8 @@ function ClienteWS (name,controlWeb){
 			}			
 			cli.estado="vivo";
 			cli.fase="jugando";
+			cli.time=parseInt(data.time);
+			cli.reloj(cli.time);
 			cli.obtenerEncargo();
 			cw.mostrarJuego();
 			lanzarJuego();
@@ -285,13 +292,13 @@ function ClienteWS (name,controlWeb){
 			dibujarMuertos(data);
 		});
 		this.socket.on('ataqueRealizado',function(data){
-			ataqueOn = data;
+			cli.reloj(cli.time);
+		});
+		this.socket.on('heIntentadoAtacar',function(data){
+			ataqueOn=data;
 		});
 		this.socket.on('mostrarPorcentaje',function(porcentaje){
 			cw.mostrarPorcentaje(porcentaje);
-		});
-		this.socket.on('mostrarMatar',function(porcentaje){
-			cw.mostrarMatar(porcentaje);
 		});
 		this.socket.on('actualizarEncargo',function(encargo){
 			cli.getEncargo()[encargo.name]= encargo;

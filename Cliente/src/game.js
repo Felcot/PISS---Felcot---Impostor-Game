@@ -53,7 +53,7 @@
     capaLayout=null;
     tareasOn = true;
     layoutOn=true;
-    ataqueOn = true;
+    ataqueOn = false;
     votarOn = true;
     remotos=null;
     muertos=null;
@@ -87,7 +87,7 @@ var tombstoneRecursos = [{frame:0,sprite:"Europa-death"},
   var capaLayout;
   var layoutOn = true;
   var tareasOn = true;
-  var ataqueOn = true;
+  var ataqueOn = false;
   var votarOn = true;
   var remotos;
   var muertos;

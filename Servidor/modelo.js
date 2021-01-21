@@ -6,9 +6,9 @@ function Juego(min,persistencia){
 	this.usuario={};
 	this.cad;
 
-	this.crearPartida=function(nick,max,numImpos,numTarea,propiedad){
+	this.crearPartida=function(nick,max,numImpos,numTarea,propiedad,cooldown){
 			try{
-		console.log("modelo.Juego.crearPartida("+nick+"."+max+"."+numImpos+"."+numTarea+"."+propiedad+")");
+		console.log("modelo.Juego.crearPartida("+nick+"."+max+"."+numImpos+"."+numTarea+"."+propiedad+"."+cooldown+")");
 				if((max < this.minimo) || (max > 10)){
 				 	throw new Exception("N410");
 				}
@@ -16,7 +16,7 @@ function Juego(min,persistencia){
 			let codigo=this.obtenerCodigo();
 
 			if (!this.partidas[codigo]){
-				this.partidas[codigo]= new Partida(max,this.minimo,nick,codigo,this,numImpos,numTarea,propiedad?"privada":"publica");
+				this.partidas[codigo]= new Partida(max,this.minimo,nick,codigo,this,numImpos,numTarea,propiedad?"privada":"publica",cooldown);
 				this.partidas[codigo].iniciarPersonajes();
 				var usr =  this.partidas[codigo].usuarios;
 				this.usuario[nick] = usr[nick];
@@ -126,11 +126,12 @@ function Juego(min,persistencia){
 	this.initCap(persistencia);
 	
 }
-function confContainer(max,min,NumImpostores,NumTareas,propiedad){
+function confContainer(max,min,NumImpostores,NumTareas,propiedad,cooldown){
 	this.MaxJugadores=max;
 	this.MinJugadores=min;
 	this.NumImpostores=NumImpostores;
 	this.NumTareas=NumTareas;
+	this.cooldown=cooldown;
 	this.propiedad=propiedad;
 	this.getMaximo=function(){
 		return this.MaxJugadores;
@@ -144,6 +145,9 @@ function confContainer(max,min,NumImpostores,NumTareas,propiedad){
 	this.getNumTareas=function(){
 		return this.NumTareas;
 	}
+	this.getCooldown=function(){
+		return this.cooldown;
+	}
 	this.getPropiedad=function(){
 		return this.propiedad;
 	}
@@ -154,8 +158,8 @@ function confContainer(max,min,NumImpostores,NumTareas,propiedad){
 		return this.propiedad=="publica";
 	}
 }
-function Partida(max,min,owner,codigo,juego,NumImpostores,NumTareas,propiedad){
-	this.confContainer = new confContainer(max,min,NumImpostores,NumTareas,propiedad);
+function Partida(max,min,owner,codigo,juego,NumImpostores,NumTareas,propiedad,cooldown){
+	this.confContainer = new confContainer(max,min,NumImpostores,NumTareas,propiedad,cooldown);
 	this.codigo = codigo;
 	this.nickOwner=owner;
 	this.fase=new Inicial();

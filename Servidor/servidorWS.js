@@ -23,8 +23,8 @@ function ServidorWS(){
 	this.lanzarSocketSrv = function(io,juego){
 		var cli = this;
 		io.on('connection',function(socket){	// bloques io.on primer mensaje "connection" socket referencia al cliente que lo ha pedido	    
-		    socket.on('crearPartida', function(nick,max,numImpos,numTarea,propiedad) {
-		        var codigo=juego.crearPartida(nick,max,numImpos,numTarea,propiedad);	
+		    socket.on('crearPartida', function(nick,max,numImpos,numTarea,propiedad,cooldown) {
+		        var codigo=juego.crearPartida(nick,max,numImpos,numTarea,propiedad,cooldown);	
 				socket.join(codigo);	      
 				console.log('Usuario: '+nick+" crea partida codigo: "+codigo);
 				var lista = juego.listarJugadores(codigo);
@@ -61,7 +61,7 @@ function ServidorWS(){
 		    	var fase = juego.iniciarPartida(nick,codigo);
 		    	var partida = juego.getPartida(codigo);
 		    	console.log("Impostor ---_----->"+partida.getImpostor());
-		    	var data = {"codigo":codigo,"fase":fase.nombre,"impostor": partida.getImpostor()};
+		    	var data = {"codigo":codigo,"fase":fase.nombre,"impostor": partida.getImpostor(),"time":partida.getConfContainer().getCooldown()};
 		    	fase.nombre == "jugando" ? cli.enviarATodos(io,codigo,"partidaIniciada",data): cli.enviarRemitente(socket,"esperando",data);
 		    	 });
 		    socket.on('listaPartidas',function(nick,codigo){
@@ -111,8 +111,11 @@ function ServidorWS(){
 		    	console.log("serverWS.eviarAtaque: Impostor --> "+impostor+" Tripulanteeee --> "+tripulante);
 		    	if(partida.impostorMatar(impostor,tripulante)){
 		    		cli.enviarATodos(io,codigo,"recibirAtaque",tripulante);
+		    		cli.enviarRemitente(socket,"ataqueRealizado",true);
+		    	}else{
+		    		cli.enviarRemitente(socket,"heIntentadoAtacar",true);
 		    	}
-		    	cli.enviarRemitente(socket,"ataqueRealizado",true);
+		    	
 		    	cli.evaluarPartida(io,juego,codigo);
 		    });
 		    socket.on('pintarTumba',function(codigo,tripulante,personaje) {

@@ -355,7 +355,7 @@ describe("El juego del impostor", function() {
   describe("Evaluar Victoria",function(){
     var codigo;
     beforeEach(function() {
-      codigo = juego.crearPartida(nick,max,1,1,true);
+      codigo = juego.crearPartida(nick,max,1,1,true,0);
     });
       it("Ganan tripulantes",function(){
         juego.unirAPartida(codigo,"ana");
