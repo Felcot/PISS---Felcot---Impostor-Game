@@ -215,7 +215,7 @@ function ControlWeb(){
 	};
 	this.mostrarJuego=function(){
 		$('game-container').remove();
-		var game = '<div id="game-container"><div id="barra"></div><div>';
+		var game = '<div id="game-container"><div id="barra"></div><div style="margin-top:-50px">';
 		var button = '<button id="btnAbandonarPartida" type="button" class="btn btn-primary">Abandonar Partida</button>';
 		button+='<button id="btnVolverVotar" type="button" class="btn btn-primary">Bug en Votar</button></div></div>';
 		$('#game').append(game+button)
