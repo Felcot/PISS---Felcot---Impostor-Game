@@ -5,7 +5,7 @@ function ControlWeb(){
 		this.mainMenu();
 	}
 	this.mainMenu= function(){
-		this.limpiarHTML("mainRemove");
+		this.limpiarHTML();
 		var html = '<div id="mainRemove">';
 		if(ws == undefined){
 			html += this.mostrarRegistrarse();
@@ -82,7 +82,7 @@ function ControlWeb(){
 	this.mostrarEsperandoRivales= function(lista){
 		$('#esperandoRemove').remove();
 		this.limpiarHTML("esperandoRemove");
-		var esperandoRival = '<div id="esperandoRemove"><div class="row justify-content-center justify-content-md-start">';
+		var esperandoRival = '<div id="personaje"></div><div id="esperandoRemove"><div class="row justify-content-center justify-content-md-start">';
 		esperandoRival += '<div class="col-md-4"><label class="labelGeneral" for="num">Código:'+ws.getCodigo()+'</label><label class="labelGeneral" for="num">Jugadores:</label><div id="jugadores" class = "list-group">';
 				for(var usr in lista)
 					esperandoRival+='<a href="#" class="list-group-item list-group-item-light" value="'+lista[usr].nick+'">'+lista[usr].nick+'</a>';
@@ -93,8 +93,10 @@ function ControlWeb(){
 			esperandoRival += '<div class = "col-md-4">'
 			esperandoRival += this.mostrarChat();
 			esperandoRival +='</div>';	
-			esperandoRival += ws.isOwner()? '</div><div id="ownerGame"></div></div>':'<button id="btnAbandonarPartida" type="button" class="btn btn-primary">Abandonar Partida</button></div></div>';
-		
+			
+			esperandoRival += ws.isOwner()? '</div><div id="ownerGame">':'<button id="btnAbandonarPartida" type="button" class="btn btn-primary">Abandonar Partida</button>';
+		esperandoRival+='<button id="btnElegirPersonajeEsperando" type="button" class="btn btn-primary">Elegir personaje</button></div></div>';
+
 		$('#esperandoRival').append(esperandoRival);
 		$('#btn-msg').on('click',function(){
 			var msg = $('#msg').val();
@@ -105,8 +107,15 @@ function ControlWeb(){
 		$('#btnAbandonarPartida').on('click',function(){
 			ws.abandonarPartida(false);
 		});
+		$('#btnElegirPersonajeEsperando').on('click',function(){
+			ws.obtenerPersonajes();
+		});
 		this.mostrarInicarPartida();
 		
+	}
+	this.mostrarPersonaje=function(id){
+		$('#viewPersonaje').remove();
+		$('#personaje').append('<div id="viewPersonaje"><img src="Cliente/assets/images/personaje'+id+'.png"></div>');
 	}
 
 	this.mostrarPartidasDisponibles = function(lista){
@@ -171,23 +180,28 @@ function ControlWeb(){
 	}
 	this.limpiarHTML=function(cadena){
 		
-		if(cadena != "mainRemove")$('#mainRemove').remove();
-		if(cadena != "mostrarCP")$('#mostrarCP').remove();
-		if(cadena != "mUAP")$('#mUAP').remove();
-		if(cadena != "esperandoRemove")$('#esperandoRemove').remove();
-		if(cadena != "initialGame") $('#initialGame').remove();
-		if(cadena != "barraProgreso") $('#barraProgreso').remove();
+		$('#mainRemove').remove();
+		$('#mostrarCP').remove();
+		$('#mUAP').remove();
+		$('#esperandoRemove').remove();
+		$('#initialGame').remove();
+		$('#barraProgreso').remove();
 
 	}
 	this.mostrarBarra=function(){
 		this.clearModal();
 		this.limpiarHTML("#barraProgreso");
-		$('#barra').append('<div id="barraProgreso" class="row"></div>');
+		$('#barra').append('<div id="barraProgreso" class="row"></div><div id="reloj" class="row"></div>');
 	}
 	this.mostrarPorcentaje=function(porcentaje){
 		$('#barraProgresoItem').remove();
 		var barraProgreso = '<div id="barraProgresoItem">'+(porcentaje?porcentaje%100:0)+'%</div>';
 		$('#barraProgreso').append(barraProgreso);
+	}
+	this.mostrarReloj=function(mseg){
+		$('#relojItem').remove();
+		var relojItem = '<div id="relojItem">Podrás matar'+mseg+'</div>';
+		$('#reloj').append(relojItem);
 	}
 	
 	this.inyectarMensaje= function(data){
@@ -197,10 +211,14 @@ function ControlWeb(){
 	this.mostrarJuego=function(){
 		$('game-container').remove();
 		var game = '<div id="game-container"><div id="barra"></div><div>';
-		var button = '<button id="btnAbandonarPartida" type="button" class="btn btn-primary">Abandonar Partida</button></div></div>';
+		var button = '<button id="btnAbandonarPartida" type="button" class="btn btn-primary">Abandonar Partida</button>';
+		button+='<button id="btnVolverVotar" type="button" class="btn btn-primary">Bug en Votar</button></div></div>';
 		$('#game').append(game+button)
 		$('#btnAbandonarPartida').on('click',function(){
 			ws.abandonarPartida(true);
+		});
+		$('#btnVolverVotar').on('click',function(){
+			ws.volverVotacion();
 		});
 	}
 	this.mostrarChat = function(){
@@ -274,11 +292,13 @@ function ControlWeb(){
 	    });
 		$('#btnModalExec').on('click',function(){
 			var votado = StoreValue[0];
+			ws.heVotado=false;
 			ws.votar(votado);
 			$('#btnVotar').remove();
 		});
 		$('#btnModalExecSkip').on('click',function(){
 			StoreValue = [];
+			ws.heVotado=false;
 			ws.votar("skip");
 			$('#btnVotar').remove();
 		});
@@ -300,6 +320,7 @@ function ControlWeb(){
 		$('#modalGeneral').modal("show");
 		$('#btnMenu').on('click',function(){
 			$('#game-container').remove();
+			$('#viewPersonaje').remove();
 			ws.reset();
 			me.clearModal();
 			me.mainMenu();
@@ -316,6 +337,7 @@ function ControlWeb(){
 		$('#modalGeneral').modal("show");
 		$('#btnMenu').on('click',function(){
 			$('#game-container').remove();
+			$('#viewPersonaje').remove();
 			ws.reset();
 			me.clearModal();
 			me.mainMenu();
@@ -324,6 +346,42 @@ function ControlWeb(){
 	this.anunciarVotacion=function(msg){
 		this.clearModal();
 		this.mostrarModalSimple(msg);
+	}
+	this.mostrarModalElegirPersonaje=function(msg){
+		this.clearModal();
+		var contenidoModal = '<p id="elegirPersonajemodal">'+msg+'</p>';
+	    var button='<div id="modalFooterRemove"><button id = "btnElegirPersonaje" type="button" aria-label="Close" data-dismiss="modal" class="btn btn-primary">Elegir</button></div>';
+
+				
+		$('#contenidoModal').append(contenidoModal);
+		$('#modalFooter').append(button);
+		$('#modalGeneral').modal("show");
+
+			 StoreValue = [];
+		    $(".list-group-item").on('click',function(){
+		        StoreValue = [];
+		        StoreValue.push($(this).attr("value")); // add text to array
+		    });
+
+			$('#btnElegirPersonaje').on('click',function(){
+				var personaje = StoreValue[0];
+				if(personaje){
+					ws.establecePersonaje(personaje);
+				}
+			});
+	}
+	this.mostrarElegirPersonaje=function(lista){
+		this.clearModal();
+		ws.console(lista);
+		var elegirPersonaje = '<div id="elegirPersonajesLista"><div class = "list-group"><table id="elegirPersonajes">';
+			for(var id in lista){
+				elegirPersonaje += lista[id]%4==0?'<tr>':'';
+				elegirPersonaje+='<td><a href="#" class="list-group-item" value="'+lista[id]+'"><img src="Cliente/assets/images/personaje'+lista[id]+'.png"></a></td>';
+				elegirPersonaje += lista[id]%4==3?'</tr>':'';
+			}
+			elegirPersonaje +='</table></div></div>';
+
+			this.mostrarModalElegirPersonaje(elegirPersonaje);
 	}
 	this.clearModal=function(){
 		$('#avisarImpostor').remove();
@@ -335,6 +393,8 @@ function ControlWeb(){
 		$('#btnMenu').remove();
 		$('#viewMuertos').remove();
 		$('#modalFooterRemove').remove();
+		$('#elegirPersonajesLista').remove();
+		$('#elegirPersonajemodal').remove();
 	}
 }
 

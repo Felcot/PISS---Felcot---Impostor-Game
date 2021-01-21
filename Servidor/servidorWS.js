@@ -87,6 +87,11 @@ function ServidorWS(){
 		    	console.log("<<");
 		    	cli.enviarATodos(io,codigo,"activarReport",data);
 		    });
+		    socket.on('volverVotacion',function(nick,codigo){
+		    	console.log("servidorWS.volverVotacion");
+		    	var data={"fase":juego.getPartida(codigo).getFase().nombre,"lista":juego.listarJugadorBy(codigo,"vivo")};
+		    	cli.enviarRemitente(socket,"activarReport",data);
+		    })
 		    socket.on('votar',function(nick,votado,codigo){
 		    	juego.usuario[nick].votar(votado);
 		    	var cond = juego.getPartida(codigo).comprobarVotacion();
@@ -112,7 +117,13 @@ function ServidorWS(){
 		    });
 		    socket.on('pintarTumba',function(codigo,tripulante,personaje) {
 		    	cli.enviarATodos(io,codigo,"pintarTumba",{"tripulante":tripulante,"personaje":personaje});
-		    })
+		    });
+		    socket.on('obtenerPersonajes',function(codigo){
+		    	var partida= juego.getPartida(codigo);
+		    	var data = partida?partida.listarPersonajesLibres():undefined;
+		    	cli.enviarRemitente(socket,'obtenerPersonajes',data);
+
+		    });
 		    socket.on('establecerPersonajeServidor',function(codigo,nick,id){
 		    	var usr = juego.partidas[codigo].usuarios[nick];
 		    	usr.elegirPersonaje(id);

@@ -8,10 +8,19 @@ function ClienteWS (name,controlWeb){
 	this.impostor;
 	this.estado;
 	this.encargo;
+	this.heVotado=false;
 	this.ini=function(){
 		this.socket=io.connect();
 		this.lanzarSocketSrv();
 	}
+	this.reloj=function(cont){
+		this.mostrarReloj(cont);
+	}
+	this.mostrarReloj=function(){
+		if(cont!=-1)return;
+		this.reloj(cont-1);
+	}
+
 	this.getImpostor =function(){
 		return this.impostor;
 	}
@@ -117,6 +126,9 @@ function ClienteWS (name,controlWeb){
 	this.movimiento=function(direccion,x,y){
 		this.socket.emit('movimiento',this.getNick(),this.getCodigo(),direccion,x,y,this.estado,this.personaje);
 	}
+	this.obtenerPersonajes=function(){
+		this.socket.emit('obtenerPersonajes',this.codigo);
+	}
 	this.establecePersonaje=function(id){
 		this.socket.emit('establecerPersonajeServidor',this.getCodigo(),this.getNick(),id);
 	}
@@ -140,6 +152,9 @@ function ClienteWS (name,controlWeb){
 	}
 	this.estamosJugando=function(){
 		return this.fase == "jugando";
+	}
+	this.volverVotacion=function(){
+		if(this.heVotado)this.socket.emit('volverVotacion',this.getNick(),this.getCodigo());
 	}
 	this.lanzarSocketSrv = function(){
 		var cli =  this; // capturar el objeto, porque se hace pisto manchego con las funciones de callback.
@@ -200,8 +215,15 @@ function ClienteWS (name,controlWeb){
 			cli.setEncargo(data.encargo);
 			cw.anunciarTareas(cli.encargo);
 		});
+		this.socket.on('obtenerPersonajes',function(data){
+			if(data){
+				cw.mostrarElegirPersonaje(data);
+			}
+		})
 		this.socket.on('recibirPersonaje',function(personaje){
+			ws.console(personaje);
 			cli.setPersonaje(personaje);
+			cw.mostrarPersonaje(personaje);
 		});
 		this.socket.on('recibirListarPartidas',function(data){
 			console.log(data);
@@ -220,9 +242,11 @@ function ClienteWS (name,controlWeb){
 			votarOn = true;
 			ws.fase="jugando";
 			cw.anunciarVotacion(data.msg);
+			cli.heVotado=false;
 		});
 		
 		this.socket.on('activarReport',function(data){
+			cli.heVotado = true;
 			console.log(cli.getNick() + ".activarReport");
 			console.log(data);
 			if(data.fase =="votacion"){
@@ -266,6 +290,9 @@ function ClienteWS (name,controlWeb){
 		this.socket.on('mostrarPorcentaje',function(porcentaje){
 			cw.mostrarPorcentaje(porcentaje);
 		});
+		this.socket.on('mostrarMatar',function(porcentaje){
+			cw.mostrarMatar(porcentaje);
+		});
 		this.socket.on('actualizarEncargo',function(encargo){
 			cli.getEncargo()[encargo.name]= encargo;
 			tareasOn = true;
@@ -283,12 +310,12 @@ function ClienteWS (name,controlWeb){
 			cw.mostrarMuertos(data);
 		});
 		this.socket.on('iniciarReport',function(data){
-			console.log("iniciarReport");
 			ws.report();
 		});
 		this.socket.on('consultarLayout',function(data){
 			layoutOn=data;
 		});
+
 	}
 	this.ini();
 }

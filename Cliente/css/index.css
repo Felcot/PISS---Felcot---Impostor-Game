@@ -100,10 +100,20 @@ div#btn-msg{
 
 #barraProgreso{
 	border-radius: 5px;
-	border-color: black;
+	border-color: white;
 	border-style: solid;
 	background: grey;
 	height: 30px;
 	width: 100px;
 	color:white;
+}
+#reloj{
+	border-radius: 5px;
+	border-color: white;
+	border-style: solid;
+	opacity: 50%
+	background: grey;
+	height: 50px;
+	width: 50px;
+	color:grey;
 }

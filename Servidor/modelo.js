@@ -1,10 +1,11 @@
 var moduleCad= require('./cad.js');
-function Juego(min){
+function Juego(min,persistencia){
 	this.minimo=min;
 	console.log("Se ha establecido el minimo en: "+this.minimo);
 	this.partidas={};
 	this.usuario={};
-	this.cad =  new moduleCad.Cad();
+	this.cad;
+
 	this.crearPartida=function(nick,max,numImpos,numTarea,propiedad){
 			try{
 		console.log("modelo.Juego.crearPartida("+nick+"."+max+"."+numImpos+"."+numTarea+"."+propiedad+")");
@@ -114,9 +115,16 @@ function Juego(min){
 		return this.getPartida(codigo).listarJugadorBy(estado);
 	}
 	// se realiza la llamada a la conexion con la capa de acceso a datos
-	this.cad.connect(function(db){
-		console.log("conectado a Atlas");
-	});
+	
+	this.initCap=function(persistencia){
+		if(persistencia){
+			this.cad= new moduleCad.Cad();
+			this.cad.connect(function(db){
+				console.log("conectado a Atlas");});
+		}
+	}
+	this.initCap(persistencia);
+	
 }
 function confContainer(max,min,NumImpostores,NumTareas,propiedad){
 	this.MaxJugadores=max;
@@ -131,7 +139,7 @@ function confContainer(max,min,NumImpostores,NumTareas,propiedad){
 		return this.MinJugadores;
 	}
 	this.getNumImpostores=function(){
-		return this.MaxJugadores;
+		return this.NumImpostores;
 	}
 	this.getNumTareas=function(){
 		return this.NumTareas;
@@ -163,6 +171,9 @@ function Partida(max,min,owner,codigo,juego,NumImpostores,NumTareas,propiedad){
 		for (var id = 0; id < spritesNumber; id++){
 			this.sprites.push({"id":id,"elegido":false});
 		} 
+	}
+	this.getConfContainer = function(){
+		return this.confContainer;
 	}
 	this.comprobarVotacion = function(){
 		return this.fase.comprobarVotacion(this);
@@ -247,29 +258,31 @@ function Partida(max,min,owner,codigo,juego,NumImpostores,NumTareas,propiedad){
 	this.AsignarTarea = function(){
 		for(var usr in this.usuarios){
 			if(!this.usuarios[usr].impostor){
-				console.log("AsignarTarea.confContainer("+this.confContainer.getNumTareas()+")");
 				for (var tareaNum = 0; tareaNum < this.confContainer.getNumTareas();) {
-					//TODO - > Configuración
 					var enc = encargo();
 					if(!this.Tareas[usr+enc.getNombre()]){
 						this.usuarios[usr].addEncargo(enc);
 						this.Tareas[usr+enc.getNombre()] = "No Completado"; 
 						this.contenedor.declarar(this.usuarios[usr]);
 						tareaNum+=1;
+
 					}
 				}
 		    }
-			
 		}
-		console.log(this.Tareas);
 		this.total_tareas =sizeDictionary(this.Tareas);
 	}
 	this.AsignarImpostor = function(){
 		let keys = Object.keys(this.usuarios);
-		let usr = this.usuarios[keys[randomInt(0,keys.length)]];
-		usr.impostor = true;
-		usr.addEncargo(new Tarea({"nombre":"impostor","coste":0}));
-		this.contenedor.declarar(usr);
+		for (var impos = 0; impos < this.confContainer.getNumImpostores();) {
+			let usr = this.usuarios[keys[randomInt(0,keys.length)]];
+			if(!usr.impostor){
+				usr.impostor = true;
+				usr.addEncargo(new Tarea({"nombre":"impostor","coste":0}));
+				this.contenedor.declarar(usr);
+				impos+=1;
+			}
+		}
 	}
 	this.puedeIniciarPartida = function(){
 		this.AsignarImpostor();
@@ -833,6 +846,7 @@ function Votacion(){
 		var result = (masVotado!= "skip" && !check)? partida.eyectar(masVotado)
 		:"Nadie ha sido eyectado";
 		console.log("VOTACION-"+masVotado+"-RECUENTO--->"+result);
+		console.log("recuento--->"+partida.fase.nombre);
 		if(partida.fase.nombre != "final")
 			partida.fase = new Jugando();
 		var data = {"votado":masVotado,"msg":result};
@@ -1103,7 +1117,7 @@ function contenedor(){
 	this.crewmate = {}
 
 	this.eliminar=function(nick,cond,partida){
-		if(!partida.fase.esJugando())return;
+		if(!this.isEnable(partida))return;
 		if(cond)
 			delete this.impostor[nick];
 		else

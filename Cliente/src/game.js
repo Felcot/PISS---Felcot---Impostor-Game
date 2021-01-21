@@ -242,6 +242,7 @@ function lanzarJuego(){
     muertos.add(muerto);
     crear.physics.add.overlap(player,muertos,votacion,()=>{return votarOn}); 
     cond? trip.visible=false:trip.setTexture("personajes-fantasma");
+    trip.alpha =0.5;
   }
 
   function votacion(sprite,muerto){
@@ -259,11 +260,7 @@ function lanzarJuego(){
     /*Esta funcion se encarga de eliminar todos las tumbas, 
       si se ha llamado ha reportar*/
     var i = 0;
-    ws.console(muertos)
-    ws.console(muertos.children.size)
-    for(i=0;i<=muertos.children.size;i++){
-      ws.console(muertos)
-    ws.console(muertos.children.size)
+    for(i=0;i<muertos.children.size;i++){
         muertos.children.entries[0].destroy();
       }
   }
