@@ -190,7 +190,6 @@ function ClienteWS (name,controlWeb){
 		});
 		this.socket.on('hasAbandonadoPartida',function(data){
 			if(data.check){
-				cli.console("Hola Abandonando");
 				cw.mostrarModalAbandonarPartida(data.nick+" has abandondo Partida",true);
 				cli.reset();
 			}
@@ -266,9 +265,6 @@ function ClienteWS (name,controlWeb){
 		this.socket.on('dibujarRemoto',function(data){
 			for(var jugador in data)
 				if(data[jugador].nick != cli.getNick()){
-					console.log(">>DibujarRemoto");
-					console.log(data[jugador]);
-					console.log("<<");
 					lanzarJugadorRemoto(data[jugador]);
 				}
 				crearColision();

@@ -230,20 +230,32 @@ function lanzarJuego(){
     ws.estoyDentro();
   }
   
-  
+  function crearFantasma(data){
+    var cond = jugadores[data.tripulante]?true:false;
+    var trip = cond ? jugadores[data.tripulante] : player;
+    cond? remoteTags[data.tripulante].visible=trip.visible=false
+        : trip.setTexture("personajes-fantasma");
+    if(!cond){
+      for(var usr in jugadores){
+        remoteTags[usr].visible=jugadores[usr]=true;
+      }
+    }
+    trip.alpha =0.5;
+  }
   
   function dibujarMuertos(data){
     var cond = jugadores[data.tripulante]?true:false;
     var trip = cond ? jugadores[data.tripulante] : player;
     var x =  trip.x;
     var y = trip.y;
-    var numJugador =  trip.numJugador;
     var muerto = crear.physics.add.sprite(x,y,"tombstone",data.personaje);
     //Alternativa
     // jugadores[inocente].setTexture()
+
     muertos.add(muerto);
     crear.physics.add.overlap(player,muertos,votacion,()=>{return votarOn}); 
-    cond? trip.visible=false:trip.setTexture("personajes-fantasma");
+    cond? remoteTags[data.tripulante].visible=trip.visible=false
+        : trip.setTexture("personajes-fantasma");
     trip.alpha =0.5;
   }
 
@@ -251,10 +263,7 @@ function lanzarJuego(){
     //comprobar si el jugador local pulsa la tecla de votacion por ejemplo la V.
     //Si pulsa la V  entonces se lanza la votación
     if(ws.getEstado() == "vivo" && teclaV.isDown){
-      votarOn = false;    
-      // ws.console(sprite);
-      // ws.console("MUERTO Todo lo de arriba antes era Sprite");
-      ws.console(muertos); 
+      votarOn = false;     
       ws.report();
     }
   }
@@ -275,6 +284,8 @@ function lanzarJuego(){
     var remotoTag = remoteTags[input.nick];
     if(remoto && remotoTag){
       if(input.estado != "fantasma" || ws.getEstado()=="fantasma"){
+        remoto.visible = true;
+        remotoTag.visible=true;
         const speed = 175;
         const prevVelocity = player.body.velocity.clone();
         const sprite = input.estado == "vivo"?recursos[input.id].sprite:fantasmas[input.id].sprite;
