@@ -218,7 +218,7 @@ function ControlWeb(){
 	}
 	this.mostrarPorcentaje=function(porcentaje){
 		$('#barraProgresoItem').remove();
-		var barraProgreso = '<div id="barraProgresoItem">'+(porcentaje?porcentaje%100:0)+'%</div>';
+		var barraProgreso = '<div id="barraProgresoItem">'+(porcentaje?parseInt(porcentaje):0)+'%</div>';
 		$('#barraProgreso').append(barraProgreso);
 	}
 	this.mostrarReloj=function(mseg){
