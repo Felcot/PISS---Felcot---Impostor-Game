@@ -137,7 +137,25 @@ function ControlWeb(){
 	this.actualizarMostrarUnirAPartidas=function(lista){
 		console.log("actualizarMostrarUnirAPartidas."+lista);
 		$('#listaPartidas').remove();
-		$('#listaPartidasContainer').append(this.mostrarPartidasDisponibles(lista));
+		$('#buttonRemoveUnir').remove();
+			var cadena=this.mostrarPartidasDisponibles(lista);
+			cadena+='<div id="buttonRemoveUnir"><button id = "btnmUAP" type="button" class="btn btn-primary">Unirse</button><button id = "btnMainMenu" type="button" class="btn btn-primary">Volver al Menú</button></div>';
+
+		$('#listaPartidasContainer').append(cadena);
+
+		 StoreValue = [];
+	    $(".list-group-item").on('click',function(){
+	        StoreValue = [];
+	        StoreValue.push($(this).attr("value")); // add text to array
+	    });
+
+		$('#btnmUAP').on('click',function(){
+			var codigo = $('#codePrivate').val()!=""?$('#codePrivate').val():StoreValue[0];
+			if(codigo){
+				ws.unirAPartida(codigo.toUpperCase());
+				me.mostrarEsperandoRivales();
+			};
+		})
 	}
 	this.mostrarUnirAPartida = function(lista){
 		console.log("mostrarUnirAPartida."+lista);
@@ -147,8 +165,8 @@ function ControlWeb(){
 			cadena+='<label class="labelGeneral" for="num">Elige y Juega:</label>';
 			cadena+='<div id="listaPartidasContainer">';
 				cadena+=this.mostrarPartidasDisponibles(lista);
+			cadena+='<div id="buttonRemoveUnir"><button id = "btnmUAP" type="button" class="btn btn-primary">Unirse</button><button id = "btnMainMenu" type="button" class="btn btn-primary">Volver al Menú</button></div>';
 			cadena+='</div>';
-			cadena+='<button id = "btnmUAP" type="button" class="btn btn-primary">Unirse</button><button id = "btnMainMenu" type="button" class="btn btn-primary">Volver al Menú</button>'
 			cadena+= '</div>';
 
 		$('#unirAPartida').append(cadena);
