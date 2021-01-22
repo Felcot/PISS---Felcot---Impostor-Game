@@ -36,6 +36,8 @@
   var crear;
   var spawnPoint;
   var id;
+  var nameTag;
+  var remoteTags={};
   function resetGame(){
     if(!game)return; 
     game.destroy();
@@ -270,7 +272,8 @@ function lanzarJuego(){
   }
   function moverRemoto(input){
     var remoto=jugadores[input.nick];
-    if(remoto){
+    var remotoTag = remoteTags[input.nick];
+    if(remoto && remotoTag){
       if(input.estado != "fantasma" || ws.getEstado()=="fantasma"){
         const speed = 175;
         const prevVelocity = player.body.velocity.clone();
@@ -278,12 +281,15 @@ function lanzarJuego(){
         remoto.body.setVelocity(0);
         remoto.setX(input.direccion.x);
         remoto.setY(input.direccion.y);
+        remotoTag.setX(input.direccion.x-25);
+        remotoTag.setY(input.direccion.y-50);
         remoto.body.velocity.normalize().scale(speed);
         var direccion =input.direccion.nombre;
         var condition = (direccion == "left"||direccion == "right"||direccion == "back"||direccion == "front");
             condition ? remoto.anims.play(sprite+"-"+direccion+"-walk",true):remoto.anims.stop();
       }else{
         remoto.visible = false;
+        remotoTag.visible=false;
       }
     }
   }
@@ -315,9 +321,11 @@ function lanzarJuego(){
     crear.physics.add.collider(player, worldLayer);
     crear.physics.add.collider(player,capaTareas ,realizarTareas,()=>{return tareasOn});
     crear.physics.add.collider(player,capaLayout ,consultarLayout,()=>{return layoutOn});
+    nameTag = crear.add.text(player.x-25,player.y-50,ws.nick,{fontSize:'16px',fill:'#75D5E8'});
     camera = crear.cameras.main;
     camera.startFollow(player);
     camera.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
+
   }
 
   function crearColision(){
@@ -341,6 +349,7 @@ function lanzarJuego(){
     jugadores[jugador.nick].nick = jugador.nick;
     jugadores[jugador.nick].personaje=jugador.personaje;
     remotos.add(jugadores[jugador.nick]);
+    remoteTags[jugador.nick]=crear.add.text(spawnPoint.x+20*jugador.personaje-25,spawnPoint.y-50,jugador.nick,{fontSize:'16px',fill:'#DAECF0'});
   }
   function update(time, delta) {
     if(!ws.estamosJugando())return;
@@ -349,6 +358,7 @@ function lanzarJuego(){
     const sprite = ws.getEstado() == "vivo"?recursos[id].sprite:fantasmas[id].sprite;
     // Stop any previous movement from the last frame
     player.body.setVelocity(0);
+    //nameTag.destroy();
     //player2.body.setVelocity(0);
     var direccion = "stop";
     // Horizontal movement
@@ -370,6 +380,9 @@ function lanzarJuego(){
     }
     var x = player.x;
     var y = player.y;
+    nameTag.setX(x-25)
+    nameTag.setY(y-50)
+
     ws.movimiento(direccion,x,y)
     // Normalize and scale the velocity so that player can't move faster along a diagonal
     player.body.velocity.normalize().scale(speed);
