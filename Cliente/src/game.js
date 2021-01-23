@@ -38,28 +38,8 @@
   var id;
   var nameTag;
   var remoteTags={};
-  function resetGame(){
-    if(!game)return; 
-    game.destroy();
-    cursors=null;
-    player=null;
-    jugadores={}; //la colección de jugadores remotos
-    showDebug = false;
-    camera=null;
-    worldLayer=null;
-    map=null;
-    crear=null;
-    spawnPoint=null;
-    id=null;
-    capaTareas=null;
-    capaLayout=null;
-    tareasOn = true;
-    layoutOn=true;
-    ataqueOn = false;
-    votarOn = true;
-    remotos=null;
-    muertos=null;
-  }
+  var memento={}
+  
   var recursos=[{frame:0,sprite:"Europa"},
                 {frame:3,sprite:"Gaia"},
                 {frame:6,sprite:"Apolo"},
@@ -93,6 +73,32 @@ var tombstoneRecursos = [{frame:0,sprite:"Europa-death"},
   var votarOn = true;
   var remotos;
   var muertos;
+  function resetGame(){
+    try{
+    game.destroy();
+    cursors=null;
+    player=null;
+    jugadores={}; //la colección de jugadores remotos
+    showDebug = false;
+    camera=null;
+    worldLayer=null;
+    map=null;
+    crear=null;
+    spawnPoint=null;
+    id=null;
+    capaTareas=null;
+    capaLayout=null;
+    tareasOn = true;
+    layoutOn=true;
+    ataqueOn = false;
+    votarOn = true;
+    remotos=null;
+    muertos=null;
+    nameTag=null;
+    remoteTags={};
+    memento={}
+  }catch(err){}
+}
 function lanzarJuego(){
   game = new Phaser.Game(config);
 }
@@ -102,13 +108,13 @@ function lanzarJuego(){
     this.load.spritesheet("personajes-vivo","Cliente/assets/images/players.png",{frameWidth:32,frameHeight:48});
     this.load.spritesheet("personajes-fantasma","Cliente/assets/images/fantasmas.png",{frameWidth:32,frameHeight:32});
     this.load.spritesheet("tombstone","Cliente/assets/images/tombstone.png",{frameWidth:32,frameHeight:64});
+   
   }
 
   function create() {
     crear=this;
     map = crear.make.tilemap({ key: "map" });
-
-    // Parameters are the name you gave the tileset in Tiled and then the key of the tileset image in
+        // Parameters are the name you gave the tileset in Tiled and then the key of the tileset image in
     // Phaser's cache (i.e. the name you used in preload)
     const tileset = map.addTilesetImage("tuxmon-sample-32px-extruded", "tiles");
      
@@ -249,9 +255,7 @@ function lanzarJuego(){
     var x =  trip.x;
     var y = trip.y;
     var muerto = crear.physics.add.sprite(x,y,"tombstone",data.personaje);
-    //Alternativa
-    // jugadores[inocente].setTexture()
-
+    
     muertos.add(muerto);
     crear.physics.add.overlap(player,muertos,votacion,()=>{return votarOn}); 
     cond? remoteTags[data.tripulante].visible=trip.visible=false
@@ -315,6 +319,9 @@ function lanzarJuego(){
         //cw.mostrarModalTarea(ws.encargo);
       }
   }
+  function tareaCompletada(tarea){
+    memento[tarea].visible=false;
+  }
   function consultarLayout(sprite,objeto){
       //¿El sprite, el jugador local puede realizar la tarea?
       //En tal caso llamar al servidor que puede hacer la tarea, 
@@ -336,7 +343,17 @@ function lanzarJuego(){
     camera = crear.cameras.main;
     camera.startFollow(player);
     camera.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
-
+    var objetosTarea = capaTareas.layer.data;
+    
+    for (var i = 0; i<objetosTarea.length; i++) {
+      for (var j = 0;j<objetosTarea.length; j++) {
+        if(!memento[objetosTarea[i][j].properties.tarea] && objetosTarea[i][j].properties.tarea){
+          memento[objetosTarea[i][j].properties.tarea] =crear.add.text(objetosTarea[i][j].pixelX+6,objetosTarea[i][j].pixelY-30,'!',{fontSize:'30px',fill:'#FF0000'});
+          memento[objetosTarea[i][j].properties.tarea].visible = ws.encargo[objetosTarea[i][j].properties.tarea]?true:false;
+          if(memento["Comprar"])memento["Comprar"].y =22;
+        }
+      }
+    }
   }
 
   function crearColision(){

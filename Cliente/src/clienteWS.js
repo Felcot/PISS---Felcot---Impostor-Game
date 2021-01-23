@@ -297,7 +297,10 @@ function ClienteWS (name,controlWeb){
 			cw.mostrarPorcentaje(porcentaje);
 		});
 		this.socket.on('actualizarEncargo',function(encargo){
-			cli.getEncargo()[encargo.name]= encargo;
+			var userEncargo = cli.getEncargo()[encargo.name]
+			userEncargo = encargo;
+			if(userEncargo.coste<=userEncargo.realizado)
+				tareaCompletada(userEncargo.name);
 			tareasOn = true;
 		});
 		this.socket.on('anunciarGanadores',function(msg){
