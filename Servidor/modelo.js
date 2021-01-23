@@ -8,22 +8,25 @@ function Juego(min,persistencia){
 
 	this.crearPartida=function(nick,max,numImpos,numTarea,propiedad,cooldown){
 			try{
+				let codigo="fallo";
 		console.log("modelo.Juego.crearPartida("+nick+"."+max+"."+numImpos+"."+numTarea+"."+propiedad+"."+cooldown+")");
 				if((max < this.minimo) || (max > 10)){
 				 	throw new Exception("N410");
 				}
 
-			let codigo=this.obtenerCodigo();
-
-			if (!this.partidas[codigo]){
+				do{
+					codigo=this.obtenerCodigo();
+				}while(this.partidas[codigo]);
+			
+			//if (!this.partidas[codigo]){
 				this.partidas[codigo]= new Partida(max,this.minimo,nick,codigo,this,numImpos,numTarea,propiedad?"privada":"publica",cooldown);
 				this.partidas[codigo].iniciarPersonajes();
 				var usr =  this.partidas[codigo].usuarios;
 				this.usuario[nick] = usr[nick];
-			}
+			//}
 			return codigo;
 		}catch(Exception){
-			return "fallo";
+			return codigo/*"fallo"*/;
 		}
 	}
 	
