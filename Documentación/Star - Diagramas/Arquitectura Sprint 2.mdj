@@ -272,7 +272,7 @@
 											"width": 65.00634765625,
 											"height": 13,
 											"underline": true,
-											"text": "Index.html"
+											"text": "Index.js"
 										},
 										{
 											"_type": "LabelView",
@@ -826,7 +826,7 @@
 											"width": 65.00634765625,
 											"height": 13,
 											"underline": true,
-											"text": "Index.html"
+											"text": "Index.js"
 										},
 										{
 											"_type": "LabelView",
@@ -1945,7 +1945,7 @@
 							"_parent": {
 								"$ref": "AAAAAAF1A/mgLy5cE10="
 							},
-							"name": "Index.html",
+							"name": "Index.js",
 							"ownedElements": [
 								{
 									"_type": "UMLDependency",
