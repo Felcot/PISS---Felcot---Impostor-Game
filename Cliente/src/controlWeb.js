@@ -90,7 +90,7 @@ function ControlWeb(){
 		$('#esperandoRemove').remove();
 		this.limpiarHTML("esperandoRemove");
 		var esperandoRival = '<div id="personaje"></div><div id="esperandoRemove"><div class="row justify-content-center justify-content-md-start">';
-		esperandoRival += '<div class="col-md-4"><label class="labelGeneral" for="num">Código:'+ws.getCodigo()+'</label><label class="labelGeneral" for="num">Jugadores:</label><div id="jugadores" class = "list-group">';
+		esperandoRival += '<div class="col-md-4"><label class="labelGeneral" for="num">Código:'+ws.getCodigo()+'</label><br/><label class="labelGeneral" for="num">Jugadores:</label><div id="jugadores" class = "list-group">';
 				for(var usr in lista)
 					esperandoRival+='<a href="#" class="list-group-item list-group-item-light" value="'+lista[usr].nick+'">'+lista[usr].nick+'</a>';
 			esperandoRival += '</div></div><div class="col-md-4"><div id="waiting">';
