@@ -176,6 +176,7 @@ function ClienteWS (name,controlWeb){
 		});
 		this.socket.on('unidoAPartida',function(data){
 			console.log(data)
+			cli.nick = data.nick;
 			cw.mostrarEsperandoRivales(data.lista);
 		});
 		this.socket.on('nuevoJugador',function(data){

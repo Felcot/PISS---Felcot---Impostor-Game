@@ -36,11 +36,12 @@ function ServidorWS(){
 
 		    socket.on('unirAPartida',function(nick,codigo){
 		    	console.log('El usuario: '+ nick + ' quiere unirse a la partida '+codigo);
-		    	var result = juego.unirAPartida(codigo,nick);
+		    	var payload = juego.unirAPartida(codigo,nick);
+		    	console.log(payload);
 		    	socket.join(codigo);
 		    	var lista =  juego.listarJugadores(codigo);
 
-		    	cli.enviarRemitente(socket,"unidoAPartida",{"codigo" : codigo,"lista":lista});
+		    	cli.enviarRemitente(socket,"unidoAPartida",{"nick":payload.nick,"codigo" : codigo,"lista":lista});
 		    	cli.enviarATodosMenosRemitente(socket,codigo,"nuevoJugador",lista);
 		    });
 		    socket.on('abandonarPartida',function(nick,codigo,condition){

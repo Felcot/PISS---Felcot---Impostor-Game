@@ -32,7 +32,7 @@ function Juego(min,persistencia){
 	
 	this.unirAPartida=function(codigo,nick){
 		if (this.partidas[codigo]){
-			this.partidas[codigo].agregarUsuario(nick);
+			return this.partidas[codigo].agregarUsuario(nick);
 		}
 	}
 
@@ -228,9 +228,10 @@ function Partida(max,min,owner,codigo,juego,NumImpostores,NumTareas,propiedad,co
 		return this.confContainer.esPublica();
 	}
 	this.agregarUsuario=function(nick){
-		this.fase.agregarUsuario(nick,this);
+		return this.fase.agregarUsuario(nick,this);
 	}
 	this.puedeAgregarUsuario=function(nick){
+		var payload = {"nick":nick,"check":false};
 		let nuevo=nick;
 		let contador=1;
 		while(this.usuarios[nuevo]){
@@ -240,6 +241,9 @@ function Partida(max,min,owner,codigo,juego,NumImpostores,NumTareas,propiedad,co
 		this.usuarios[nuevo]=new Usuario(nuevo);
 		this.juego.nuevoUsuario(this.usuarios[nuevo]);
 		this.usuarios[nuevo].partida = this;
+		payload.nick = nuevo;
+		payload.check=true;
+		return payload;
 	}
 	this.comprobarMinimo=function(){
 		return sizeDictionary(this.usuarios)>=this.confContainer.getMinimo();
@@ -418,10 +422,11 @@ function Partida(max,min,owner,codigo,juego,NumImpostores,NumTareas,propiedad,co
 function Inicial(){
 	this.nombre="inicial";
 	this.agregarUsuario=function(nick,partida){
-		partida.puedeAgregarUsuario(nick);
+		var payload = partida.puedeAgregarUsuario(nick);
 		if (partida.comprobarMinimo()){
 			partida.fase=new Completado();
-		}		
+		}
+		return payload;		
 	}
 	this.esJugando=function(){
 		return false;
@@ -528,7 +533,7 @@ function Completado(){
 	}
 	this.agregarUsuario=function(nick,partida){
 		if (partida.comprobarMaximo()){
-			partida.puedeAgregarUsuario(nick);
+			return partida.puedeAgregarUsuario(nick);
 		}
 		else{
 			try{
