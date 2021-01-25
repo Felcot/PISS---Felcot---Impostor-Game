@@ -47,13 +47,13 @@ function ControlWeb(){
 		var cadena =  '<div id="mostrarCP">' 
 				cadena+='<div class="form-group">';
 					cadena+='<label class="labelGeneral" for="num">Número Máximo:</label>';
-					cadena+='<input type="number" class="form-control" id="max" min="4" max="8" value="4">';
+					cadena+='<input type="number" path="note" class="form-control" id="max" min="4" max="8" value="4">';
 					cadena+='<label class="labelGeneral" for="num">Número de Impostores:</label>';
-					cadena+='<input type="number" class="form-control" id="numImpos" min="1" max="3" value="1">';
+					cadena+='<input type="number" path="note" class="form-control" id="numImpos" min="1" max="3" value="1">';
 					cadena+='<label class="labelGeneral" for="num">Kill cooldown:</label>';
-					cadena+='<input type="number" class="form-control" id="cooldown" min="20" max="30" value="20">';
+					cadena+='<input type="number" path="note" class="form-control" id="cooldown" min="20" max="30" value="20">';
 					cadena+='<label class="labelGeneral" for="num">Número Tareas:</label>';
-					cadena+='<input type="number" class="form-control" id="numTarea" min="1" max="4" value="1">';
+					cadena+='<input type="number" path="note" class="form-control" id="numTarea" min="1" max="4" value="1">';
 					cadena+='<label class="labelGeneral" for="num">Partida propiedad:</label>';
 					cadena+='<input type="checkbox" id="propiedad">';
 					
