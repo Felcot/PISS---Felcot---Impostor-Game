@@ -48,7 +48,8 @@ function Juego(min,persistencia){
 	}
 	
 	this.eliminarPartida= function(codigo){
-		delete this.partida[codigo];
+		if(this.partida[codigo])
+			delete this.partida[codigo];
 	}
 	this.listarPartidasDisponibles=function(){
 
@@ -87,11 +88,14 @@ function Juego(min,persistencia){
 			console.log("no existe ese codigo");
 	}
 	this.usuario=function(nick){
-		return this.usuario[nick];
+		if(this.usuario[nick])
+			return this.usuario[nick];
 	}
 	this.nuevoUsuario= function(usr){
-		var nick = usr.getNick();
-		this.usuario[nick] = usr;
+		if(usr){
+			var nick = usr.getNick();
+			this.usuario[nick] = usr;
+		}
 	}
 
 	this.iniciarPartida = function(nick){

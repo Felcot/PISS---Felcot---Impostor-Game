@@ -18,7 +18,7 @@ function ControlWeb(){
 
 		$('#btnRegister').on('click',function(){
 			var nick = $('#nick').val();
-			if(nick){
+			if(me.isValid(nick)){
 				ws =  new ClienteWS(nick);
 				$('#register').remove();
 				me.mainMenu();
@@ -77,9 +77,11 @@ function ControlWeb(){
 			var numTarea = $('#numTarea').val();
 			var cooldown = $('#cooldown').val();
 			var propiedad = document.getElementById('propiedad').checked;
+			
 			console.log(max+"."+numImpos+"."+numTarea+"."+propiedad+"."+cooldown);
 			$('#mostrarCP').remove();
 			ws.crearPartida(max,numImpos,numTarea,propiedad,cooldown);
+			
 		});
 	}
 
@@ -151,11 +153,11 @@ function ControlWeb(){
 
 		$('#btnmUAP').on('click',function(){
 			var codigo = $('#codePrivate').val()!=""?$('#codePrivate').val():StoreValue[0];
-			if(codigo){
+			if(me.isValid(codigo)){
 				ws.unirAPartida(codigo.toUpperCase());
 				me.mostrarEsperandoRivales();
-			};
-		})
+			}
+		});
 	}
 	this.mostrarUnirAPartida = function(lista){
 		console.log("mostrarUnirAPartida."+lista);
@@ -179,7 +181,7 @@ function ControlWeb(){
 
 		$('#btnmUAP').on('click',function(){
 			var codigo = $('#codePrivate').val()!=""?$('#codePrivate').val():StoreValue[0];
-			if(codigo){
+			if(me.isValid(codigo)){
 				ws.unirAPartida(codigo.toUpperCase());
 				me.mostrarEsperandoRivales();
 			}
@@ -255,7 +257,7 @@ function ControlWeb(){
 	this.buildListaJugadores=function(lista){
 		var jugadores = '<div id="votaciones"><div class = "list-group">';
 			for(var nick in lista)
-				jugadores+='<a href="#" class="list-group-item" value="'+lista[nick]+'">'+lista[nick]+'</a>';
+				jugadores+='<a href="#" style="padding:2px" class="list-group-item" value="'+lista[nick]+'">'+lista[nick]+'</a>';
 			jugadores +='</div></div>';
 		return jugadores;
 	}
@@ -274,7 +276,6 @@ function ControlWeb(){
 	}
 	this.anunciarTareas=function(lista){
 		this.clearModal();
-		ws.console("HOLA MUNDO");
 		var listaEncargos = '<ul id="listaEncargos">';
 		ws.console(lista);
 		for(var enc in lista){
@@ -300,8 +301,8 @@ function ControlWeb(){
 		this.clearModal();
 		var contenidoModal = '<div id="viewVotacion" class="modal-body"><div class="container-fluid">';
     	contenidoModal +='<div class="row"><div class="col-md-2">'+msg+'</div>';
-		contenidoModal += '<div class="col-md-4">'+this.mostrarChat()+'</div></div></div></div>';
-		var button ='<div id="modalFooterRemove"><button id="btnModalExec" type="button" class="btn btn-secondary" data-dismiss="modal">votar</button>';
+		contenidoModal += '<div class="col-md-8">'+this.mostrarChat()+'</div></div></div></div>';
+		var button ='<div id="modalFooterRemove"><button id="btnModalExec" type="button" class="btn btn-secondary">votar</button>';
 			button += '<button id="btnModalExecSkip" type="button" class="btn btn-secondary" data-dismiss="modal">skip</button></div>';
 		if(ws.getEstado()!="fantasma")
 			$('#modalFooter').append(button);
@@ -315,18 +316,22 @@ function ControlWeb(){
 	    });
 		$('#btnModalExec').on('click',function(){
 			var votado = StoreValue[0];
-			ws.heVotado=false;
-			ws.votar(votado);
-			$('#btnVotar').remove();
+			if(me.isValid(votado)){
+				ws.heVotado=false;
+				ws.votar(votado);
+				$('#modalFooterRemove').remove();
+			}	
 		});
 		$('#btnModalExecSkip').on('click',function(){
 			StoreValue = [];
 			ws.heVotado=false;
 			ws.votar("skip");
-			$('#btnVotar').remove();
+			$('#modalFooterRemove').remove();
 		});
 		$('#btn-msg').on('click',function(){
-			ws.sendMensaje($('#msg').val());
+			var msg = $('#msg').val();
+			if(msg!='')
+			ws.sendMensaje(msg);
 			$('#msg').val('');
 		});
 	}
@@ -418,6 +423,9 @@ function ControlWeb(){
 		$('#modalFooterRemove').remove();
 		$('#elegirPersonajesLista').remove();
 		$('#elegirPersonajemodal').remove();
+	}
+	this.isValid=function(evaluated){
+	return evaluated?true:false;
 	}
 }
 
