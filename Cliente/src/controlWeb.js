@@ -192,7 +192,7 @@ function ControlWeb(){
 		});
 	}
 	this.mostrarInicarPartida=function(){
-		var ownerGame = '<div id="initialGameButton">';
+		var ownerGame = '<div id="initialGameButton>';
 			ownerGame +='<button id = "btnInitGame" type="button" class="btn btn-primary">Iniciar Partida</button>'
 			ownerGame += '</div>'
 		$('#ownerGame').append(ownerGame);
