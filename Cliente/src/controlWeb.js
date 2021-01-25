@@ -87,7 +87,7 @@ function ControlWeb(){
 		});
 	}
 	this.createValid = function(max,numImpos,numTarea,cooldown){
-		return max>=4&&max<=8&&numImpos<=3&&numImpos>1=&&numTarea<=4&&numTarea>=1&&cooldown<=30 && cooldown>=20;
+		return max>=4 && max<=8 && numImpos<=3 && numImpos>=1 && numTarea<=4 && numTarea>=1 && cooldown<=30 && cooldown>=20;
 	}
 
 	this.mostrarEsperandoRivales= function(lista){

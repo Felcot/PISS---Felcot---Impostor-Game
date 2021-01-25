@@ -288,7 +288,6 @@ function Partida(max,min,owner,codigo,juego,NumImpostores,NumTareas,propiedad,co
 						this.Tareas[usr+enc.getNombre()] = "No Completado"; 
 						this.contenedor.declarar(this.usuarios[usr]);
 						tareaNum+=1;
-
 					}
 				}
 		    }
