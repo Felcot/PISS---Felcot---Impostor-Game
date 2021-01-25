@@ -41,19 +41,19 @@ function ControlWeb(){
 					register+='<div class="col-md-5"></div><div id="d-btnRegister" class="col-md-2"><button id = "btnRegister" type="button" class="btn btn-primary">Registrarse</button>';
 				register+='</div></div></div>';
 		return register;
-	}
+	}/*No mostrar dialogo si esta en final revivir*/
 	this.mostrarCrearPartida = function(){
 		this.limpiarHTML("mostrarCP");
 		var cadena =  '<div id="mostrarCP">' 
 				cadena+='<div class="form-group">';
 					cadena+='<label class="labelGeneral" for="num">Número Máximo:</label>';
-					cadena+='<input type="number" path="note" class="form-control" id="max" min="4" max="8" value="4">';
+					cadena+='<input type="number" class="form-control" id="max" min="4" max="8" value="4">';
 					cadena+='<label class="labelGeneral" for="num">Número de Impostores:</label>';
-					cadena+='<input type="number" path="note" class="form-control" id="numImpos" min="1" max="3" value="1">';
+					cadena+='<input type="number" class="form-control" id="numImpos" min="1" max="3" value="1">';
 					cadena+='<label class="labelGeneral" for="num">Kill cooldown:</label>';
-					cadena+='<input type="number" path="note" class="form-control" id="cooldown" min="20" max="30" value="20">';
+					cadena+='<input type="number" class="form-control" id="cooldown" min="20" max="30" value="20">';
 					cadena+='<label class="labelGeneral" for="num">Número Tareas:</label>';
-					cadena+='<input type="number" path="note" class="form-control" id="numTarea" min="1" max="4" value="1">';
+					cadena+='<input type="number" class="form-control" id="numTarea" min="1" max="4" value="1">';
 					cadena+='<label class="labelGeneral" for="num">Partida propiedad:</label>';
 					cadena+='<input type="checkbox" id="propiedad">';
 					
@@ -78,13 +78,17 @@ function ControlWeb(){
 			var cooldown = $('#cooldown').val();
 			var propiedad = document.getElementById('propiedad').checked;
 			
-			console.log(max+"."+numImpos+"."+numTarea+"."+propiedad+"."+cooldown);
-			$('#mostrarCP').remove();
-			ws.crearPartida(max,numImpos,numTarea,propiedad,cooldown);
+			if(me.createValid(max,numImpos,numTarea,cooldown)){
+				console.log(max+"."+numImpos+"."+numTarea+"."+propiedad+"."+cooldown);
+				$('#mostrarCP').remove();
+				ws.crearPartida(max,numImpos,numTarea,propiedad,cooldown);
+			}
 			
 		});
 	}
-
+	this.createValid = function(max,numImpos,numTarea,cooldown){
+		return max>=4&&max<=8&&numImpos<=3&&numImpos>1=&&numTarea<=4&&numTarea>=1&&cooldown<=30 && cooldown>=20;
+	}
 
 	this.mostrarEsperandoRivales= function(lista){
 		$('#esperandoRemove').remove();
