@@ -116,7 +116,6 @@ describe("El juego del impostor", function() {
       expect(num).toEqual(4);
       expect(juego.partidas[codigo].fase.nombre).toEqual("completado");
       juego.usuario[nick].iniciarPartida();   
-      console.log("line 119--104");
       do{
         for(var user in juego.partidas[codigo].usuarios){
             // Reiniciamos el contenedor, hasta tener el escenario deseado
@@ -127,7 +126,6 @@ describe("El juego del impostor", function() {
         juego.partidas[codigo].AsignarImpostor();
         juego.partidas[codigo].AsignarTarea();
       }while(juego.partidas[codigo].usuarios["ana"].impostor);
-      console.log("line 130--104");
       expect(juego.partidas[codigo].fase.nombre).toEqual("jugando");
       expect(juego.partidas[codigo].usuarios["ana"].impostor).toEqual(false);
       juego.partidas[codigo].usuarios["ana"].abandonarPartida();
@@ -189,7 +187,6 @@ describe("El juego del impostor", function() {
           for(var encr in encargo)
             expect(encargo[encr].getNombre()).not.toEqual("ninguno");
         }
-        console.log("line 201--180");
       });
     it("Al menos 1 Impostor",function(){
         juego.unirAPartida(codigo,"ana");
@@ -207,11 +204,9 @@ describe("El juego del impostor", function() {
         juego.usuario[nick].iniciarPartida();
         expect(juego.partidas[codigo].fase.nombre).toEqual("jugando");
         var expectImpostor = false;
-        console.log("line 219--203");
         for(var usrExpected in juego.partidas[codigo].usuarios){
            expectImpostor = expectImpostor || juego.partidas[codigo].usuarios[usrExpected].impostor;
         }
-        console.log("line 223--203");
         expect(expectImpostor).toEqual(true);
     })
 
@@ -233,7 +228,6 @@ describe("El juego del impostor", function() {
         var checked = false;
         var expectImpostorName="";
         var expectcrewmateName="";
-        console.log("line 245--227");
         for(var usrExpected in juego.partidas[codigo].usuarios){
            if(juego.partidas[codigo].usuarios[usrExpected].impostor){
               expectImpostorName = usrExpected;
@@ -242,7 +236,6 @@ describe("El juego del impostor", function() {
               expectcrewmateName = usrExpected;
             }
         }
-        console.log("line 254--227");
         expect(juego.partidas[codigo].usuarios[expectImpostorName].impostor).toEqual(true);
         expect(juego.partidas[codigo].usuarios[expectcrewmateName].impostor).toEqual(false);
         juego.partidas[codigo].usuarios[expectImpostorName].matar(expectcrewmateName);
