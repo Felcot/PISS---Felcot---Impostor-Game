@@ -41,7 +41,7 @@ function ControlWeb(){
 					register+='<div class="col-md-5"></div><div id="d-btnRegister" class="col-md-2"><button id = "btnRegister" type="button" class="btn btn-primary">Registrarse</button>';
 				register+='</div></div></div>';
 		return register;
-	}/*No mostrar dialogo si esta en final revivir*/
+	}
 	this.mostrarCrearPartida = function(){
 		this.limpiarHTML("mostrarCP");
 		var cadena =  '<div id="mostrarCP">' 
